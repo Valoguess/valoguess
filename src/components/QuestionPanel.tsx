@@ -58,13 +58,14 @@ import { cn } from "@/lib/utils";
 
 const CATEGORY_LABEL: Record<QuestionCategory | "all", string> = {
   all: "All",
-  ability: "Abilities",
+  offense: "Offense",
+  defense: "Defense",
+  information: "Information",
+  mobility: "Mobility",
+  control: "Control",
+  support: "Support",
   utility: "Utility",
-  movement: "Movement",
-  vision: "Vision",
-  combat: "Combat",
-  theme: "Themes",
-  custom: "Custom",
+  unique: "Unique"
 };
 
 export function QuestionPanel({
@@ -111,7 +112,7 @@ export function QuestionPanel({
             <SelectValue placeholder="Categories" />
           </SelectTrigger>
           <SelectContent className="bg-base-800 border-white/10 text-ink-300">
-            {(["all", "ability", "utility", "movement", "vision", "combat", "theme", "custom"] as const).map((c) => (
+            {(["all", "offense", "defense", "information", "mobility", "control", "support", "utility", "unique"] as const).map((c) => (
               <SelectItem key={c} value={c} className="hover:bg-base-750 focus:bg-base-750 text-xs">
                 {CATEGORY_LABEL[c]}
               </SelectItem>
