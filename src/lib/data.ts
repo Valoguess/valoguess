@@ -43,16 +43,6 @@ export const AGENTS: Agent[] = [
 ];
 
 
-
-export type QuestionCategory =
-  | "ability"
-  | "utility"
-  | "movement"
-  | "vision"
-  | "combat"
-  | "theme"
-  | "custom";
-
 export type Question = {
   id: string;
   label: string;
@@ -60,52 +50,278 @@ export type Question = {
   description?: string;
 };
 
+export type QuestionCategory =
+  | "offense"
+  | "defense"
+  | "information"
+  | "mobility"
+  | "control"
+  | "support"
+  | "utility"
+  | "unique";
+
 export const QUESTIONS: Question[] = [
-  // ===== Utility =====
+  // =========================
+  // Offense
+  // =========================
 
-  { id: "can-heal", label: "Can Heal", category: "utility", description: "Does your agent have the ability to heal allies?" },
-  { id: "can-flash", label: "Can Flash", category: "utility", description: "Does your agent have abilities that flash or blind enemies?" },
-  { id: "has-smoke", label: "Has Smoke", category: "utility", description: "Does your agent have smoke abilities to block vision?" },
-  { id: "can-stun", label: "Can Stun", category: "utility", description: "Can your agent concuss or stun opponents?" },
-  { id: "can-blind", label: "Can Blind", category: "utility", description: "Does your agent have abilities that near-sight or blind targets?" },
-  { id: "has-molly", label: "Has Molly", category: "utility", description: "Can your agent deploy damaging area-of-effect zones (mollies)?" },
-  { id: "has-wall", label: "Has Wall", category: "utility", description: "Can your agent deploy a physical or visual barrier wall?" },
-  { id: "has-trap", label: "Has Trap", category: "utility", description: "Can your agent set traps or sensors to detect enemies?" },
-  { id: "can-scan", label: "Can Scan", category: "utility", description: "Does your agent have abilities that scan and reveal enemy positions?" },
-  { id: "can-revive", label: "Can Revive", category: "utility", description: "Does your agent have the ability to resurrect fallen teammates?" },
-  { id: "has-decoy", label: "Has Decoy", category: "utility", description: "Can your agent create clones or decoys to distract enemies?" },
-  { id: "can-suppress", label: "Can Suppress", category: "utility", description: "Can your agent disable or suppress enemy abilities?" },
+  {
+    id: "can-deal-damage",
+    label: "Can Deal Damage",
+    category: "offense",
+    description: "Can the agent deal damage with an ability?"
+  },
+  {
+    id: "has-damage-zone",
+    label: "Has Damage Zone",
+    category: "offense",
+    description: "Can the agent create an area that damages enemies?"
+  },
+  {
+    id: "can-destroy-utility",
+    label: "Can Destroy Utility",
+    category: "offense",
+    description: "Can the agent destroy enemy abilities?"
+  },
+  {
+    id: "can-disarm",
+    label: "Can Disarm",
+    category: "offense",
+    description: "Can the agent temporarily remove an enemy's weapon?"
+  },
 
-  // ===== Movement =====
+  // =========================
+  // Defense
+  // =========================
 
-  { id: "can-dash", label: "Can Dash", category: "movement", description: "Does your agent have a dash or quick relocation ability?" },
-  { id: "can-teleport", label: "Can Teleport", category: "movement", description: "Can your agent teleport to different locations?" },
-  { id: "can-fly", label: "Can Fly", category: "movement", description: "Can your agent lift off the ground or glide in the air?" },
-  { id: "has-speed", label: "Has Speed", category: "movement", description: "Does your agent have abilities that boost movement speed?" },
+  {
+    id: "can-create-wall",
+    label: "Can Create Wall",
+    category: "defense",
+    description: "Can the agent create a wall-like barrier?"
+  },
+  {
+    id: "can-block-bullets",
+    label: "Can Block Bullets",
+    category: "defense",
+    description: "Can the agent create something that blocks bullets?"
+  },
+  {
+    id: "can-create-shield",
+    label: "Can Create Shield",
+    category: "defense",
+    description: "Can the agent create a temporary shield?"
+  },
+  {
+    id: "can-create-cover",
+    label: "Can Create Cover",
+    category: "defense",
+    description: "Can the agent create temporary cover?"
+  },
 
-  // ===== Vision =====
+  // =========================
+  // Information
+  // =========================
 
-  { id: "creates-smoke", label: "Creates Vision Block", category: "vision", description: "Can your agent create large smoke clouds to block sightlines?" },
-  { id: "reveals-enemies", label: "Reveals Enemies", category: "vision", description: "Does your agent have abilities that outline or reveal enemies?" },
-  { id: "hides-vision", label: "Blocks Vision", category: "vision", description: "Does your agent have abilities that block or reduce enemy vision?" },
+  {
+    id: "can-reveal",
+    label: "Can Reveal",
+    category: "information",
+    description: "Can the agent reveal enemy locations?"
+  },
+  {
+    id: "can-detect-enemies",
+    label: "Can Detect",
+    category: "information",
+    description: "Can the agent detect nearby enemies?"
+  },
+  {
+    id: "can-track-enemy",
+    label: "Can Track",
+    category: "information",
+    description: "Can the agent track an enemy's location?"
+  },
+  {
+    id: "can-nearsight",
+    label: "Can Nearsight",
+    category: "information",
+    description: "Can the agent reduce an enemy's vision range?"
+  },
 
-  // ===== Combat =====
+  // =========================
+  // Mobility
+  // =========================
 
-  { id: "util-damage", label: "Utility Deals Damage", category: "combat", description: "Does your agent have non-ultimate abilities that deal direct damage?" },
-  { id: "can-detain", label: "Can Detain", category: "combat", description: "Can your agent detain or lock enemies in place?" },
-  { id: "can-concuss", label: "Can Concuss", category: "combat", description: "Can your agent concuss enemies to slow and disorient them?" },
-  { id: "can-root", label: "Can Root", category: "combat", description: "Can your agent root enemies to prevent movement?" },
-  { id: "can-displace", label: "Can Displace", category: "combat", description: "Can your agent push, pull, or lift enemies from their positions?" },
+  {
+    id: "can-dash",
+    label: "Can Dash",
+    category: "mobility",
+    description: "Can the agent quickly dash to another position?"
+  },
+  {
+    id: "can-teleport",
+    label: "Can Teleport",
+    category: "mobility",
+    description: "Can the agent teleport to another location?"
+  },
+  {
+    id: "can-fly",
+    label: "Can Fly",
+    category: "mobility",
+    description: "Can the agent move through the air?"
+  },
+  {
+    id: "can-move-faster",
+    label: "Can Move Faster",
+    category: "mobility",
+    description: "Can the agent temporarily increase movement speed?"
+  },
+  {
+    id: "can-move-through-walls",
+    label: "Can Pass Through Walls",
+    category: "mobility",
+    description: "Can the agent move through walls or another dimension?"
+  },
 
-  // ===== Themes =====
+  // =========================
+  // Control
+  // =========================
 
-  { id: "uses-fire", label: "Uses Fire", category: "theme", description: "Is your agent's theme or ability design centered around fire?" },
-  { id: "uses-water", label: "Uses Water", category: "theme", description: "Is your agent's theme or ability design centered around water or tides?" },
-  { id: "uses-electricity", label: "Uses Electricity", category: "theme", description: "Is your agent's theme or ability design centered around lightning or electricity?" },
-  { id: "uses-poison", label: "Uses Poison", category: "theme", description: "Is your agent's theme or ability design centered around toxins or poison?" },
-  { id: "uses-tech", label: "Uses Technology", category: "theme", description: "Is your agent's theme or ability design centered around high-tech gear?" },
-  { id: "uses-shadows", label: "Uses Shadows", category: "theme", description: "Is your agent's theme or ability design centered around shadows or darkness?" },
-  { id: "uses-plants", label: "Uses Nature", category: "theme", description: "Is your agent's theme or ability design centered around plants or nature?" },
+  {
+    id: "can-concuss",
+    label: "Can Concuss",
+    category: "control",
+    description: "Can the agent apply the Concussed effect?"
+  },
+  {
+    id: "can-slow",
+    label: "Can Slow",
+    category: "control",
+    description: "Can the agent slow enemies?"
+  },
+  {
+    id: "can-detain",
+    label: "Can Detain",
+    category: "control",
+    description: "Can the agent detain an enemy?"
+  },
+  {
+    id: "can-suppress",
+    label: "Can Suppress",
+    category: "control",
+    description: "Can the agent suppress enemy abilities?"
+  },
+  {
+    id: "can-displace",
+    label: "Can Displace",
+    category: "control",
+    description: "Can the agent push, pull, or lift enemies?"
+  },
+  {
+    id: "can-trap",
+    label: "Can Trap",
+    category: "control",
+    description: "Can the agent trap or restrict enemy movement?"
+  },
+
+  // =========================
+  // Support
+  // =========================
+
+  {
+    id: "can-heal-ally",
+    label: "Can Heal Ally",
+    category: "support",
+    description: "Can the agent directly heal a teammate?"
+  },
+  {
+    id: "can-heal-self",
+    label: "Can Heal Self",
+    category: "support",
+    description: "Can the agent restore their own health?"
+  },
+  {
+    id: "can-revive-ally",
+    label: "Can Revive Ally",
+    category: "support",
+    description: "Can the agent bring a dead teammate back to life?"
+  },
+
+  // =========================
+  // Utility
+  // =========================
+
+  {
+    id: "can-smoke",
+    label: "Can Smoke",
+    category: "utility",
+    description: "Can the agent create an area that blocks vision?"
+  },
+  {
+    id: "can-flash",
+    label: "Can Flash",
+    category: "utility",
+    description: "Can the agent blind enemies?"
+  },
+  {
+    id: "has-decoy",
+    label: "Has Decoy",
+    category: "utility",
+    description: "Can the agent create a fake or decoy?"
+  },
+  {
+    id: "has-deployable",
+    label: "Has Deployable",
+    category: "utility",
+    description: "Can the agent place persistent utility on the map?"
+  },
+  {
+    id: "has-controllable-utility",
+    label: "Has Controllable Utility",
+    category: "utility",
+    description: "Can the agent directly control or view through deployed utility?"
+  },
+  {
+    id: "can-block-vision",
+    label: "Can Block Vision",
+    category: "utility",
+    description: "Can the agent block an enemy's line of sight?"
+  },
+
+  // =========================
+  // Unique
+  // =========================
+
+  {
+    id: "can-act-after-death",
+    label: "Can Act After Death",
+    category: "unique",
+    description: "Can the agent continue using abilities after dying?"
+  },
+  {
+    id: "can-reuse-ability",
+    label: "Can Reuse Ability",
+    category: "unique",
+    description: "Can one of the agent's abilities be recovered and used again?"
+  },
+  {
+    id: "has-creature",
+    label: "Has Creature",
+    category: "unique",
+    description: "Can the agent deploy a creature or companion?"
+  },
+  {
+    id: "can-interact-with-spike",
+    label: "Can Affect Spike",
+    category: "unique",
+    description: "Can an ability directly interact with the Spike?"
+  },
+  {
+    id: "has-alternate-form",
+    label: "Has Alternate Form",
+    category: "unique",
+    description: "Can the agent enter a substantially different form?"
+  },
 ];
 
 export type ActivityEntry = {
