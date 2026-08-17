@@ -1,20 +1,17 @@
 export interface Settings {
   maxNos: number;
-  maxRounds: number;
   timePerRound: number;
+  maxGuesses: number;
+  questionCount: number;
+  maxRounds?: number;
 }
 
 export const DefaultSettings: Settings = {
   maxNos: 5,
-  maxRounds: -1,
-  timePerRound: 60,
-}
-
-export interface Spectator {
-  id: string;
-  username: string;
-  // socketId: string;
-}
+  timePerRound: -1,
+  maxGuesses: 1,
+  questionCount: 15,
+};
 
 export type RoomState = "waiting" | "playing" | "finished";
 
@@ -38,23 +35,18 @@ export interface Player {
   state: PlayerGameState;
 }
 
-export interface RoomSpectator {
-  id: string;
-  username: string;
-}
-
 export interface GameState {
   startedAt: number;
   turnNumber: number;
-  turnEndTime?: number;
+  turnEndTime?: number | null;
 
+  questionPool: string[];
   pendingQuestion?: PendingQuestion | undefined;
   history: QuestionHistory[];
 
   winnerId?: string | undefined;
   endedAt?: number | undefined;
 }
-
 
 export interface Room {
   id: string;
@@ -63,8 +55,6 @@ export interface Room {
 
   me: Player;
   opponent?: Player;
-
-  spectators: RoomSpectator[];
 
   settings: Settings;
   createdAt: number;
@@ -76,7 +66,6 @@ export interface PendingQuestion {
   askedBy: string;
   targetPlayer: string;
   questionId: string;
-  // questionLabel: string;
 }
 
 export interface QuestionHistory {
@@ -86,4 +75,3 @@ export interface QuestionHistory {
   answer: "yes" | "no";
   timestamp: number;
 }
-
