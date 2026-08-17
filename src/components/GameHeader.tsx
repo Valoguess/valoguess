@@ -1,4 +1,4 @@
-import { ArrowLeft, HelpCircle, Settings } from "lucide-react";
+import { ArrowLeft, HelpCircle, Settings, LogOut } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -14,6 +14,7 @@ type GameHeaderProps = {
   nosMax?: number;
   round?: number;
   maxRounds?: number;
+  onLeave?: () => void;
 };
 
 export function GameHeader({
@@ -25,22 +26,36 @@ export function GameHeader({
   nosMax = 5,
   round = 1,
   maxRounds = 10,
+  onLeave,
 }: GameHeaderProps) {
 
   return (
-    <header className="border-b border-white/10 bg-[#090B11]">
+    <header className="border-b border-white/10 bg-[#090B11] relative">
       {/* HUD */}
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-8 px-6 py-4">
-        <PlayerSide
-          align="left"
-          name={userName}
-          rank="Player 1"
-          rankColor="#3CF2C4"
-          avatar="/agents/icon/iso.png"
-          nosUsed={userNosUsed}
-          nosMax={nosMax}
-          turn={turnOwner === "you"}
-        />
+        <div className="flex items-center gap-4">
+          {onLeave && (
+            <button
+              onClick={onLeave}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-white/10 bg-white/[0.02] hover:bg-[#FF4655]/15 hover:border-[#FF4655]/60 text-white/50 hover:text-white transition-all text-[9.5px] font-display font-bold uppercase tracking-widest cursor-pointer shadow-sm group shrink-0"
+              title="Leave Game"
+            >
+              <LogOut className="h-3.5 w-3.5 text-white/40 group-hover:text-[#FF4655] transition-colors" />
+              <span className="hidden sm:inline">LEAVE</span>
+            </button>
+          )}
+
+          <PlayerSide
+            align="left"
+            name={userName}
+            rank="Player 1"
+            rankColor="#3CF2C4"
+            avatar="/agents/icon/iso.png"
+            nosUsed={userNosUsed}
+            nosMax={nosMax}
+            turn={turnOwner === "you"}
+          />
+        </div>
 
         <CenterHUD
           time={60}

@@ -2,12 +2,13 @@
 
 import { Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Flag, Check, X, Loader2 } from "lucide-react";
+import { Flag, Check, X, Loader2, LogOut } from "lucide-react";
 import { GameHeader } from "@/components/GameHeader";
 import { SecretAgentCard } from "@/components/SecretAgentCard";
 import { QuestionPanel } from "@/components/QuestionPanel";
 import { AgentGrid } from "@/components/AgentGrid";
 import { ActivityFeed } from "@/components/ActivityFeed";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   AGENTS,
   getQuestionById,
@@ -30,20 +31,21 @@ function PlayContent() {
 
   const [isAsking, setIsAsking] = useState(false);
   const [isAnswering, setIsAnswering] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (!room) {
       router.replace("/");
     } else if (room.state === "finished") {
-      const isVictory = room.game?.winnerId === room.me.player.id;
+      const isVictory = room.game?.winnerId === room.me?.player?.id;
       router.replace(`/play/result?status=${isVictory ? "victory" : "defeat"}`);
     } else {
       // Clear pending action states when room sync arrives
       setIsAsking(false);
       setIsAnswering(false);
     }
-  }, [room]);
+  }, [room, router]);
 
   useEffect(() => {
     const onError = (err: any) => {
@@ -59,19 +61,33 @@ function PlayContent() {
     };
   }, []);
 
-  if (!room) return null;
-
   useEffect(() => { 
+    if (!room?.id) return;
     const interval = setInterval(() => {
-      if (room) {
-        sendHeartbeat(room.id);
-      }
-    }, 5000)
+      sendHeartbeat(room.id);
+    }, 5000);
 
     return () => {
       clearInterval(interval);
-    }
-  },[room.id])
+    };
+  }, [room?.id]);
+
+  if (!room || !room.me) {
+    return (
+      <main className="min-h-screen bg-base-950 flex flex-col items-center justify-center text-white select-none">
+        <div className="flex flex-col items-center gap-3">
+          <svg viewBox="0 0 100 100" className="w-12 h-12 animate-pulse">
+            <path d="M15 15 L45 15 L25 85 Z" fill="#FFFFFF" />
+            <path d="M32 15 L52 15 L37 75 Z" fill="#FF4655" />
+            <path d="M58 15 L88 15 L78 85 Z" fill="#FF4655" />
+          </svg>
+          <span className="font-valorant text-xs text-white/50 tracking-widest mt-2">
+            Returning to Lobby...
+          </span>
+        </div>
+      </main>
+    );
+  }
 
   const isMyTurn = room.me.state.isMyTurn;
   const pendingQuestion = room.game?.pendingQuestion;
@@ -163,11 +179,11 @@ function PlayContent() {
     }
   };
 
-  const handleSurrender = () => {
+  const handleLeaveGame = () => {
     if (room) {
       leaveRoom(room.id);
       clearRoom();
-      router.push("/");
+      router.replace("/");
     }
   };
 
@@ -186,6 +202,7 @@ function PlayContent() {
         nosMax={room.settings.maxNos ?? 5}
         round={currentRound}
         maxRounds={room.settings.maxRounds ?? -1}
+        onLeave={() => setShowLeaveModal(true)}
       />
 
       {errorMsg && (
@@ -208,11 +225,11 @@ function PlayContent() {
             map="Ascent"
           />
           <button
-            onClick={handleSurrender}
-            className="flex items-center justify-center gap-2 rounded-sm border border-[#FF4655]/30 bg-[#FF4655]/5 py-3 text-sm font-semibold text-[#FF4655] transition hover:bg-[#FF4655]/10 cursor-pointer"
+            onClick={() => setShowLeaveModal(true)}
+            className="flex items-center justify-center gap-2 rounded-sm border border-[#FF4655]/40 bg-[#FF4655]/10 hover:bg-[#FF4655]/20 hover:border-[#FF4655] py-3 text-xs font-display font-bold uppercase tracking-wider text-[#FF4655] transition-all cursor-pointer shadow-[0_0_12px_rgba(255,70,85,0.15)]"
           >
-            <Flag className="h-4 w-4" />
-            Surrender
+            <LogOut className="h-4 w-4" />
+            Leave Game
           </button>
         </div>
 
@@ -325,6 +342,37 @@ function PlayContent() {
           />
         </div>
       </div>
+
+      {/* LEAVE MATCH CONFIRMATION MODAL */}
+      <Dialog open={showLeaveModal} onOpenChange={setShowLeaveModal}>
+        <DialogContent className="bg-[#090d14]/95 border border-[#FF4655]/40 max-w-sm p-6 text-center text-white backdrop-blur-xl shadow-[0_0_35px_rgba(255,70,85,0.25)] rounded-sm">
+          <div className="flex flex-col items-center">
+            <div className="h-12 w-12 rounded-full border border-[#FF4655]/60 bg-[#FF4655]/15 flex items-center justify-center mb-4 text-[#FF4655] shadow-[0_0_15px_rgba(255,70,85,0.3)]">
+              <LogOut className="h-6 w-6" />
+            </div>
+            <h3 className="font-valorant text-xl tracking-wider text-white mb-2">
+              LEAVE MATCH?
+            </h3>
+            <p className="text-xs text-white/60 mb-6 font-medium">
+              Are you sure you want to exit the match? Leaving will forfeit your current duel and return you to the lobby.
+            </p>
+            <div className="flex items-center justify-center gap-3 w-full">
+              <button
+                onClick={() => setShowLeaveModal(false)}
+                className="flex-1 py-2.5 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white font-display text-xs font-bold uppercase tracking-wider transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLeaveGame}
+                className="flex-1 py-2.5 rounded-sm border border-[#FF4655] bg-[#FF4655] hover:bg-[#e03847] text-white font-display text-xs font-bold uppercase tracking-wider transition cursor-pointer shadow-[0_0_12px_rgba(255,70,85,0.4)]"
+              >
+                Leave Match
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
