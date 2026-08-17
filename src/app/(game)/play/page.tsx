@@ -8,7 +8,14 @@ import { SecretAgentCard } from "@/components/SecretAgentCard";
 import { QuestionPanel } from "@/components/QuestionPanel";
 import { AgentGrid } from "@/components/AgentGrid";
 import { ActivityFeed } from "@/components/ActivityFeed";
-import { AGENTS, QUESTIONS, ActivityEntry, Question } from "@/lib/data";
+import {
+  AGENTS,
+  getQuestionById,
+  getQuestionLabel,
+  getRandomQuestions,
+  ActivityEntry,
+  QuestionItem,
+} from "@/lib/data";
 import { useRoomStore } from "@/store/roomStore";
 import { askQuestion as sendAskQuestion, answerQuestion as sendAnswerQuestion, leaveRoom, sendHeartbeat } from "@/socket/emitter";
 
@@ -80,11 +87,29 @@ function PlayContent() {
   const activeSecretAgent =
     AGENTS.find((a) => a.id === room.me.state.secretAgent) || AGENTS[0];
 
+  const questionPoolIds = room.game?.questionPool || [];
+  const gameQuestions: QuestionItem[] =
+    questionPoolIds.length > 0
+      ? questionPoolIds.map(
+          (id) =>
+            getQuestionById(id) || {
+              id,
+              label: id,
+              category: "utility" as const,
+              difficulty: "low" as const,
+            }
+        )
+      : getRandomQuestions(
+          room.settings?.questionCount || 15,
+          room.id || room.game?.startedAt
+        );
+
   const opponentQuestionObj = pendingQuestion
-    ? QUESTIONS.find((q) => q.id === pendingQuestion.questionId) || {
+    ? getQuestionById(pendingQuestion.questionId) || {
         id: pendingQuestion.questionId,
         label: pendingQuestion.questionId,
         category: "utility" as const,
+        difficulty: "low" as const,
         description: `Characteristic: "${pendingQuestion.questionId}"`,
       }
     : null;
@@ -98,8 +123,7 @@ function PlayContent() {
 
   const activity: ActivityEntry[] = (room.game?.history || []).flatMap((h, i) => {
     const isMyQuestion = h.askedBy === room.me.player.id;
-    const qObj = QUESTIONS.find((q) => q.id === h.questionId);
-    const qLabel = qObj?.label || h.questionId;
+    const qLabel = getQuestionLabel(h.questionId);
     const timeStr = new Date(h.timestamp).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -123,7 +147,7 @@ function PlayContent() {
     ];
   });
 
-  const handleAskQuestion = (q: Question) => {
+  const handleAskQuestion = (q: QuestionItem) => {
     if (room && isMyTurn && !pendingQuestion && !isAsking) {
       setIsAsking(true);
       setErrorMsg(null);
@@ -208,7 +232,7 @@ function PlayContent() {
                       ? `${room.opponent?.player.username || "Opponent"} is thinking...`
                       : undefined
               }
-              questions={QUESTIONS}
+              questions={gameQuestions}
             />
           )}
 

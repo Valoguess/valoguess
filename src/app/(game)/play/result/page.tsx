@@ -31,7 +31,7 @@ type TimelineEvent = {
 };
 
 import { useRoomStore } from "@/store/roomStore";
-import { AGENTS, QUESTIONS } from "@/lib/data";
+import { AGENTS, getQuestionLabel } from "@/lib/data";
 
 function ResultContent() {
   const searchParams = useSearchParams();
@@ -67,8 +67,7 @@ function ResultContent() {
 
   const timeline: TimelineEvent[] = history.flatMap((h, i) => {
     const isMyQuestion = h.askedBy === room?.me.player.id;
-    const qObj = QUESTIONS.find((q) => q.id === h.questionId);
-    const qLabel = qObj?.label || h.questionId;
+    const qLabel = getQuestionLabel(h.questionId);
     const timeStr = new Date(h.timestamp).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
