@@ -18,6 +18,8 @@ type LobbySettingsProps = {
   setMaxNos: (val: number | ((prev: number) => number)) => void;
   maxGuesses: number;
   setMaxGuesses: (val: number | ((prev: number) => number)) => void;
+  questionCount?: number;
+  setQuestionCount?: (val: number | ((prev: number) => number)) => void;
   showMoreOptions: boolean;
   setShowMoreOptions: (val: boolean) => void;
 };
@@ -30,6 +32,8 @@ export function LobbySettings({
   setMaxNos,
   maxGuesses,
   setMaxGuesses,
+  questionCount = 15,
+  setQuestionCount,
   showMoreOptions,
   setShowMoreOptions,
 }: LobbySettingsProps) {
@@ -260,6 +264,79 @@ export function LobbySettings({
                 )}
               >
                 {preset === -1 ? "∞" : preset}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* SETTING 4: QUESTION POOL COUNT */}
+        <div className="flex flex-col text-left">
+          {/* Icon & Title */}
+          <div className="flex items-start gap-2 mb-2">
+            <Compass className="h-4.5 w-4.5 text-mint mt-0.5 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-valorant text-[11px] tracking-wider text-white">QUESTION POOL COUNT</span>
+              <span className="text-[9.5px] font-sans text-white/60 uppercase tracking-wide">Questions sampled per match</span>
+            </div>
+          </div>
+          
+          {/* Value Adjuster - Floating */}
+          <div className="flex items-center justify-between px-8 py-1 mb-2">
+            {/* Decrement */}
+            <button 
+              onClick={() => {
+                if (!setQuestionCount) return;
+                const poolOpts = [10, 15, 20, 25, 30];
+                const idx = poolOpts.indexOf(questionCount);
+                if (idx > 0) setQuestionCount(poolOpts[idx - 1]);
+              }}
+              disabled={!isHost || !setQuestionCount || questionCount <= 10}
+              className="h-8 w-8 rounded-sm border border-white/10 bg-white/[0.01] hover:bg-white/[0.05] hover:border-white/20 text-white/50 hover:text-white transition-all disabled:opacity-20 flex items-center justify-center font-bold text-base cursor-pointer"
+            >
+              -
+            </button>
+            
+            {/* LARGE STACKED VALUE */}
+            <div className="flex flex-col items-center select-none">
+              <span className="font-display text-3xl font-black text-white leading-none">
+                {questionCount}
+              </span>
+              <span className="text-[8.5px] text-white/50 uppercase tracking-widest font-black mt-0.5">
+                QUESTIONS
+              </span>
+            </div>
+
+            {/* Increment */}
+            <button 
+              onClick={() => {
+                if (!setQuestionCount) return;
+                const poolOpts = [10, 15, 20, 25, 30];
+                const idx = poolOpts.indexOf(questionCount);
+                if (idx >= 0 && idx < poolOpts.length - 1) setQuestionCount(poolOpts[idx + 1]);
+                else if (idx === -1) setQuestionCount(20);
+              }}
+              disabled={!isHost || !setQuestionCount || questionCount >= 30}
+              className="h-8 w-8 rounded-sm border border-white/10 bg-white/[0.01] hover:bg-white/[0.05] hover:border-white/20 text-white/50 hover:text-white transition-all disabled:opacity-20 flex items-center justify-center font-bold text-base cursor-pointer"
+            >
+              +
+            </button>
+          </div>
+
+          {/* Presets */}
+          <div className="grid grid-cols-4 gap-1.5">
+            {[10, 15, 20, 25].map((preset) => (
+              <button
+                key={preset}
+                onClick={() => setQuestionCount && setQuestionCount(preset)}
+                disabled={!isHost || !setQuestionCount}
+                className={cn(
+                  "py-1 rounded-sm text-[9.5px] font-display font-bold uppercase tracking-wider transition-all border cursor-pointer",
+                  questionCount === preset 
+                    ? "bg-mint/5 border-mint text-white shadow-[0_0_10px_rgba(60,242,196,0.2)]" 
+                    : "bg-white/[0.01] border-white/5 text-white/60 hover:text-white hover:bg-white/[0.03]"
+                )}
+              >
+                {preset}
               </button>
             ))}
           </div>
