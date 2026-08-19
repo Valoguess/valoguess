@@ -93,166 +93,196 @@ export type Question = {
 };
 
 export const QUESTIONS: Record<QuestionId, Question> = {
-  // =========================
-  // Offense
-  // =========================
+  // =========================================================
+  // OFFENSE
+  // =========================================================
 
-  "deals-damage": {
-    label: "Deals Damage",
+  "can-deal-ability-damage": {
+    label: "Can Deal Ability Damage",
     category: "offense",
     difficulty: "low",
-    description: "Can any of the agent's abilities directly damage enemies?",
+    description:
+      "Can the Agent use a non-ultimate ability that directly damages an enemy?",
   },
 
-  "damage-over-time": {
-    label: "Damage Over Time",
+  "can-damage-multiple-enemies": {
+    label: "Can Damage Multiple Enemies",
+    category: "offense",
+    difficulty: "low",
+    description:
+      "Can one of the Agent's abilities damage two or more enemies at the same time?",
+  },
+
+  "can-deal-damage-over-time": {
+    label: "Can Deal Damage Over Time",
     category: "offense",
     difficulty: "medium",
-    description: "Can the agent create an effect that damages enemies over time?",
+    description:
+      "Can the Agent create an effect that continues damaging enemies after it is used?",
   },
 
-  "hits-multiple-enemies": {
-    label: "Hits Multiple Enemies",
+  "can-destroy-enemy-utility": {
+    label: "Can Destroy Enemy Utility",
     category: "offense",
     difficulty: "medium",
-    description: "Can an ability damage multiple enemies at once?",
+    description:
+      "Can one of the Agent's abilities destroy an enemy's placed ability or deployable?",
   },
 
-  "destroys-utility": {
-    label: "Destroys Utility",
+  "can-damage-through-area": {
+    label: "Can Damage Through an Area",
     category: "offense",
     difficulty: "medium",
-    description: "Can an ability destroy enemy deployables or utility?",
-  },
-
-  "can-kill": {
-    label: "Can Kill",
-    category: "offense",
-    difficulty: "high",
-    description: "Can an ability directly kill an enemy?",
-  },
-
-  "affects-weapons": {
-    label: "Affects Weapons",
-    category: "offense",
-    difficulty: "high",
-    description: "Can an ability directly affect an enemy's weapon?",
+    description:
+      "Can the Agent damage enemies without needing to directly attack them with a normal weapon?",
   },
 
   "ultimate-deals-damage": {
-    label: "Ultimate Deals Damage",
+    label: "Does the Ultimate Deal Damage",
     category: "offense",
-    difficulty: "medium",
-    description: "Does the agent's ultimate deal damage?",
-  },
-
-  // =========================
-  // Defense
-  // =========================
-
-  "creates-barrier": {
-    label: "Creates Barrier",
-    category: "defense",
-    difficulty: "medium",
-    description: "Can the agent create a physical barrier?",
-  },
-
-  "blocks-bullets": {
-    label: "Blocks Bullets",
-    category: "defense",
-    difficulty: "medium",
-    description: "Can the agent create something that blocks bullets?",
-  },
-
-  "provides-protection": {
-    label: "Provides Protection",
-    category: "defense",
-    difficulty: "medium",
-    description: "Can an ability provide direct protection to a player?",
-  },
-
-  "creates-cover": {
-    label: "Creates Cover",
-    category: "defense",
     difficulty: "low",
-    description: "Can the agent create temporary cover?",
+    description:
+      "Does the Agent's ultimate have a direct damaging effect on enemies?",
   },
 
-  "denies-area": {
-    label: "Can Deny Area",
+  "ultimate-can-kill": {
+    label: "Can the Ultimate Kill",
+    category: "offense",
+    difficulty: "high",
+    description:
+      "Can the Agent's ultimate directly eliminate an enemy without needing a normal weapon attack?",
+  },
+
+  // =========================================================
+  // DEFENSE
+  // =========================================================
+
+  "can-create-a-wall": {
+    label: "Can Create a Wall",
     category: "defense",
     difficulty: "low",
     description:
-      "Can the agent make an area difficult or dangerous for enemies to enter?",
+      "Can the Agent create a wall or solid barrier that blocks movement or sight?",
   },
 
-  // =========================
-  // Information
-  // =========================
+  "can-block-bullets": {
+    label: "Can Block Bullets",
+    category: "defense",
+    difficulty: "medium",
+    description:
+      "Can the Agent create something that prevents bullets from passing through?",
+  },
 
-  "reveals-enemies": {
-    label: "Reveals Enemies",
+  "can-create-cover": {
+    label: "Can Create Cover",
+    category: "defense",
+    difficulty: "low",
+    description:
+      "Can the Agent create temporary cover that helps a player avoid being seen or attacked?",
+  },
+
+  "can-protect-an-ally": {
+    label: "Can Protect an Ally",
+    category: "defense",
+    difficulty: "medium",
+    description:
+      "Can the Agent directly protect a teammate from enemy damage or danger?",
+  },
+
+  "can-deny-an-area": {
+    label: "Can Make an Area Unsafe",
+    category: "defense",
+    difficulty: "low",
+    description:
+      "Can the Agent make an area dangerous or difficult for enemies to enter or stay in?",
+  },
+
+  "can-hold-an-area": {
+    label: "Can Hold an Area",
+    category: "defense",
+    difficulty: "medium",
+    description:
+      "Can the Agent use an ability to make it harder for enemies to enter or take control of an area?",
+  },
+
+  // =========================================================
+  // INFORMATION
+  // =========================================================
+
+  "can-find-enemies": {
+    label: "Can Find Enemy Locations",
     category: "information",
     difficulty: "low",
-    description: "Can an ability reveal enemy positions?",
+    description:
+      "Can the Agent use an ability to get information about where enemies are?",
   },
 
-  "detects-enemies": {
-    label: "Detects Enemies",
+  "can-reveal-enemies": {
+    label: "Can Reveal Enemy Locations",
+    category: "information",
+    difficulty: "medium",
+    description:
+      "Can the Agent use an ability that shows enemy locations to the Agent or their team?",
+  },
+
+  "can-get-information-safely": {
+    label: "Can Get Information From Safety",
+    category: "information",
+    difficulty: "medium",
+    description:
+      "Can the Agent use an ability to check an area or gather information without fully entering it?",
+  },
+
+  "can-track-an-enemy": {
+    label: "Can Track an Enemy",
+    category: "information",
+    difficulty: "high",
+    description:
+      "Can one of the Agent's abilities continue following or tracking an enemy after finding them?",
+  },
+
+  "can-see-enemies-through-walls": {
+    label: "Can Find Enemies Through Walls",
+    category: "information",
+    difficulty: "medium",
+    description:
+      "Can the Agent get information about an enemy's location even when the enemy is behind a wall?",
+  },
+
+  "can-detect-nearby-enemies": {
+    label: "Can Detect Nearby Enemies",
     category: "information",
     difficulty: "low",
-    description: "Can the agent detect nearby enemies?",
-  },
-
-  "tracks-enemies": {
-    label: "Tracks Enemies",
-    category: "information",
-    difficulty: "medium",
     description:
-      "Can an ability track an enemy after detecting them?",
+      "Can the Agent use an ability that detects enemies when they are within a certain area or range?",
   },
 
-  "reveals-through-walls": {
-    label: "Reveals Through Walls",
-    category: "information",
-    difficulty: "medium",
-    description:
-      "Can the agent reveal enemies without requiring direct line of sight?",
-  },
+  // =========================================================
+  // MOBILITY
+  // =========================================================
 
-  "uses-utility-for-info": {
-    label: "Uses Utility for Info",
-    category: "information",
-    difficulty: "medium",
-    description:
-      "Can the agent deploy something that provides information?",
-  },
-
-  "can-scout": {
-    label: "Can Scout",
-    category: "information",
-    difficulty: "medium",
-    description:
-      "Can the agent use an ability to safely check an area?",
-  },
-
-  // =========================
-  // Mobility
-  // =========================
-
-  "has-fast-movement": {
-    label: "Has Fast Movement",
+  "has-a-movement-ability": {
+    label: "Has a Movement Ability",
     category: "mobility",
     difficulty: "low",
     description:
-      "Can an ability significantly increase the agent's movement speed?",
+      "Does the Agent have an ability that directly helps them move around the map?",
+  },
+
+  "can-move-faster": {
+    label: "Can Move Faster",
+    category: "mobility",
+    difficulty: "low",
+    description:
+      "Can the Agent temporarily increase their movement speed?",
   },
 
   "can-dash": {
     label: "Can Dash",
     category: "mobility",
     difficulty: "high",
-    description: "Can the agent quickly move a short distance?",
+    description:
+      "Can the Agent quickly move a short distance using a dash-like ability?",
   },
 
   "can-teleport": {
@@ -260,109 +290,119 @@ export const QUESTIONS: Record<QuestionId, Question> = {
     category: "mobility",
     difficulty: "high",
     description:
-      "Can the agent teleport to another location?",
+      "Can the Agent instantly move from one location to another using an ability?",
   },
 
-  "can-change-dimension": {
-    label: "Can Change Dimension",
-    category: "mobility",
-    difficulty: "high",
-    description:
-      "Can the agent temporarily leave normal gameplay space?",
-  },
-
-  "can-return": {
-    label: "Can Return",
-    category: "mobility",
-    difficulty: "high",
-    description:
-      "Can the agent return to a previous or marked location?",
-  },
-
-  "can-move-vertically": {
-    label: "Can Move Vertically",
+  "can-move-through-space": {
+    label: "Can Move in an Unusual Way",
     category: "mobility",
     difficulty: "medium",
     description:
-      "Can the agent use an ability to gain significant vertical movement?",
+      "Can the Agent move in a way that is very different from normal walking, running, or jumping?",
   },
 
-  // =========================
-  // Control
-  // =========================
+  "has-vertical-movement": {
+    label: "Can Move High or Stay in the Air",
+    category: "mobility",
+    difficulty: "medium",
+    description:
+      "Can the Agent use an ability to gain significant vertical movement or stay airborne?",
+  },
 
-  "can-slow": {
-    label: "Can Slow",
+  "can-return-to-a-location": {
+    label: "Can Return to a Location",
+    category: "mobility",
+    difficulty: "high",
+    description:
+      "Can the Agent mark or use a location and later return to it with an ability?",
+  },
+
+  // =========================================================
+  // CONTROL
+  // =========================================================
+
+  "can-slow-enemies": {
+    label: "Can Slow Enemies",
     category: "control",
     difficulty: "low",
-    description: "Can the agent slow enemy movement?",
+    description:
+      "Can the Agent use an ability that reduces an enemy's movement speed?",
   },
 
-  "restricts-movement": {
-    label: "Restricts Movement",
+  "can-restrict-movement": {
+    label: "Can Restrict Enemy Movement",
     category: "control",
     difficulty: "medium",
     description:
-      "Can an ability prevent or heavily restrict enemy movement?",
+      "Can the Agent use an ability that prevents or strongly limits an enemy from moving?",
   },
 
-  "can-displace": {
-    label: "Can Displace",
+  "can-push-or-pull-enemies": {
+    label: "Can Push or Pull Enemies",
     category: "control",
     difficulty: "high",
     description:
-      "Can the agent push, pull, lift, or otherwise displace enemies?",
+      "Can the Agent directly move an enemy by pushing, pulling, lifting, or displacing them?",
   },
 
-  "can-concuss": {
-    label: "Can Concuss",
+  "can-concuss-enemies": {
+    label: "Can Concuss Enemies",
     category: "control",
     difficulty: "medium",
     description:
-      "Can the agent apply the Concussed effect?",
+      "Can the Agent use an ability that applies the Concussed effect to an enemy?",
   },
 
-  "can-suppress": {
-    label: "Can Suppress",
+  "can-suppress-enemies": {
+    label: "Can Disable Enemy Abilities",
     category: "control",
     difficulty: "high",
     description:
-      "Can the agent temporarily disable enemy abilities?",
+      "Can the Agent temporarily stop enemies from using their abilities?",
   },
 
-  "can-detain": {
-    label: "Can Detain",
-    category: "control",
-    difficulty: "high",
-    description: "Can the agent detain an enemy?",
-  },
-
-  "can-deafen": {
-    label: "Can Deafen",
+  "can-detain-enemies": {
+    label: "Can Detain an Enemy",
     category: "control",
     difficulty: "high",
     description:
-      "Can the agent apply an effect that interferes with enemy audio?",
+      "Can the Agent use an ability that detains an enemy and prevents them from acting normally?",
   },
 
-  "can-hinder": {
-    label: "Can Hinder",
+  "can-deafen-enemies": {
+    label: "Can Affect Enemy Audio",
     category: "control",
     difficulty: "high",
     description:
-      "Can the agent apply the Hindered effect?",
+      "Can the Agent use an ability that makes it harder for enemies to hear?",
   },
 
-  // =========================
-  // Support
-  // =========================
+  "can-impair-enemy-actions": {
+    label: "Can Make Enemies Less Effective",
+    category: "control",
+    difficulty: "medium",
+    description:
+      "Can the Agent use an ability that gives enemies an effect that makes fighting or moving harder?",
+  },
 
-  "can-heal-allies": {
-    label: "Can Heal Allies",
+  // =========================================================
+  // SUPPORT
+  // =========================================================
+
+  "can-heal": {
+    label: "Can Restore Health",
+    category: "support",
+    difficulty: "medium",
+    description:
+      "Can the Agent use an ability to restore a player's health?",
+  },
+
+  "can-heal-an-ally": {
+    label: "Can Heal an Ally",
     category: "support",
     difficulty: "high",
     description:
-      "Can the agent directly heal a teammate?",
+      "Can the Agent directly restore the health of a teammate?",
   },
 
   "can-heal-self": {
@@ -370,159 +410,135 @@ export const QUESTIONS: Record<QuestionId, Question> = {
     category: "support",
     difficulty: "high",
     description:
-      "Can the agent restore their own health?",
+      "Can the Agent use an ability to restore their own health?",
   },
 
-  "can-revive": {
-    label: "Can Revive",
+  "can-revive-an-ally": {
+    label: "Can Revive an Ally",
     category: "support",
     difficulty: "high",
     description:
-      "Can the agent bring a dead player back?",
+      "Can the Agent bring a dead teammate back into the round?",
   },
 
-  "can-buff-allies": {
-    label: "Can Buff Allies",
+  "can-help-an-ally-directly": {
+    label: "Can Directly Help an Ally",
     category: "support",
-    difficulty: "medium",
+    difficulty: "low",
     description:
-      "Can the agent directly enhance a teammate?",
+      "Does the Agent have an ability that directly gives a teammate a useful effect?",
   },
 
-  "supports-from-distance": {
-    label: "Supports From Distance",
-    category: "support",
-    difficulty: "medium",
-    description:
-      "Can the agent provide an effect to an ally from a significant distance?",
-  },
+  // =========================================================
+  // UTILITY
+  // =========================================================
 
-  // =========================
-  // Utility
-  // =========================
-
-  "blocks-vision": {
-    label: "Blocks Vision",
+  "can-block-line-of-sight": {
+    label: "Can Block Line of Sight",
     category: "utility",
     difficulty: "low",
     description:
-      "Can the agent block an enemy's line of sight?",
+      "Can the Agent create something that stops enemies from seeing through an area?",
   },
 
-  "can-blind": {
-    label: "Can Blind",
+  "can-impair-vision": {
+    label: "Can Impair Enemy Vision",
     category: "utility",
     difficulty: "medium",
     description:
-      "Can the agent impair enemy vision with an ability?",
+      "Can the Agent use an ability that makes it harder for enemies to see clearly?",
   },
 
-  "creates-vision-cover": {
-    label: "Creates Vision Cover",
+  "can-place-utility": {
+    label: "Can Place Utility",
     category: "utility",
     difficulty: "low",
     description:
-      "Can the agent create an area that obscures vision?",
+      "Can the Agent place an ability somewhere on the map instead of using it immediately?",
   },
 
-  "has-deployable": {
-    label: "Has Deployable",
+  "has-utility-that-stays": {
+    label: "Has Utility That Stays",
     category: "utility",
     difficulty: "low",
     description:
-      "Can the agent place persistent utility on the map?",
+      "Can the Agent leave an ability active in a location after placing it?",
   },
 
-  "controls-utility": {
-    label: "Controls Utility",
+  "can-control-placed-utility": {
+    label: "Can Control Placed Utility",
     category: "utility",
     difficulty: "medium",
     description:
-      "Can the agent directly control deployed utility?",
+      "Can the Agent control, move, or interact with their own placed utility after deploying it?",
   },
 
-  "can-recall-utility": {
-    label: "Can Recall Utility",
+  "can-recover-utility": {
+    label: "Can Recover Their Utility",
     category: "utility",
     difficulty: "high",
     description:
-      "Can the agent retrieve or recall deployed utility?",
+      "Can the Agent pick up, recall, or recover their own placed utility?",
   },
 
-  "can-reuse-utility": {
-    label: "Can Reuse Utility",
+  "can-reuse-an-ability": {
+    label: "Can Reuse an Ability",
     category: "utility",
     difficulty: "medium",
     description:
-      "Can an ability be recovered and used again?",
+      "Can one of the Agent's abilities become available again during the same round?",
   },
 
-  "creates-decoy": {
-    label: "Creates Decoy",
+  "can-create-a-decoy": {
+    label: "Can Create a Decoy",
     category: "utility",
     difficulty: "high",
     description:
-      "Can the agent create something designed to fool enemies?",
+      "Can the Agent create something that is meant to trick or distract enemies?",
   },
 
-  "uses-projectile": {
-    label: "Uses Projectile",
+  "uses-thrown-or-launched-abilities": {
+    label: "Uses Thrown or Launched Abilities",
     category: "utility",
     difficulty: "low",
     description:
-      "Does the agent have an ability that is thrown or launched as a projectile?",
+      "Does the Agent have an ability that is thrown, launched, or sent toward a location?",
   },
 
-  "places-ground-utility": {
-    label: "Places Ground Utility",
-    category: "utility",
-    difficulty: "low",
-    description:
-      "Can the agent place an ability directly onto the ground?",
-  },
-
-  "casts-through-walls": {
-    label: "Casts Through Walls",
+  "can-use-abilities-through-walls": {
+    label: "Can Use Abilities Through Walls",
     category: "utility",
     difficulty: "medium",
     description:
-      "Can an ability affect an area or enemy through a wall?",
+      "Can the Agent affect an enemy or area with an ability without needing a direct line of sight?",
   },
 
-  // =========================
-  // Unique
-  // =========================
+  "can-place-utility-at-range": {
+    label: "Can Place Utility From Far Away",
+    category: "utility",
+    difficulty: "medium",
+    description:
+      "Can the Agent place or activate useful abilities at a location far away from themselves?",
+  },
 
-  "has-alternate-form": {
-    label: "Has Alternate Form",
+  // =========================================================
+  // UNIQUE
+  // =========================================================
+
+  "has-a-companion": {
+    label: "Can Use a Companion",
     category: "unique",
     difficulty: "high",
     description:
-      "Can the agent enter a substantially different form?",
+      "Can the Agent use an ability that creates or controls a creature or companion?",
   },
 
-  "acts-after-death": {
-    label: "Acts After Death",
+  "can-create-a-copy": {
+    label: "Can Create a Copy",
     category: "unique",
     difficulty: "high",
     description:
-      "Can the agent continue influencing the round after dying?",
-  },
-
-  "has-companion": {
-    label: "Has Companion",
-    category: "unique",
-    difficulty: "high",
-    description:
-      "Can the agent deploy a creature or companion?",
-  },
-
-  "creates-copy": {
-    label: "Creates Copy",
-    category: "unique",
-    difficulty: "high",
-    description:
-      "Can the agent create a copy or imitation of themselves?",
+      "Can the Agent create a copy, clone, or fake version of themselves?",
   },
 
   "can-become-invulnerable": {
@@ -530,7 +546,15 @@ export const QUESTIONS: Record<QuestionId, Question> = {
     category: "unique",
     difficulty: "high",
     description:
-      "Can the agent temporarily become immune to damage?",
+      "Can the Agent become immune to damage for a short period of time?",
+  },
+
+  "can-act-after-death": {
+    label: "Can Act After Death",
+    category: "unique",
+    difficulty: "high",
+    description:
+      "Can the Agent still use or control something after their body has been eliminated?",
   },
 
   "can-return-after-death": {
@@ -538,39 +562,47 @@ export const QUESTIONS: Record<QuestionId, Question> = {
     category: "unique",
     difficulty: "high",
     description:
-      "Can the agent return to the round after being eliminated?",
+      "Can the Agent come back into the round after being eliminated?",
   },
 
-  "can-affect-spike": {
-    label: "Can Affect Spike",
+  "can-affect-the-spike": {
+    label: "Can Directly Affect the Spike",
     category: "unique",
     difficulty: "high",
     description:
-      "Can an ability directly interact with the Spike?",
+      "Can one of the Agent's abilities directly interact with the Spike?",
+  },
+
+  "has-different-ability-modes": {
+    label: "Has Different Ability Modes",
+    category: "unique",
+    difficulty: "high",
+    description:
+      "Can one of the Agent's abilities be used in different modes or have clearly different effects?",
   },
 
   "uses-map-targeting": {
-    label: "Uses Map Targeting",
+    label: "Can Target Using a Map",
     category: "unique",
     difficulty: "medium",
     description:
-      "Can the agent target an ability using a tactical map interface?",
+      "Can the Agent choose where to use an ability through a map-style targeting view?",
   },
 
-  "has-rechargeable-ability": {
-    label: "Has Rechargeable Ability",
+  "has-rechargeable-abilities": {
+    label: "Has Rechargeable Abilities",
     category: "unique",
     difficulty: "medium",
     description:
-      "Can an ability recharge during a round?",
+      "Can one of the Agent's abilities recharge and become available again during a round?",
   },
 
-  "has-ability-modes": {
-    label: "Has Ability Modes",
+  "has-a-special-ultimate-effect": {
+    label: "Has a Unique Ultimate Effect",
     category: "unique",
     difficulty: "high",
     description:
-      "Can an ability switch between different effects or modes?",
+      "Does the Agent's ultimate do something very different from simply dealing damage or helping with normal combat?",
   },
 };
 
