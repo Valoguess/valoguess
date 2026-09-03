@@ -35,6 +35,8 @@ export const user = pgTable("user", {
 
   image: text("image"),
 
+  isAnonymous: boolean("is_anonymous").default(false),
+
   createdAt: timestamp("created_at")
     .defaultNow()
     .notNull(),
@@ -422,3 +424,14 @@ export const relations = defineRelations(
     },
   }),
 );
+
+export const schema = {
+  user,
+  session,
+  verification,
+  account,
+  friendship,
+  userSettings,
+  game,
+  gamePlayer,
+}
