@@ -3,12 +3,13 @@ import {
   text,
   timestamp,
   boolean,
+  uuid
 } from "drizzle-orm/pg-core";
 import { user } from "./user";
 
 export const userSettings = pgTable("user_settings", {
-  id: text("id")
-    .primaryKey(),
+  id: uuid("id").primaryKey()
+    .defaultRandom(),
 
   userId: text("user_id")
     .notNull()

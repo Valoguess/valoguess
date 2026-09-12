@@ -3,14 +3,20 @@ import {
   text,
   timestamp,
   boolean,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
+  
+  username: varchar("username", { length: 255 })
+    .notNull()
+    .unique(),
+  
+  name: text("name")
+    .notNull(),
 
-  name: text("name").notNull(),
-
-  email: text("email").notNull().unique(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
 
   emailVerified: boolean("email_verified")
     .default(false)
@@ -20,11 +26,11 @@ export const user = pgTable("user", {
 
   isAnonymous: boolean("is_anonymous").default(false),
 
-  createdAt: timestamp("created_at")
+  createdAt: timestamp("created_at", { precision: 6, withTimezone: true })
     .defaultNow()
     .notNull(),
 
-  updatedAt: timestamp("updated_at")
+  updatedAt: timestamp("updated_at", { precision: 6, withTimezone: true })
     .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),

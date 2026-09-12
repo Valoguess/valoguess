@@ -7,59 +7,57 @@ import {
 } from "drizzle-orm/pg-core";
 import { user } from "./user";
 
-export const account = pgTable(
-  "account",
-  {
-    id: text("id").primaryKey(),
+export const account = pgTable("account", {
+  id: text("id").primaryKey(),
 
-    issuer: text("issuer")
-      .notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, {
+      onDelete: "cascade",
+    }),
+  
+  accountId: text("account_id")
+    .notNull(),
+  
+  providerId: text("provider_id")
+    .notNull(),
+  
+  issuer: text("issuer")
+    .notNull(),
 
-    accountId: text("account_id")
-      .notNull(),
+  accessToken: text("access_token"),
 
-    providerId: text("provider_id")
-      .notNull(),
+  refreshToken: text("refresh_token"),
 
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, {
-        onDelete: "cascade",
-      }),
+  idToken: text("id_token"),
 
-    accessToken: text("access_token"),
+  accessTokenExpiresAt: timestamp(
+    "access_token_expires_at",
+  ),
 
-    refreshToken: text("refresh_token"),
+  refreshTokenExpiresAt: timestamp(
+    "refresh_token_expires_at",
+  ),
 
-    idToken: text("id_token"),
+  scope: text("scope"),
 
-    accessTokenExpiresAt: timestamp(
-      "access_token_expires_at",
-    ),
+  password: text("password"),
 
-    refreshTokenExpiresAt: timestamp(
-      "refresh_token_expires_at",
-    ),
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
 
-    scope: text("scope"),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+},
 
-    password: text("password"),
+(table) => [
+  uniqueIndex("account_issuer_account_id_uidx")
+    .on(table.issuer, table.accountId),
 
-    createdAt: timestamp("created_at")
-      .defaultNow()
-      .notNull(),
-
-    updatedAt: timestamp("updated_at")
-      .defaultNow()
-      .$onUpdate(() => new Date())
-      .notNull(),
-  },
-
-  (table) => [
-    uniqueIndex("account_issuer_account_id_uidx")
-      .on(table.issuer, table.accountId),
-
-    index("account_user_id_idx")
-      .on(table.userId),
-  ],
+  index("account_user_id_idx")
+    .on(table.userId),
+],
 );

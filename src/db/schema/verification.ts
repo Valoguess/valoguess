@@ -5,32 +5,28 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 
-export const verification = pgTable(
-  "verification",
-  {
-    id: text("id").primaryKey(),
+export const verification = pgTable("verification", {
+  id: text("id").primaryKey(),
 
-    identifier: text("identifier")
-      .notNull(),
+  identifier: text("identifier")
+    .notNull(),
 
-    value: text("value")
-      .notNull(),
+  value: text("value")
+    .notNull(),
 
-    expiresAt: timestamp("expires_at")
-      .notNull(),
+  expiresAt: timestamp("expires_at", { precision: 6, withTimezone: true })
+    .notNull(),
 
-    createdAt: timestamp("created_at")
-      .defaultNow()
-      .notNull(),
+  createdAt: timestamp("created_at", { precision: 6, withTimezone: true })
+    .defaultNow()
+    .notNull(),
 
-    updatedAt: timestamp("updated_at")
-      .defaultNow()
-      .$onUpdate(() => new Date())
-      .notNull(),
-  },
-
-  (table) => [
-    index("verification_identifier_idx")
-      .on(table.identifier),
-  ],
-);
+  updatedAt: timestamp("updated_at", { precision: 6, withTimezone: true })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  
+}, (table) => [
+  index("verification_identifier_idx")
+    .on(table.identifier),
+]);

@@ -3,43 +3,40 @@ import {
   text,
   timestamp,
   index,
+  varchar,
 } from "drizzle-orm/pg-core";
 import { user } from "./user";
 
-export const session = pgTable(
-  "session",
-  {
-    id: text("id").primaryKey(),
+export const session = pgTable("session", {
+  id: text("id").primaryKey(),
 
-    expiresAt: timestamp("expires_at")
-      .notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, {
+      onDelete: "cascade",
+    }),
+  
+  token: varchar("token", { length: 255 })
+    .notNull()
+    .unique(),
+  
+  expiresAt: timestamp("expires_at", { precision: 6, withTimezone: true })
+    .notNull(),
 
-    token: text("token")
-      .notNull()
-      .unique(),
+  ipAddress: text("ip_address"),
 
-    createdAt: timestamp("created_at")
-      .defaultNow()
-      .notNull(),
+  userAgent: text("user_agent"),
 
-    updatedAt: timestamp("updated_at")
-      .defaultNow()
-      .$onUpdate(() => new Date())
-      .notNull(),
+  createdAt: timestamp("created_at", { precision: 6, withTimezone: true })
+    .defaultNow()
+    .notNull(),
 
-    ipAddress: text("ip_address"),
-
-    userAgent: text("user_agent"),
-
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, {
-        onDelete: "cascade",
-      }),
-  },
-
-  (table) => [
-    index("session_user_id_idx")
-      .on(table.userId),
-  ],
-);
+  updatedAt: timestamp("updated_at", { precision: 6, withTimezone: true })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  
+}, (table) => [
+  index("session_userId_idx")
+    .on(table.userId),
+]);

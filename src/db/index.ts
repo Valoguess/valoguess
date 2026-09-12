@@ -3,9 +3,14 @@ import { account } from "./schema/account";
 import { userSettings } from "./schema/userSettings";
 import { session } from "./schema/session";
 import { verification } from "./schema/verification";
-import { gamePlayer } from "./schema/gamePlayer";
-import { friendship } from "./schema/friendship";
+import { gamePlayer, gameResultEnum } from "./schema/gamePlayer";
+import { friendship, friendshipStatusEnum } from "./schema/friendship";
 import { game } from "./schema/game";
+
+import 'dotenv/config';
+import { drizzle } from 'drizzle-orm/node-postgres';
+
+export const db = drizzle(process.env.DATABASE_URL!);
 
 export const schema = {
   user,
@@ -14,8 +19,10 @@ export const schema = {
   session,
   verification,
   friendship,
+  friendshipStatusEnum,
   game,
   gamePlayer,
+  gameResultEnum,
 }
 
 export {
@@ -25,6 +32,8 @@ export {
   session,
   verification,
   friendship,
+  friendshipStatusEnum,
   game,
   gamePlayer,
+  gameResultEnum,
 }
