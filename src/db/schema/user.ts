@@ -35,3 +35,5 @@ export const user = pgTable("user", {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+
+export type User = typeof user.$inferSelect;
