@@ -41,7 +41,7 @@ export const relations = defineRelations(
 
       sentFriendRequests: r.many.friendship({
         from: r.user.id,
-        to: r.friendship.receiverId,
+        to: r.friendship.requesterId,
       }),
 
       receivedFriendRequests: r.many.friendship({
@@ -78,7 +78,7 @@ export const relations = defineRelations(
 
     friendship: {
       requester: r.one.user({
-        from: r.friendship.receiverId,
+        from: r.friendship.requesterId,
         to: r.user.id,
       }),
 
