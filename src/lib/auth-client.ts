@@ -1,14 +1,16 @@
 import { createAuthClient } from "better-auth/react";
-import { anonymousClient } from "better-auth/client/plugins"
+import { anonymousClient, usernameClient } from "better-auth/client/plugins"
 
 export const { signIn, signUp, signOut, useSession } = createAuthClient({
   plugins: [
-    anonymousClient()
+    anonymousClient(),
+    usernameClient({
+      displayUsername: false
+    }),
   ]
 });
 
-
-export const googleSignIn = () => signIn.social({
+export const googleSignIn = (callbackURL: string) => signIn.social({
   provider: "google",
-  
+  callbackURL,
 });
