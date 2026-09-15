@@ -8,9 +8,10 @@ import { friendship, friendshipStatusEnum } from "./schema/friendship";
 import { game } from "./schema/game";
 
 import 'dotenv/config';
+import { relations } from "./relations";
 import { drizzle } from 'drizzle-orm/node-postgres';
 
-export const db = drizzle(process.env.DATABASE_URL!);
+export const db = drizzle(process.env.DATABASE_URL!, { relations });
 
 export const schema = {
   user,
