@@ -1,11 +1,21 @@
 import { User } from '@/db/schema/user';
-import { create } from 'zustand'
-import { createJSONStorage, persist } from 'zustand/middleware'
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+
+export type StoreUser = Partial<User> & {
+  id: string;
+  name: string;
+  username?: string;
+  email?: string | null;
+  emailVerified?: boolean;
+  image?: string | null;
+  isAnonymous?: boolean | null;
+};
 
 interface IAuthStore {
   hydrated: boolean;
-  user: User | null;
-  setUser: (user: User | null) => void;
+  user: StoreUser | null;
+  setUser: (user: StoreUser | null) => void;
   clearUser: () => void;
   setHydrated: (hydrated: boolean) => void;
 }
@@ -16,7 +26,7 @@ export const useAuthStore = create<IAuthStore>()(
       hydrated: false,
       user: null,
 
-      setUser: (user: User | null) =>
+      setUser: (user: StoreUser | null) =>
         set({ user: user ? { ...user } : null }),
 
       clearUser: () =>
@@ -28,9 +38,9 @@ export const useAuthStore = create<IAuthStore>()(
     {
       name: 'authStore',
       onRehydrateStorage: () => (state) => {
-        state?.setHydrated(true)
+        state?.setHydrated(true);
       },
-      storage: createJSONStorage(() => sessionStorage)
+      storage: createJSONStorage(() => sessionStorage),
     },
-  )
-)
+  ),
+);
