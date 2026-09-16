@@ -19,8 +19,8 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SummaryRow } from "@/components/SummaryRow";
-import { StatCol } from "@/components/StatCol";
+import { SummaryRow } from "./_components/SummaryRow";
+import { StatCol } from "./_components/StatCol";
 
 type TimelineEvent = {
   id: string;
@@ -109,7 +109,7 @@ function ResultContent() {
         </div>
 
         <Link
-          href="/"
+          href="/lobby"
           className="flex items-center gap-2 rounded-sm border border-white/10 bg-base-900 px-4 py-2 text-xs font-semibold text-ink-300 transition hover:border-white/20 hover:text-white"
         >
           MAIN MENU
@@ -383,7 +383,7 @@ function ResultContent() {
           BACK TO ROOM
         </Link>
         <Link
-          href="/"
+          href="/lobby"
           className="flex items-center justify-center gap-2 rounded-sm border border-white/10 bg-base-900 hover:border-white/20 hover:text-white hover:bg-base-800 py-2.5 px-8 text-xs font-bold uppercase tracking-wider text-ink-300 transition"
         >
           LEAVE GAME

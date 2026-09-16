@@ -3,11 +3,11 @@
 import { Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Flag, Check, X, Loader2, LogOut } from "lucide-react";
-import { GameHeader } from "@/components/GameHeader";
-import { SecretAgentCard } from "@/components/SecretAgentCard";
-import { QuestionPanel } from "@/components/QuestionPanel";
-import { AgentGrid } from "@/components/AgentGrid";
-import { ActivityFeed } from "@/components/ActivityFeed";
+import { GameHeader } from "./_components/GameHeader";
+import { SecretAgentCard } from "./_components/SecretAgentCard";
+import { QuestionPanel } from "./_components/QuestionPanel";
+import { AgentGrid } from "./_components/AgentGrid";
+import { ActivityFeed } from "./_components/ActivityFeed";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   AGENTS,
@@ -36,7 +36,7 @@ function PlayContent() {
 
   useEffect(() => {
     if (!room) {
-      router.replace("/");
+      router.replace("/lobby");
     } else if (room.state === "finished") {
       const isVictory = room.game?.winnerId === room.me?.player?.id;
       router.replace(`/play/result?status=${isVictory ? "victory" : "defeat"}`);
@@ -183,7 +183,7 @@ function PlayContent() {
     if (room) {
       leaveRoom(room.id);
       clearRoom();
-      router.replace("/");
+      router.replace("/lobby");
     }
   };
 
