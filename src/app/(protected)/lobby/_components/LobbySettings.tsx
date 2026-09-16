@@ -38,7 +38,7 @@ export function LobbySettings({
   setShowMoreOptions,
 }: LobbySettingsProps) {
   return (
-    <div className="border border-white/[0.05] bg-[#07090e]/60 backdrop-blur-md rounded-sm p-5 flex flex-col justify-between relative overflow-hidden h-full min-h-0">
+    <div className="border border-white/5 bg-[#07090e]/60 backdrop-blur-md rounded-sm p-5 flex flex-col justify-between relative overflow-hidden h-full min-h-0">
       <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       
       {/* Header */}
