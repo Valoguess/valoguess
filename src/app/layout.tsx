@@ -3,6 +3,7 @@ import { Rajdhani, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import SocketProvider from "@/components/SocketProvider";
+import { AuthInitializer } from "@/components/AuthInitializer";
 
 const rajdhani = Rajdhani({
   subsets: ["latin"],
@@ -186,7 +187,11 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased bg-[#050811] text-white">
-        <SocketProvider>{children}</SocketProvider>
+        <AuthInitializer>
+          <SocketProvider>
+            {children}
+          </SocketProvider>
+        </AuthInitializer>
       </body>
     </html>
   );
