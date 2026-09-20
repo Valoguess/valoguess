@@ -1,15 +1,18 @@
+import 'dotenv/config';
+import { drizzle } from 'drizzle-orm/node-postgres';
+
+import { jwks } from "./schema/jwks";
+import { game } from "./schema/game";
 import { user } from "./schema/user";
 import { account } from "./schema/account";
-import { userSettings } from "./schema/userSettings";
 import { session } from "./schema/session";
+import { userSettings } from "./schema/userSettings";
 import { verification } from "./schema/verification";
 import { gamePlayer, gameResultEnum } from "./schema/gamePlayer";
 import { friendship, friendshipStatusEnum } from "./schema/friendship";
-import { game } from "./schema/game";
 
-import 'dotenv/config';
 import { relations } from "./relations";
-import { drizzle } from 'drizzle-orm/node-postgres';
+
 
 export const db = drizzle(process.env.DATABASE_URL!, { relations });
 
@@ -24,6 +27,7 @@ export const schema = {
   game,
   gamePlayer,
   gameResultEnum,
+  jwks
 }
 
 export {
@@ -37,4 +41,5 @@ export {
   game,
   gamePlayer,
   gameResultEnum,
+  jwks
 }

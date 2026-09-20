@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { anonymous, username } from "better-auth/plugins"
+import { anonymous, username, jwt } from "better-auth/plugins"
 
 import { db, schema } from "@/db";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
@@ -28,10 +28,21 @@ export const auth = betterAuth({
   plugins: [
     anonymous({
     }),
-    nextCookies(),
     username({
       displayUsername: false,
     }),
+    jwt({
+      jwt: {
+        definePayload: ({user}) => {
+          return {
+            id: user.id,
+            name: user.name,
+            username: user.username,
+          }
+        }
+      }
+    }),
+    nextCookies(),
   ],
   databaseHooks: {
     user: {
