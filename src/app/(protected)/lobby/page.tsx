@@ -13,11 +13,16 @@ import {
   kickPlayer,
   leaveRoom,
   updateRoom,
+  sendInvite,
+  cancelInvite,
+  acceptInvite,
+  rejectInvite,
 } from "@/socket/emitter";
 import { ServerEvents } from "@/socket/events";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useAuthStore } from "@/store/authStore";
-import { Message } from "./_components/types";
+import { useInviteStore } from "@/store/inviteStore";
+import { Message, Friend, IncomingPartyInvite } from "./_components/types";
 import { useFriends } from "@/hooks/useFriends";
 import { LobbyHeader } from "./_components/LobbyHeader";
 import { LobbySubheader } from "./_components/LobbySubheader";
@@ -80,7 +85,116 @@ export default function LobbyPage() {
     handleCancelRequest,
     handleRemoveFriend,
     handleInviteFriend,
+    refetchFriends,
   } = useFriends(user);
+
+  const friendsListRef = useRef(friendsList);
+  friendsListRef.current = friendsList;
+  const refetchFriendsRef = useRef(refetchFriends);
+  refetchFriendsRef.current = refetchFriends;
+
+  const [inviteToast, setInviteToast] = useState("");
+
+  // Handle inviting a friend to the current party
+  const onInviteFriendToParty = (friend: Friend) => {
+    if (!room?.id) {
+      setInviteToast("Please create a party first to invite friends!");
+      setTimeout(() => setInviteToast(""), 3500);
+      return;
+    }
+
+    sendInvite(
+      {
+        id: friend.id,
+        username: friend.username?.replace(/^@/, "") || friend.name,
+      },
+      room.id,
+    );
+
+    setInviteToast(`Party invite sent to ${friend.name}!`);
+    setTimeout(() => setInviteToast(""), 3000);
+  };
+
+  // Incoming party invites state from global inviteStore
+  const { incomingInvites, lastDeclinedInvite, removeIncomingInvite } = useInviteStore();
+
+  // Handle declined party invites from friends
+  useEffect(() => {
+    if (!lastDeclinedInvite) return;
+    const { otherPlayerId } = lastDeclinedInvite;
+    const friend = friendsList.find((f) => f.id === otherPlayerId);
+    const friendName = friend?.name || "Friend";
+    setInviteToast(`${friendName} declined the party invite.`);
+    setTimeout(() => setInviteToast(""), 4000);
+  }, [lastDeclinedInvite, friendsList]);
+
+  // When incoming invites change, refetch friends list to ensure details are populated
+  useEffect(() => {
+    if (incomingInvites.length > 0) {
+      refetchFriends();
+    }
+  }, [incomingInvites.length, refetchFriends]);
+
+  // Enrich incoming invites with known friend info
+  const enrichedIncomingInvites = incomingInvites.map((inv) => {
+    const matched = friendsList.find((f) => f.id === inv.sender.id);
+    if (matched) {
+      return {
+        ...inv,
+        sender: {
+          ...inv.sender,
+          name: matched.name,
+          username: matched.username,
+          avatar: matched.avatar,
+        },
+      };
+    }
+    return inv;
+  });
+
+  // Provide browser console test utility for easy frontend debugging
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (window as any).__simulatePartyInvite = (custom?: any) => {
+        useInviteStore.getState().addIncomingInvite({
+          id: `test-${Date.now()}`,
+          inviteId: `test-${Date.now()}`,
+          roomId: "VALO-" + Math.floor(1000 + Math.random() * 9000),
+          sender: {
+            id: "2",
+            name: "JETT",
+            username: "@wind_striker",
+            avatar: "/agents/icon/jett.png",
+          },
+          sentAt: Date.now(),
+          ...custom,
+        });
+      };
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        delete (window as any).__simulatePartyInvite;
+      }
+    };
+  }, []);
+
+  // Handle accepting an incoming party invite
+  const handleAcceptPartyInvite = (inviteId: string, incomingRoomId: string) => {
+    setErrorMsg("");
+    setIsCreatingOrJoining(true);
+
+    acceptInvite(incomingRoomId);
+    removeIncomingInvite(inviteId, incomingRoomId);
+  };
+
+  // Handle declining an incoming party invite
+  const handleDeclinePartyInvite = (inviteId: string) => {
+    const invite = incomingInvites.find((i) => i.id === inviteId);
+    if (invite?.roomId && invite?.sender?.id) {
+      rejectInvite(invite.roomId, invite.sender.id);
+    }
+    removeIncomingInvite(inviteId);
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -103,6 +217,9 @@ export default function LobbyPage() {
 
   // Handle room state change
   useEffect(() => {
+    if (room) {
+      setIsCreatingOrJoining(false);
+    }
     if (room?.state === "playing") {
       router.push(`/play?code=${room.id}`);
     }
@@ -198,15 +315,7 @@ export default function LobbyPage() {
   const handleCreateParty = () => {
     setErrorMsg("");
     setIsCreatingOrJoining(true);
-
-    let pId =
-      localStorage.getItem("playerId") || sessionStorage.getItem("playerId");
-    if (!pId) {
-      pId = crypto.randomUUID();
-      localStorage.setItem("playerId", pId);
-      sessionStorage.setItem("playerId", pId);
-    }
-    createRoom({ id: pId, username: savedUsername });
+    createRoom();
   };
 
   // Execute Join Party
@@ -215,18 +324,7 @@ export default function LobbyPage() {
     if (!roomInput.trim()) return;
     setErrorMsg("");
     setIsCreatingOrJoining(true);
-
-    let pId =
-      localStorage.getItem("playerId") || sessionStorage.getItem("playerId");
-    if (!pId) {
-      pId = crypto.randomUUID();
-      localStorage.setItem("playerId", pId);
-      sessionStorage.setItem("playerId", pId);
-    }
-    joinRoom(roomInput.trim().toUpperCase(), {
-      id: pId,
-      username: savedUsername,
-    });
+    joinRoom(roomInput.trim().toUpperCase());
   };
 
   const handleStartGame = () => {
@@ -328,6 +426,15 @@ export default function LobbyPage() {
         </div>
       )}
 
+      {inviteToast && (
+        <div className="relative z-20 w-full max-w-md mx-auto mt-2 px-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="bg-[#090d14]/90 border border-mint/40 text-mint text-xs font-display font-bold uppercase tracking-wider p-2 rounded text-center shadow-[0_0_15px_rgba(60,242,196,0.2)] flex items-center justify-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-mint animate-ping" />
+            {inviteToast}
+          </div>
+        </div>
+      )}
+
       {/* 3. CENTER CONTENT: 4 PLAYER CARDS & COLLAPSIBLE SIDEBAR */}
       <div className="relative z-10 flex-1 flex items-center justify-between gap-6 px-8 py-2 min-h-0">
         <LobbyCenterSlots
@@ -359,8 +466,11 @@ export default function LobbyPage() {
           handleDeclineRequest={handleDeclineRequest}
           handleCancelRequest={handleCancelRequest}
           handleRemoveFriend={handleRemoveFriend}
-          handleInviteFriend={handleInviteFriend}
-          friendAddedToast={friendAddedToast}
+          handleInviteFriend={onInviteFriendToParty}
+          incomingPartyInvites={enrichedIncomingInvites}
+          onAcceptPartyInvite={handleAcceptPartyInvite}
+          onDeclinePartyInvite={handleDeclinePartyInvite}
+          friendAddedToast={friendAddedToast || inviteToast}
           isAddingFriend={isAddingFriend}
         />
       </div>

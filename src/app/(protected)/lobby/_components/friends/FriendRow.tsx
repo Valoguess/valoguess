@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { X, UserPlus } from "lucide-react";
+import { X, UserPlus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Friend } from "../types";
 
@@ -9,20 +10,41 @@ interface FriendRowProps {
   friend: Friend;
   onSelectToRemove: (friend: Friend) => void;
   onInvite?: (friend: Friend) => void;
+  isInvited?: boolean;
+  onCancelInvite?: (friend: Friend) => void;
+  hasIncomingInvite?: boolean;
+  onAcceptIncomingInvite?: () => void;
+  onDeclineIncomingInvite?: () => void;
 }
 
 export function FriendRow({
   friend,
   onSelectToRemove,
   onInvite,
+  hasIncomingInvite = false,
+  onAcceptIncomingInvite,
+  onDeclineIncomingInvite,
 }: FriendRowProps) {
-  const isOffline = friend.status === "offline";
+  const isOffline = friend.status === "offline" && !hasIncomingInvite;
+  const [justInvited, setJustInvited] = useState(false);
+
+  const handleInviteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onInvite) return;
+    onInvite(friend);
+    setJustInvited(true);
+    setTimeout(() => {
+      setJustInvited(false);
+    }, 1200);
+  };
 
   return (
     <div
       className={cn(
         "flex items-center justify-between p-2 rounded transition group",
-        isOffline
+        hasIncomingInvite
+          ? "bg-mint/[0.08] border border-mint/40 shadow-[0_0_12px_rgba(60,242,196,0.15)] animate-pulse"
+          : isOffline
           ? "bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 opacity-60 hover:opacity-80"
           : "bg-white/[0.02] hover:bg-white/[0.06] border border-white/5"
       )}
@@ -66,34 +88,77 @@ export function FriendRow({
 
         {/* Friend info */}
         <div className="flex flex-col text-left min-w-0">
-          <span className="font-display text-[11px] font-bold text-white tracking-wide truncate max-w-[120px]">
+          <span className="font-display text-[11px] font-bold text-white tracking-wide truncate max-w-[110px]">
             {friend.name}
           </span>
           <span
             className={cn(
               "text-[8px] uppercase font-semibold tracking-wider font-display",
-              isOffline ? "text-zinc-500" : "text-mint"
+              hasIncomingInvite
+                ? "text-mint font-bold flex items-center gap-1"
+                : isOffline
+                ? "text-zinc-500"
+                : "text-mint"
             )}
           >
-            {isOffline
-              ? "Offline"
-              : friend.status === "online"
-              ? `• ${friend.activity || "Online"}`
-              : `• ${friend.activity || "In Match"}`}
+            {hasIncomingInvite ? (
+              <>
+                <span className="h-1.5 w-1.5 rounded-full bg-mint animate-ping" />
+                INVITED YOU
+              </>
+            ) : isOffline ? (
+              "Offline"
+            ) : friend.status === "online" ? (
+              `• ${friend.activity || "Online"}`
+            ) : (
+              `• ${friend.activity || "In Match"}`
+            )}
           </span>
         </div>
       </div>
 
-      {/* Invite button (only if not offline and handler provided) */}
-      {!isOffline && onInvite && (
+      {/* Action buttons alongside friend: Tick (✓) & Cross (✕) for incoming invite, or repeat invite button */}
+      {hasIncomingInvite ? (
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onAcceptIncomingInvite?.();
+            }}
+            className="h-6.5 w-6.5 rounded bg-mint/25 hover:bg-mint/40 border border-mint/60 text-mint flex items-center justify-center transition cursor-pointer hover:scale-110 shadow-[0_0_8px_rgba(60,242,196,0.35)]"
+            title="Accept Invite (✓)"
+          >
+            <Check className="h-3.5 w-3.5 stroke-[3]" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeclineIncomingInvite?.();
+            }}
+            className="h-6.5 w-6.5 rounded bg-[#FF4655]/25 hover:bg-[#FF4655]/40 border border-[#FF4655]/50 text-[#FF4655] flex items-center justify-center transition cursor-pointer hover:scale-110 shadow-[0_0_8px_rgba(255,70,85,0.35)]"
+            title="Decline Invite (✕)"
+          >
+            <X className="h-3.5 w-3.5 stroke-[3]" />
+          </button>
+        </div>
+      ) : !isOffline && onInvite ? (
         <button
-          onClick={() => onInvite(friend)}
-          className="text-white/40 hover:text-accent p-1 transition cursor-pointer hover:scale-110"
+          onClick={handleInviteClick}
+          className={cn(
+            "p-1 rounded transition cursor-pointer hover:scale-110 shrink-0",
+            justInvited
+              ? "text-mint bg-mint/15 shadow-[0_0_8px_rgba(60,242,196,0.3)]"
+              : "text-white/40 hover:text-accent hover:bg-white/5"
+          )}
           title="Invite to Party"
         >
-          <UserPlus className="h-3.5 w-3.5" />
+          {justInvited ? (
+            <Check className="h-3.5 w-3.5 stroke-[2.5]" />
+          ) : (
+            <UserPlus className="h-3.5 w-3.5" />
+          )}
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

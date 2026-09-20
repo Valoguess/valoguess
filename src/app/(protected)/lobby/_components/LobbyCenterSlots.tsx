@@ -13,6 +13,8 @@ interface LobbyCenterSlotsProps {
   handleCreateParty: () => void;
   handleKickGuest: () => void;
   handleCopyCode: () => void;
+  pendingInvite?: any;
+  handleCancelInvite?: any;
 }
 
 export function LobbyCenterSlots({
@@ -54,7 +56,7 @@ export function LobbyCenterSlots({
 
           <div className="w-full text-center z-10 pt-1">
             <h3 className="font-display text-xl font-black uppercase tracking-wider text-white truncate">
-              {you?.player.username || savedUsername}
+              {you?.player?.name || you?.player?.username || savedUsername}
             </h3>
             <span className="text-[10px] text-accent font-display font-bold uppercase tracking-widest block mt-0.5">
               {isHost ? "HOST • 1V1 DUELIST" : "MEMBER"}
@@ -123,7 +125,7 @@ export function LobbyCenterSlots({
 
             <div className="w-full text-center z-10 pt-1">
               <h3 className="font-display text-xl font-black uppercase tracking-wider text-white truncate">
-                {opponent.player.username}
+                {opponent.player?.name || opponent.player?.username || "CHALLENGER"}
               </h3>
               <span className="text-[10px] text-mint font-display font-bold uppercase tracking-widest block mt-0.5">
                 READY FOR MATCH

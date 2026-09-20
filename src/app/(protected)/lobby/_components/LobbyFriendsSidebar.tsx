@@ -12,9 +12,12 @@ import {
   UserCheck,
   Circle,
   Lock,
+  Radio,
+  Check,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Friend, FriendRequest } from "./types";
+import { Friend, FriendRequest, IncomingPartyInvite } from "./types";
 import { FriendRow } from "./friends/FriendRow";
 import { IncomingRequestRow, OutgoingRequestRow } from "./friends/FriendRequestRow";
 import { AddFriendForm } from "./friends/AddFriendForm";
@@ -35,6 +38,11 @@ interface LobbyFriendsSidebarProps {
   handleCancelRequest: (requestId: string) => void;
   handleRemoveFriend: (friendId: string) => void | Promise<void>;
   handleInviteFriend: (friend: Friend) => void;
+  invitedFriendIds?: string[];
+  onCancelInviteFriend?: (friend: Friend) => void;
+  incomingPartyInvites?: IncomingPartyInvite[];
+  onAcceptPartyInvite?: (inviteId: string, roomId: string) => void;
+  onDeclinePartyInvite?: (inviteId: string) => void;
   friendAddedToast: string;
   isAddingFriend?: boolean;
 }
@@ -53,6 +61,11 @@ export function LobbyFriendsSidebar({
   handleCancelRequest,
   handleRemoveFriend,
   handleInviteFriend,
+  invitedFriendIds = [],
+  onCancelInviteFriend,
+  incomingPartyInvites = [],
+  onAcceptPartyInvite,
+  onDeclinePartyInvite,
   friendAddedToast,
   isAddingFriend = false,
 }: LobbyFriendsSidebarProps) {
@@ -80,11 +93,34 @@ export function LobbyFriendsSidebar({
 
   const incomingRequests = friendRequests.filter((r) => r.type === "incoming");
   const outgoingRequests = friendRequests.filter((r) => r.type === "outgoing");
-  const onlineFriends = friendsList.filter(
-    (f) => f.status === "online" || f.status === "ingame"
+
+  const unlistedInviteFriends: Friend[] = incomingPartyInvites
+    .filter((inv) => !friendsList.some((f) => f.id === inv.sender.id))
+    .map((inv) => ({
+      id: inv.sender.id,
+      name: inv.sender.name || "Player",
+      username: inv.sender.username,
+      avatar: inv.sender.avatar || "/agents/icon/omen.png",
+      status: "online",
+      activity: "In Lobby",
+    }));
+
+  const onlineFriends = [
+    ...unlistedInviteFriends,
+    ...friendsList.filter(
+      (f) =>
+        f.status === "online" ||
+        f.status === "ingame" ||
+        incomingPartyInvites.some((inv) => inv.sender.id === f.id)
+    ),
+  ];
+  const offlineFriends = friendsList.filter(
+    (f) =>
+      f.status === "offline" &&
+      !incomingPartyInvites.some((inv) => inv.sender.id === f.id)
   );
-  const offlineFriends = friendsList.filter((f) => f.status === "offline");
   const totalRequestsCount = incomingRequests.length + outgoingRequests.length;
+
 
   return (
     <div
@@ -191,6 +227,19 @@ export function LobbyFriendsSidebar({
         ) : isFriendsCollapsed ? (
           /* CASE B: COLLAPSED VIEW (AUTHENTICATED) */
           <div className="flex flex-col items-center space-y-2.5">
+            {incomingPartyInvites.length > 0 && (
+              <div
+                onClick={() => setIsFriendsCollapsed(false)}
+                className="relative h-8 w-8 rounded-full bg-mint/20 border border-mint flex items-center justify-center text-mint cursor-pointer hover:scale-105 transition animate-pulse"
+                title={`${incomingPartyInvites.length} Pending Party Invite(s)`}
+              >
+                <Radio className="h-4 w-4" />
+                <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-mint text-black text-[8px] font-bold flex items-center justify-center shadow-[0_0_6px_#3cf2c4]">
+                  {incomingPartyInvites.length}
+                </span>
+              </div>
+            )}
+
             {incomingRequests.length > 0 && (
               <div
                 onClick={() => setIsFriendsCollapsed(false)}
@@ -344,14 +393,57 @@ export function LobbyFriendsSidebar({
                               No friends currently online
                             </div>
                           ) : (
-                            onlineFriends.map((friend) => (
-                              <FriendRow
-                                key={friend.id}
-                                friend={friend}
-                                onSelectToRemove={setFriendToRemove}
-                                onInvite={handleInviteFriend}
-                              />
-                            ))
+                            [...onlineFriends]
+                              .sort((a, b) => {
+                                const aHasInvite = incomingPartyInvites.some(
+                                  (inv) =>
+                                    inv.sender.id === a.id ||
+                                    (a.username && inv.sender.username === a.username) ||
+                                    inv.sender.name.toLowerCase() === a.name.toLowerCase()
+                                );
+                                const bHasInvite = incomingPartyInvites.some(
+                                  (inv) =>
+                                    inv.sender.id === b.id ||
+                                    (b.username && inv.sender.username === b.username) ||
+                                    inv.sender.name.toLowerCase() === b.name.toLowerCase()
+                                );
+                                if (aHasInvite && !bHasInvite) return -1;
+                                if (!aHasInvite && bHasInvite) return 1;
+                                return 0;
+                              })
+                              .map((friend) => {
+                                const incomingInviteForFriend = incomingPartyInvites.find(
+                                  (inv) =>
+                                    inv.sender.id === friend.id ||
+                                    (friend.username && inv.sender.username === friend.username) ||
+                                    inv.sender.name.toLowerCase() === friend.name.toLowerCase()
+                                );
+
+                                return (
+                                  <FriendRow
+                                    key={friend.id}
+                                    friend={friend}
+                                    onSelectToRemove={setFriendToRemove}
+                                    onInvite={handleInviteFriend}
+                                    hasIncomingInvite={Boolean(incomingInviteForFriend)}
+                                    onAcceptIncomingInvite={
+                                      incomingInviteForFriend
+                                        ? () =>
+                                            onAcceptPartyInvite?.(
+                                              incomingInviteForFriend.id,
+                                              incomingInviteForFriend.roomId
+                                            )
+                                        : undefined
+                                    }
+                                    onDeclineIncomingInvite={
+                                      incomingInviteForFriend
+                                        ? () =>
+                                            onDeclinePartyInvite?.(incomingInviteForFriend.id)
+                                        : undefined
+                                    }
+                                  />
+                                );
+                              })
                           )}
                         </div>
                       )}

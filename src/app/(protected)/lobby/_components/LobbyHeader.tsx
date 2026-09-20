@@ -12,6 +12,7 @@ import {
   User,
   Edit3,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface LobbyHeaderProps {
   savedUsername: string;
@@ -24,6 +25,8 @@ export function LobbyHeader({
   onOpenHowToPlay,
   onOpenSettings,
 }: LobbyHeaderProps) {
+
+  const router = useRouter();
 
   return (
     <header className="relative z-20 w-full h-16 bg-[#080B10]/90 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between shrink-0">
@@ -84,7 +87,7 @@ export function LobbyHeader({
           <Mail className="h-4.5 w-4.5" />
         </button>
         <button
-          onClick={onOpenSettings}
+          onClick={() => router.push("/settings")}
           className="h-10 w-10 flex items-center justify-center rounded-sm border border-white/5 bg-white/[0.02] hover:bg-white/[0.08] text-white/60 hover:text-white transition cursor-pointer"
           title="Room Settings"
         >

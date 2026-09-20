@@ -3,16 +3,19 @@
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   User,
   Shield,
   Image as ImageIcon,
   ArrowLeft,
   Save,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSession } from "@/lib/auth-client";
+import { useSession, signOut } from "@/lib/auth-client";
 import { useAuthStore } from "@/store/authStore";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AGENT_BANNERS } from "./constants";
 import { ProfileCardPreview } from "./_components/ProfileCardPreview";
 import { IdentitySettingsTab } from "./_components/IdentitySettingsTab";
@@ -20,8 +23,9 @@ import { BannerTaglineTab } from "./_components/BannerTaglineTab";
 import { PrivacyAccountTab } from "./_components/PrivacyAccountTab";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { data: session } = useSession();
-  const { user } = useAuthStore();
+  const { user, clearUser } = useAuthStore();
 
   const isAnonymous = useMemo(() => {
     if (typeof user?.isAnonymous === "boolean") return user.isAnonymous;
@@ -57,34 +61,32 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveToast, setSaveToast] = useState<string>("");
 
+  // Logout modal state
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   // Load initial settings from user/localStorage
   useEffect(() => {
-    // 1. Initial display name
     const initialName = user?.name || (typeof window !== "undefined" && localStorage.getItem("username")) || "AGENT";
     setName(initialName);
 
-    // 2. Initial username
     const initialUsername =
       user?.username ||
       (typeof window !== "undefined" && localStorage.getItem("handle")) ||
       (initialName.toLowerCase().replace(/[^a-z0-9_]/g, "") || "agent_001");
     setUsername(initialUsername.replace(/^@/, ""));
 
-    // 3. Initial tagline
     const savedTagline = typeof window !== "undefined" ? localStorage.getItem("valoguess_tagline") : null;
     setTagline(savedTagline || "CLUTCH SPECIALIST");
 
-    // 4. Initial banner
     const savedBanner = typeof window !== "undefined" ? localStorage.getItem("valoguess_banner") : null;
     if (savedBanner && AGENT_BANNERS.some((b) => b.id === savedBanner)) {
       setSelectedBannerId(savedBanner);
     }
 
-    // 5. Initial hideName privacy setting
     const savedHideName = typeof window !== "undefined" ? localStorage.getItem("valoguess_hide_name") : null;
     setHideName(savedHideName === "true");
 
-    // 6. Calculate 30-day cooldowns based on timestamp in localStorage
     if (typeof window !== "undefined") {
       const lastUsernameChange = localStorage.getItem("valoguess_username_last_changed");
       if (lastUsernameChange) {
@@ -148,13 +150,37 @@ export default function SettingsPage() {
         }
       }
 
-      setSaveToast("Profile settings saved successfully!");
+      setSaveToast("Settings saved successfully!");
       setTimeout(() => setSaveToast(""), 4000);
     } catch {
       setSaveToast("Failed to save settings. Please try again.");
       setTimeout(() => setSaveToast(""), 4000);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Logout handler
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await signOut();
+      clearUser();
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("username");
+        localStorage.removeItem("handle");
+        localStorage.removeItem("playerId");
+        localStorage.removeItem("guestPrefix");
+        sessionStorage.clear();
+      }
+      router.replace("/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+      clearUser();
+      router.replace("/login");
+    } finally {
+      setIsLoggingOut(false);
+      setShowLogoutModal(false);
     }
   };
 
@@ -195,8 +221,8 @@ export default function SettingsPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,transparent_20%,#040609_90%)]" />
       </div>
 
-      {/* 1. TOP HEADER NAVIGATION BAR */}
-      <header className="relative z-30 w-full h-16 bg-[#080B10]/95 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between shrink-0">
+      {/* 1. STICKY TOP HEADER NAVIGATION BAR */}
+      <header className="sticky top-0 z-30 w-full h-16 bg-[#080B10]/95 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between shrink-0 shadow-lg">
         <div className="flex items-center gap-4">
           <Link
             href="/lobby"
@@ -216,7 +242,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Action Button: Save Changes */}
+        {/* Header Actions: Feedback + Single Save Button + Logout Button */}
         <div className="flex items-center gap-3">
           {saveToast && (
             <span className="text-[11px] font-display font-bold text-mint animate-fade-in hidden md:inline truncate">
@@ -241,11 +267,20 @@ export default function SettingsPage() {
               </>
             )}
           </button>
+
+          <button
+            onClick={() => setShowLogoutModal(true)}
+            className="py-2 px-3.5 rounded-sm border border-white/10 bg-white/3 hover:bg-[#FF4655]/15 hover:border-[#FF4655]/40 text-white/60 hover:text-[#FF4655] font-display text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer"
+            title="Log out of account"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">LOG OUT</span>
+          </button>
         </div>
       </header>
 
       {/* 2. MAIN SETTINGS CONTAINER */}
-      <div className="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 py-8 flex flex-col gap-8">
+      <div className="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 py-8 flex flex-col gap-8 pb-16">
         {/* TOP HERO: LIVE PLAYER CARD PREVIEW */}
         <ProfileCardPreview
           currentBanner={currentBanner}
@@ -293,7 +328,7 @@ export default function SettingsPage() {
             )}
           >
             <Shield className="h-4 w-4 text-mint" />
-            <span>3. PRIVACY & SOCIAL</span>
+            <span>3. PRIVACY & ACCOUNT</span>
           </button>
         </div>
 
@@ -327,7 +362,7 @@ export default function SettingsPage() {
           />
         )}
 
-        {/* TAB 3: PRIVACY & SOCIAL */}
+        {/* TAB 3: PRIVACY & ACCOUNT */}
         {activeTab === "privacy" && (
           <PrivacyAccountTab
             hideName={hideName}
@@ -337,45 +372,69 @@ export default function SettingsPage() {
             username={username}
             isAnonymous={isAnonymous}
             userEmail={user?.email || session?.user?.email}
+            onRequestLogout={() => setShowLogoutModal(true)}
           />
         )}
-
-        {/* BOTTOM SAVE BAR */}
-        <div className="p-4 bg-[#080B10]/90 border border-white/10 rounded-sm backdrop-blur-md flex items-center justify-between shrink-0 shadow-lg">
-          <Link
-            href="/lobby"
-            className="text-xs font-display font-bold uppercase tracking-wider text-white/50 hover:text-white transition py-2 px-3 rounded cursor-pointer"
-          >
-            DISCARD & RETURN
-          </Link>
-
-          <div className="flex items-center gap-3">
-            {saveToast && (
-              <span className="text-xs font-display font-bold text-mint animate-fade-in truncate">
-                {saveToast}
-              </span>
-            )}
-
-            <button
-              onClick={() => handleSaveSettings()}
-              disabled={isSaving}
-              className="py-2.5 px-6 bg-accent hover:bg-accent-dim text-white font-display text-xs font-bold uppercase tracking-widest rounded-sm shadow-[0_0_20px_rgba(255,70,85,0.4)] transition cursor-pointer disabled:opacity-50 active:scale-98 flex items-center gap-2"
-            >
-              {isSaving ? (
-                <>
-                  <div className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                  <span>SAVING PROFILE...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  <span>SAVE SETTINGS</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
       </div>
+
+      {/* LOGOUT CONFIRMATION MODAL */}
+      <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
+        <DialogContent
+          showCloseButton={false}
+          className="bg-[#0b0e14]/95 border border-white/10 max-w-sm p-6 shadow-[0_0_50px_rgba(0,0,0,0.9)] backdrop-blur-xl rounded-none relative overflow-hidden"
+        >
+          {/* Top Valorant-style red accent bar */}
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#FF4655]" />
+
+          <div className="flex flex-col items-center text-center space-y-4 pt-1">
+            <div className="h-12 w-12 rounded-full bg-[#FF4655]/10 border border-[#FF4655]/30 flex items-center justify-center text-[#FF4655] shadow-[0_0_20px_rgba(255,70,85,0.2)]">
+              <LogOut className="h-6 w-6" />
+            </div>
+
+            <div className="space-y-1">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-[#FF4655] font-bold">
+                SESSION TERMINATION
+              </div>
+              <h3 className="font-valorant text-lg tracking-wider text-white">
+                LOG OUT OF VALOGUESS?
+              </h3>
+            </div>
+
+            <p className="text-xs text-zinc-400 leading-relaxed max-w-[280px]">
+              {isAnonymous
+                ? "You are using a guest session. Logging out will clear your local guest session and return you to the sign-in screen."
+                : "Are you sure you want to end your session? You will need to sign in again to access party duels and saved stats."}
+            </p>
+
+            <div className="flex items-center gap-2.5 w-full pt-2">
+              <button
+                type="button"
+                disabled={isLoggingOut}
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 py-2.5 px-4 bg-white/5 hover:bg-white/10 border border-white/15 text-white/80 hover:text-white font-display text-xs font-bold uppercase tracking-wider rounded-xs transition cursor-pointer disabled:opacity-50"
+              >
+                CANCEL
+              </button>
+
+              <button
+                type="button"
+                disabled={isLoggingOut}
+                onClick={handleLogout}
+                className="flex-1 py-2.5 px-4 bg-[#FF4655] hover:bg-[#FF4655]/90 text-white font-display text-xs font-bold uppercase tracking-wider rounded-xs shadow-[0_0_15px_rgba(255,70,85,0.4)] transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                {isLoggingOut ? (
+                  <span className="animate-pulse">LOGGING OUT...</span>
+                ) : (
+                  <>
+                    <LogOut className="h-3.5 w-3.5" />
+                    <span>LOG OUT</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

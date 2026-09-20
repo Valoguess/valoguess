@@ -25,6 +25,27 @@ export type FriendRequest = {
   createdAt?: string;
 };
 
+export type SentPartyInvite = {
+  friendId: string;
+  friendName: string;
+  friendAvatar: string;
+  roomId: string;
+  sentAt: number;
+};
+
+export type IncomingPartyInvite = {
+  id: string;
+  inviteId?: string;
+  roomId: string;
+  sender: {
+    id: string;
+    name: string;
+    username?: string;
+    avatar?: string;
+  };
+  sentAt?: number;
+};
+
 export const INITIAL_FRIENDS_LIST: Friend[] = [
   {
     id: "1",
