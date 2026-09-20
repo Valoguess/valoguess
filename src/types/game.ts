@@ -17,7 +17,8 @@ export type RoomState = "waiting" | "playing" | "finished";
 
 export interface RoomPlayer {
   id: string;
-  username: string;
+  name: string;
+  username?: string;
 }
 
 export interface PlayerGameState {

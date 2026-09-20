@@ -5,15 +5,22 @@ export const ClientEvents = {
   ROOM_UPDATE: "room:update",
   ROOM_KICK: "room:kick",
 
+  INVITE_SEND: "invite:send",
+  INVITE_ACCEPT: "invite:accept",
+  INVITE_REJECT: "invite:reject",
+  INVITE_CANCEL: "invite:cancel",
+
+
   ROOM_RECONNECT: "room:reconnect",
+  GAME_HEARTBEAT: "game:heartbeat",
 
   GAME_START: "game:start",
-
-  GAME_HEARTBEAT: "game:heartbeat",
 
   QUESTION_ASK: "question:ask",
   QUESTION_ANSWER: "question:answer",
   GUESS_SUBMIT: "guess:submit",
+
+  PLAYER_HEARTBEAT: "player:heartbeat",
 
   // TURN_END: "turn:end",
 
@@ -28,6 +35,9 @@ export const ServerEvents = {
   GAME_OVER: "game:over",
 
   CHAT_MESSAGE: "chat:message",
+
+  INVITE_SYNC: "invite:sync",
+  INVITE_RECEIVED: "invite:received",
 
   AUTH: "auth",
   ERROR: "app:error",
