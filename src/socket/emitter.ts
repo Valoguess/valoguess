@@ -70,6 +70,6 @@ export function rejectInvite(roomId: string, inviterId: string) {
   socket.emit(ClientEvents.INVITE_REJECT, { roomId, inviterId });
 }
 
-export function cancelInvite(friendId: string, roomId: string) {
-  socket.emit(ClientEvents.INVITE_CANCEL, { friendId, roomId });
+export function sendPlayerHeartbeat() {
+  socket.emit(ClientEvents.PLAYER_HEARTBEAT);
 }
