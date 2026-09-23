@@ -8,8 +8,6 @@ export const ClientEvents = {
   INVITE_SEND: "invite:send",
   INVITE_ACCEPT: "invite:accept",
   INVITE_REJECT: "invite:reject",
-  INVITE_CANCEL: "invite:cancel",
-
 
   ROOM_RECONNECT: "room:reconnect",
   GAME_HEARTBEAT: "game:heartbeat",
@@ -37,7 +35,8 @@ export const ServerEvents = {
   CHAT_MESSAGE: "chat:message",
 
   INVITE_SYNC: "invite:sync",
-  INVITE_RECEIVED: "invite:received",
+  FRIENDS_SYNC: "friends:sync",
+  FRIENDS_PRESENCE: "friends:presence",
 
   AUTH: "auth",
   ERROR: "app:error",
