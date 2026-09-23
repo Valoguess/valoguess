@@ -14,7 +14,6 @@ import {
   leaveRoom,
   updateRoom,
   sendInvite,
-  cancelInvite,
   acceptInvite,
   rejectInvite,
 } from "@/socket/emitter";
@@ -152,31 +151,6 @@ export default function LobbyPage() {
     return inv;
   });
 
-  // Provide browser console test utility for easy frontend debugging
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      (window as any).__simulatePartyInvite = (custom?: any) => {
-        useInviteStore.getState().addIncomingInvite({
-          id: `test-${Date.now()}`,
-          inviteId: `test-${Date.now()}`,
-          roomId: "VALO-" + Math.floor(1000 + Math.random() * 9000),
-          sender: {
-            id: "2",
-            name: "JETT",
-            username: "@wind_striker",
-            avatar: "/agents/icon/jett.png",
-          },
-          sentAt: Date.now(),
-          ...custom,
-        });
-      };
-    }
-    return () => {
-      if (typeof window !== "undefined") {
-        delete (window as any).__simulatePartyInvite;
-      }
-    };
-  }, []);
 
   // Handle accepting an incoming party invite
   const handleAcceptPartyInvite = (inviteId: string, incomingRoomId: string) => {

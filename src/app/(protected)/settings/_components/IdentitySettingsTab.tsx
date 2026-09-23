@@ -8,11 +8,11 @@ interface IdentitySettingsTabProps {
   username: string;
   setUsername: (val: string) => void;
   usernameCooldownDays: number;
-  toggleUsernameCooldownDemo: () => void;
+  toggleUsernameCooldownDemo?: () => void;
   name: string;
   setName: (val: string) => void;
   nameCooldownDays: number;
-  toggleNameCooldownDemo: () => void;
+  toggleNameCooldownDemo?: () => void;
 }
 
 export function IdentitySettingsTab({
@@ -95,18 +95,6 @@ export function IdentitySettingsTab({
             </span>
           )}
         </div>
-
-        {/* Demo test toggle button */}
-        <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-zinc-500">
-          <span>Testing Demo:</span>
-          <button
-            type="button"
-            onClick={toggleUsernameCooldownDemo}
-            className="text-white/40 hover:text-accent underline cursor-pointer"
-          >
-            Toggle 30-Day Cooldown Simulation
-          </button>
-        </div>
       </div>
 
       {/* 2. DISPLAY NAME FIELD */}
@@ -162,18 +150,6 @@ export function IdentitySettingsTab({
               Maximum 24 characters. Display names do not need to be unique.
             </span>
           )}
-        </div>
-
-        {/* Demo test toggle button */}
-        <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-zinc-500">
-          <span>Testing Demo:</span>
-          <button
-            type="button"
-            onClick={toggleNameCooldownDemo}
-            className="text-white/40 hover:text-accent underline cursor-pointer"
-          >
-            Toggle 30-Day Cooldown Simulation
-          </button>
         </div>
       </div>
     </div>

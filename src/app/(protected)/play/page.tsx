@@ -197,8 +197,8 @@ function PlayContent() {
         opponentNosUsed={
           (room.settings.maxNos ?? 5) - (room.opponent?.state.nosRemaining ?? 0)
         }
-        userName={room.me.player.username}
-        opponentName={room.opponent?.player.username || "Opponent"}
+        userName={room.me.player.name || room.me.player.username || "You"}
+        opponentName={room.opponent?.player.name || room.opponent?.player.username || "Opponent"}
         nosMax={room.settings.maxNos ?? 5}
         round={currentRound}
         maxRounds={room.settings.maxRounds ?? -1}
@@ -246,7 +246,7 @@ function PlayContent() {
                   : isIWaitingForAnswer
                     ? "Opponent is answering your question..."
                     : !isMyTurn
-                      ? `${room.opponent?.player.username || "Opponent"} is thinking...`
+                      ? `${room.opponent?.player.name || room.opponent?.player.username || "Opponent"} is thinking...`
                       : undefined
               }
               questions={gameQuestions}
@@ -337,8 +337,8 @@ function PlayContent() {
           <ActivityFeed
             entries={activity}
             yourTurn={isMyTurn}
-            userName={room.me.player.username}
-            opponentName={room.opponent?.player.username || "Opponent"}
+            userName={room.me.player.name || room.me.player.username || "You"}
+            opponentName={room.opponent?.player.name || room.opponent?.player.username || "Opponent"}
           />
         </div>
       </div>

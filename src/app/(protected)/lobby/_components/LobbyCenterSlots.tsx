@@ -13,8 +13,6 @@ interface LobbyCenterSlotsProps {
   handleCreateParty: () => void;
   handleKickGuest: () => void;
   handleCopyCode: () => void;
-  pendingInvite?: any;
-  handleCancelInvite?: any;
 }
 
 export function LobbyCenterSlots({

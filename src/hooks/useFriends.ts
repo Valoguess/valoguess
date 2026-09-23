@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { StoreUser } from "@/store/authStore";
 import { Friend, FriendRequest } from "@/types/friends";
+import { usePresenceStore } from "@/store/presenceStore";
 import {
   getFriendships,
   sendFriendRequest,
@@ -14,14 +15,27 @@ import {
 
 export function useFriends(user: StoreUser | null) {
   const [friendInput, setFriendInput] = useState("");
-  const [friendsList, setFriendsList] = useState<Friend[]>([]);
+  const [rawFriends, setRawFriends] = useState<Friend[]>([]);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [friendAddedToast, setFriendAddedToast] = useState("");
   const [isAddingFriend, setIsAddingFriend] = useState(false);
 
+  const presence = usePresenceStore((state) => state.presence);
+
+  const friendsList = useMemo<Friend[]>(() => {
+    return rawFriends.map((f) => {
+      const isOnline = Boolean(presence[f.id]);
+      return {
+        ...f,
+        status: isOnline ? ("online" as const) : ("offline" as const),
+        activity: isOnline ? "In Lobby" : "Offline",
+      };
+    });
+  }, [rawFriends, presence]);
+
   const fetchFriends = useCallback(async () => {
     if (!user || user.isAnonymous) {
-      setFriendsList([]);
+      setRawFriends([]);
       setFriendRequests([]);
       return;
     }
@@ -98,7 +112,7 @@ export function useFriends(user: StoreUser | null) {
         }
       }
 
-      setFriendsList(friends);
+      setRawFriends(friends);
       setFriendRequests([...receivedRequests, ...sentRequests]);
     } catch (err) {
       console.error("Failed to load friends:", err);
@@ -108,7 +122,7 @@ export function useFriends(user: StoreUser | null) {
   // Initial fetch and visibility-based polling
   useEffect(() => {
     if (!user || user.isAnonymous) {
-      setFriendsList([]);
+      setRawFriends([]);
       setFriendRequests([]);
       return;
     }
