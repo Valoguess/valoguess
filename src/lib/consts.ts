@@ -1,4 +1,3 @@
-import { Agent, Question, ActivityEntry } from "./data";
 
 
 export const RANKS = {
@@ -17,8 +16,6 @@ export const GAME_CONFIG = {
   MAX_NOS: 5,
   MAX_ROUNDS: 10,
   DEFAULT_TIMER: 60, // in seconds
-  MOCK_USER_NAME: "msvosch",
-  MOCK_OPPONENT_NAME: "PhoenixOG",
 } as const;
 
 
