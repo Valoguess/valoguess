@@ -35,7 +35,6 @@ FROM node:${NODE_VERSION} AS builder
 # Set working directory
 WORKDIR /app
 
-ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
 
 # Copy project dependencies from dependencies stage
 COPY --from=dependencies /app/node_modules ./node_modules
@@ -44,7 +43,8 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 
 ENV NODE_ENV=production
-
+ENV NEXT_PUBLIC_SOCKET_SERVER_URL="https://socket.nhero.xyz"
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
