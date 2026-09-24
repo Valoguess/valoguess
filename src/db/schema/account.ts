@@ -21,9 +21,6 @@ export const account = pgTable("account", {
   
   providerId: text("provider_id")
     .notNull(),
-  
-  issuer: text("issuer")
-    .notNull(),
 
   accessToken: text("access_token"),
 
@@ -54,9 +51,6 @@ export const account = pgTable("account", {
 },
 
 (table) => [
-  uniqueIndex("account_issuer_account_id_uidx")
-    .on(table.issuer, table.accountId),
-
   index("account_user_id_idx")
     .on(table.userId),
 ],
