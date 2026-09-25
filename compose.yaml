@@ -1,7 +1,7 @@
 services:
   valoguess_nextjs:
-    build:
-      context: .
+    image: ghcr.io/valoguess/valoguess:latest
+    restart: always
     ports:
       - 4000:4000
     env_file:
