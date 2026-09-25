@@ -73,3 +73,17 @@ export function rejectInvite(roomId: string, inviterId: string) {
 export function sendPlayerHeartbeat() {
   socket.emit(ClientEvents.PLAYER_HEARTBEAT);
 }
+
+// FRIEND REQUEST EVENTS
+
+export function sendFriendRequestSocket(receiverId: string) {
+  socket.emit(ClientEvents.FRIEND_REQUEST_SEND, { receiverId });
+}
+
+export function acceptFriendRequestSocket(requesterId: string) {
+  socket.emit(ClientEvents.FRIEND_REQUEST_ACCEPT, { requesterId });
+}
+
+export function declineFriendRequestSocket(requesterId: string) {
+  socket.emit(ClientEvents.FRIEND_REQUEST_DECLINE, { requesterId });
+}
