@@ -4,6 +4,12 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { StoreUser } from "@/store/authStore";
 import { Friend, FriendRequest } from "@/types/friends";
 import { usePresenceStore } from "@/store/presenceStore";
+import { useFriendStore } from "@/store/friendStore";
+import {
+  sendFriendRequestSocket,
+  acceptFriendRequestSocket,
+  declineFriendRequestSocket,
+} from "@/socket/emitter";
 import {
   getFriendships,
   sendFriendRequest,
@@ -21,6 +27,8 @@ export function useFriends(user: StoreUser | null) {
   const [isAddingFriend, setIsAddingFriend] = useState(false);
 
   const presence = usePresenceStore((state) => state.presence);
+  const friendSyncVersion = useFriendStore((state) => state.friendSyncVersion);
+  const lastFriendEvent = useFriendStore((state) => state.lastFriendEvent);
 
   const friendsList = useMemo<Friend[]>(() => {
     return rawFriends.map((f) => {
@@ -119,7 +127,29 @@ export function useFriends(user: StoreUser | null) {
     }
   }, [user]);
 
-  // Initial fetch and visibility-based polling
+  // Refetch friends whenever real-time socket events fire
+  useEffect(() => {
+    if (friendSyncVersion > 0) {
+      fetchFriends();
+    }
+  }, [friendSyncVersion, fetchFriends]);
+
+  // Handle toast notifications for real-time friend events
+  useEffect(() => {
+    if (!lastFriendEvent) return;
+    if (lastFriendEvent.type === "request_received") {
+      setFriendAddedToast("New friend request received!");
+      setTimeout(() => setFriendAddedToast(""), 4000);
+    } else if (lastFriendEvent.type === "request_accepted") {
+      setFriendAddedToast("Your friend request was accepted!");
+      setTimeout(() => setFriendAddedToast(""), 4000);
+    } else if (lastFriendEvent.type === "request_declined") {
+      setFriendAddedToast("Friend request was declined.");
+      setTimeout(() => setFriendAddedToast(""), 4000);
+    }
+  }, [lastFriendEvent]);
+
+  // Initial fetch and visibility-based gentle sync
   useEffect(() => {
     if (!user || user.isAnonymous) {
       setRawFriends([]);
@@ -129,16 +159,19 @@ export function useFriends(user: StoreUser | null) {
 
     fetchFriends();
 
-    const interval = setInterval(() => {
-      if (
-        typeof document !== "undefined" &&
-        document.visibilityState === "visible"
-      ) {
+    const onFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
         fetchFriends();
       }
-    }, 20000);
+    };
 
-    return () => clearInterval(interval);
+    window.addEventListener("focus", onFocus);
+    const interval = setInterval(onFocus, 60000);
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      clearInterval(interval);
+    };
   }, [user, fetchFriends]);
 
   // Add friend
@@ -154,6 +187,13 @@ export function useFriends(user: StoreUser | null) {
         setFriendInput("");
         setFriendAddedToast(res.message || "Friend request sent!");
         await fetchFriends();
+        if (res.receiverId) {
+          if (res.autoAccepted) {
+            acceptFriendRequestSocket(res.receiverId);
+          } else {
+            sendFriendRequestSocket(res.receiverId);
+          }
+        }
       } else {
         setFriendAddedToast(res.error || "Failed to send friend request");
       }
@@ -172,6 +212,9 @@ export function useFriends(user: StoreUser | null) {
       if (res.success) {
         setFriendAddedToast(res.message || "Friend request accepted!");
         await fetchFriends();
+        if (res.requesterId) {
+          acceptFriendRequestSocket(res.requesterId);
+        }
       } else {
         setFriendAddedToast(res.error || "Failed to accept request");
       }
@@ -188,6 +231,9 @@ export function useFriends(user: StoreUser | null) {
       if (res.success) {
         setFriendAddedToast(res.message || "Friend request declined");
         await fetchFriends();
+        if (res.requesterId) {
+          declineFriendRequestSocket(res.requesterId);
+        }
       } else {
         setFriendAddedToast(res.error || "Failed to decline request");
       }

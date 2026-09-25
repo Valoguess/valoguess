@@ -94,6 +94,8 @@ export async function sendFriendRequest(targetUsername: string) {
           return {
             success: true,
             message: `Accepted incoming request from ${displayName}! You are now friends.`,
+            receiverId: targetUser.id,
+            autoAccepted: true,
           };
         }
       }
@@ -111,6 +113,7 @@ export async function sendFriendRequest(targetUsername: string) {
       return {
         success: true,
         message: `Friend request sent to ${displayName}!`,
+        receiverId: targetUser.id,
       };
     }
 
@@ -123,6 +126,7 @@ export async function sendFriendRequest(targetUsername: string) {
     return {
       success: true,
       message: `Friend request sent to ${displayName}!`,
+      receiverId: targetUser.id,
     };
   } catch (err: any) {
     console.error("Error sending friend request:", err);
@@ -175,7 +179,11 @@ export async function acceptFriendRequest(targetIdOrFriendshipId: string) {
       };
     }
 
-    return { success: true, message: "Friend request accepted!" };
+    return {
+      success: true,
+      message: "Friend request accepted!",
+      requesterId: updated[0].requesterId,
+    };
   } catch (err: any) {
     console.error("Error accepting friend request:", err);
     return { success: false, error: err?.message || "Failed to accept friend request" };
@@ -224,7 +232,11 @@ export async function declineFriendRequest(targetIdOrFriendshipId: string) {
       return { success: false, error: "Friend request not found" };
     }
 
-    return { success: true, message: "Friend request declined" };
+    return {
+      success: true,
+      message: "Friend request declined",
+      requesterId: updated[0].requesterId,
+    };
   } catch (err: any) {
     console.error("Error declining friend request:", err);
     return { success: false, error: err?.message || "Failed to decline friend request" };

@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react'
 
 import { useAuthStore } from '@/store/authStore';
 import { usePresenceStore } from '@/store/presenceStore';
+import { useFriendStore } from '@/store/friendStore';
 
 function SocketProvider({
   children,
@@ -89,10 +90,6 @@ function SocketProvider({
     console.log("Room synced:", syncedRoom);
   };
 
-  const handleAuthSync = (reconnectToken: string) => { 
-    console.log("Auth Sync", reconnectToken);
-    localStorage.setItem("reconnectToken", reconnectToken);
-  };
 
   const handleInviteSync = (data: {
     roomId: string;
@@ -151,6 +148,37 @@ function SocketProvider({
     }
   };
 
+  const handleFriendRequest = (data: { requesterId: string }) => {
+    console.log("Friend request received in SocketProvider:", data);
+    if (data?.requesterId) {
+      useFriendStore.getState().triggerFriendSync({
+        type: "request_received",
+        userId: data.requesterId,
+      });
+    }
+  };
+
+  const handleFriendRequestAccepted = (data: { accepterId: string }) => {
+    console.log("Friend request accepted received in SocketProvider:", data);
+    if (data?.accepterId) {
+      useFriendStore.getState().triggerFriendSync({
+        type: "request_accepted",
+        userId: data.accepterId,
+      });
+      usePresenceStore.getState().setSinglePresence(data.accepterId, true);
+    }
+  };
+
+  const handleFriendRequestDeclined = (data: { declinerId: string }) => {
+    console.log("Friend request declined received in SocketProvider:", data);
+    if (data?.declinerId) {
+      useFriendStore.getState().triggerFriendSync({
+        type: "request_declined",
+        userId: data.declinerId,
+      });
+    }
+  };
+
   const reconnect = () => {
     const reconnectToken = localStorage.getItem("reconnectToken");
     const currentRoom = useRoomStore.getState().room;
@@ -167,11 +195,13 @@ function SocketProvider({
     if (!hydrated) return;
 
     socket.on(ServerEvents.ROOM_SYNC, handleRoomSync);
-    socket.on(ServerEvents.AUTH, handleAuthSync);
     socket.on(ServerEvents.ERROR, handleError);
     socket.on(ServerEvents.INVITE_SYNC, handleInviteSync);
     socket.on(ServerEvents.FRIENDS_SYNC, handleFriendsSync);
-    socket.on(ServerEvents.FRIENDS_PRESENCE, handleFriendPresence);
+    socket.on(ServerEvents.FRIEND_PRESENCE, handleFriendPresence);
+    socket.on(ServerEvents.FRIEND_REQUEST, handleFriendRequest);
+    socket.on(ServerEvents.FRIEND_REQUEST_ACCEPTED, handleFriendRequestAccepted);
+    socket.on(ServerEvents.FRIEND_REQUEST_DECLINED, handleFriendRequestDeclined);
     socket.on("connect", reconnect);
 
     if (!socket.connected) {
@@ -184,11 +214,13 @@ function SocketProvider({
 
     return () => {
       socket.off(ServerEvents.ROOM_SYNC, handleRoomSync);
-      socket.off(ServerEvents.AUTH, handleAuthSync);
       socket.off(ServerEvents.ERROR, handleError);
       socket.off(ServerEvents.INVITE_SYNC, handleInviteSync);
       socket.off(ServerEvents.FRIENDS_SYNC, handleFriendsSync);
-      socket.off(ServerEvents.FRIENDS_PRESENCE, handleFriendPresence);
+      socket.off(ServerEvents.FRIEND_PRESENCE, handleFriendPresence);
+      socket.off(ServerEvents.FRIEND_REQUEST, handleFriendRequest);
+      socket.off(ServerEvents.FRIEND_REQUEST_ACCEPTED, handleFriendRequestAccepted);
+      socket.off(ServerEvents.FRIEND_REQUEST_DECLINED, handleFriendRequestDeclined);
       socket.off("connect", reconnect);
       socket.disconnect();
       clearInterval(heartbeat);
