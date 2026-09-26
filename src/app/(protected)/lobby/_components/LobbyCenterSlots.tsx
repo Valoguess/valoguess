@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { Crown, Plus, Loader2, X, UserPlus, Copy } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+
 interface LobbyCenterSlotsProps {
   room: any;
   you: any;
@@ -28,15 +30,26 @@ export function LobbyCenterSlots({
 }: LobbyCenterSlotsProps) {
   return (
     <div className="flex-1 flex items-center justify-center gap-4 h-full max-h-130 max-w-275uto">
-      {/* SLOT 1 (LEFT MAIN SLOT - HOST / PARTY LEADER) */}
+      {/* SLOT 1 (LEFT MAIN SLOT - YOU) */}
       {room ? (
-        /* HOST / PARTY LEADER CARD */
-        <div className="flex flex-col items-center justify-between flex-1 h-full max-h-130 max-w-65 border-2 border-accent/60 bg-[#0a0e16]/80 backdrop-blur-md clip-notch-both relative p-4 shadow-[0_0_30px_rgba(255,70,85,0.15)] group transition-all duration-300">
+        /* YOU CARD */
+        <div className={cn(
+          "flex flex-col items-center justify-between flex-1 h-full max-h-130 max-w-65 border-2 bg-[#0a0e16]/80 backdrop-blur-md clip-notch-both relative p-4 group transition-all duration-300",
+          isHost
+            ? "border-accent/60 shadow-[0_0_30px_rgba(255,70,85,0.15)]"
+            : "border-mint/40 shadow-[0_0_20px_rgba(60,242,196,0.1)]"
+        )}>
           <div className="w-full flex items-center justify-between z-10">
-            <div className="flex items-center gap-1.5 bg-accent px-2.5 py-1 clip-tag text-white font-display text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(255,70,85,0.4)]">
-              <Crown className="h-3 w-3" />
-              <span>PARTY LEADER</span>
-            </div>
+            {isHost ? (
+              <div className="flex items-center gap-1.5 bg-accent px-2.5 py-1 clip-tag text-white font-display text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(255,70,85,0.4)]">
+                <Crown className="h-3 w-3" />
+                <span>PARTY LEADER</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 bg-mint/20 border border-mint/40 px-2 py-0.5 text-mint font-display text-[9px] font-bold uppercase tracking-widest rounded-sm">
+                <span>MEMBER</span>
+              </div>
+            )}
             <span className="text-[9px] text-mint font-display font-bold uppercase tracking-wider">
               READY
             </span>
@@ -56,8 +69,11 @@ export function LobbyCenterSlots({
             <h3 className="font-display text-xl font-black uppercase tracking-wider text-white truncate">
               {you?.player?.name || you?.player?.username || savedUsername}
             </h3>
-            <span className="text-[10px] text-accent font-display font-bold uppercase tracking-widest block mt-0.5">
-              {isHost ? "HOST • 1V1 DUELIST" : "MEMBER"}
+            <span className={cn(
+              "text-[10px] font-display font-bold uppercase tracking-widest block mt-0.5",
+              isHost ? "text-accent" : "text-mint"
+            )}>
+              {isHost ? "HOST • 1V1 DUELIST" : "MEMBER • 1V1 DUELIST"}
             </span>
           </div>
         </div>
@@ -91,15 +107,27 @@ export function LobbyCenterSlots({
         </div>
       )}
 
-      {/* SLOT 2 (RIGHT MAIN SLOT - GUEST / CHALLENGER) */}
+      {/* SLOT 2 (RIGHT MAIN SLOT - OPPONENT) */}
       {room ? (
         opponent ? (
           /* OPPONENT CARD */
-          <div className="flex flex-col items-center justify-between flex-1 h-full max-h-120 max-w-65 border-2 border-mint/40 bg-[#0a0e16]/80 backdrop-blur-md clip-notch-both relative p-4 shadow-[0_0_20px_rgba(60,242,196,0.1)] group transition-all duration-300">
+          <div className={cn(
+            "flex flex-col items-center justify-between flex-1 h-full max-h-120 max-w-65 border-2 bg-[#0a0e16]/80 backdrop-blur-md clip-notch-both relative p-4 group transition-all duration-300",
+            !isHost
+              ? "border-accent/60 shadow-[0_0_30px_rgba(255,70,85,0.15)]"
+              : "border-mint/40 shadow-[0_0_20px_rgba(60,242,196,0.1)]"
+          )}>
             <div className="w-full flex items-center justify-between z-10">
-              <span className="bg-mint/20 border border-mint/40 px-2 py-0.5 text-mint font-display text-[9px] font-bold uppercase tracking-widest rounded-sm">
-                CHALLENGER
-              </span>
+              {!isHost ? (
+                <div className="flex items-center gap-1.5 bg-accent px-2.5 py-1 clip-tag text-white font-display text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(255,70,85,0.4)]">
+                  <Crown className="h-3 w-3" />
+                  <span>PARTY LEADER</span>
+                </div>
+              ) : (
+                <span className="bg-mint/20 border border-mint/40 px-2 py-0.5 text-mint font-display text-[9px] font-bold uppercase tracking-widest rounded-sm">
+                  CHALLENGER
+                </span>
+              )}
               {isHost && (
                 <button
                   onClick={handleKickGuest}
@@ -123,10 +151,13 @@ export function LobbyCenterSlots({
 
             <div className="w-full text-center z-10 pt-1">
               <h3 className="font-display text-xl font-black uppercase tracking-wider text-white truncate">
-                {opponent.player?.name || opponent.player?.username || "CHALLENGER"}
+                {opponent.player?.name || opponent.player?.username || "Opponent"}
               </h3>
-              <span className="text-[10px] text-mint font-display font-bold uppercase tracking-widest block mt-0.5">
-                READY FOR MATCH
+              <span className={cn(
+                "text-[10px] font-display font-bold uppercase tracking-widest block mt-0.5",
+                !isHost ? "text-accent" : "text-mint"
+              )}>
+                {!isHost ? "HOST • 1V1 DUELIST" : "READY FOR MATCH"}
               </span>
             </div>
           </div>

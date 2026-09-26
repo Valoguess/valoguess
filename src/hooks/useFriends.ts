@@ -27,8 +27,8 @@ export function useFriends(user: StoreUser | null) {
   const [isAddingFriend, setIsAddingFriend] = useState(false);
 
   const presence = usePresenceStore((state) => state.presence);
-  const friendSyncVersion = useFriendStore((state) => state.friendSyncVersion);
   const lastFriendEvent = useFriendStore((state) => state.lastFriendEvent);
+  const initialFriendsData = useFriendStore((state) => state.initialFriendsData);
 
   const friendsList = useMemo<Friend[]>(() => {
     return rawFriends.map((f) => {
@@ -127,29 +127,72 @@ export function useFriends(user: StoreUser | null) {
     }
   }, [user]);
 
-  // Refetch friends whenever real-time socket events fire
-  useEffect(() => {
-    if (friendSyncVersion > 0) {
-      fetchFriends();
-    }
-  }, [friendSyncVersion, fetchFriends]);
-
-  // Handle toast notifications for real-time friend events
+  // Handle real-time friend events from socket
   useEffect(() => {
     if (!lastFriendEvent) return;
+
     if (lastFriendEvent.type === "request_received") {
       setFriendAddedToast("New friend request received!");
+      if (lastFriendEvent.requester) {
+        const req = lastFriendEvent.requester;
+        setFriendRequests((prev) => [
+          ...prev.filter((r) => r.id !== req.id),
+          {
+            id: req.id,
+            name: req.name || "Player",
+            username: req.username ? `@${req.username.replace(/^@/, "")}` : undefined,
+            avatar: req.avatar || "/agents/icon/reyna.png",
+            type: "incoming",
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+      } else {
+        // Fallback to fetch if socket server didn't include requester details
+        fetchFriends();
+      }
       setTimeout(() => setFriendAddedToast(""), 4000);
     } else if (lastFriendEvent.type === "request_accepted") {
       setFriendAddedToast("Your friend request was accepted!");
+      const targetUserId = lastFriendEvent.userId;
+
+      setFriendRequests((prev) => {
+        const matched = prev.find((r) => r.id === targetUserId);
+        if (matched) {
+          setRawFriends((fPrev) => [
+            ...fPrev.filter((f) => f.id !== targetUserId),
+            {
+              id: matched.id,
+              name: matched.name,
+              username: matched.username,
+              avatar: matched.avatar,
+              status: "online",
+              activity: "In Lobby",
+            },
+          ]);
+          return prev.filter((r) => r.id !== targetUserId);
+        }
+        // If not found in current memory, sync from database
+        fetchFriends();
+        return prev;
+      });
       setTimeout(() => setFriendAddedToast(""), 4000);
     } else if (lastFriendEvent.type === "request_declined") {
       setFriendAddedToast("Friend request was declined.");
+      const targetUserId = lastFriendEvent.userId;
+      setFriendRequests((prev) => prev.filter((r) => r.id !== targetUserId));
       setTimeout(() => setFriendAddedToast(""), 4000);
     }
-  }, [lastFriendEvent]);
+  }, [lastFriendEvent, fetchFriends]);
 
-  // Initial fetch and visibility-based gentle sync
+  // Update state whenever initialFriendsData arrives from socket
+  useEffect(() => {
+    if (initialFriendsData) {
+      setRawFriends(initialFriendsData.friends);
+      setFriendRequests(initialFriendsData.requests);
+    }
+  }, [initialFriendsData]);
+
+  // When user is not logged in or is anonymous, clear friends
   useEffect(() => {
     if (!user || user.isAnonymous) {
       setRawFriends([]);
@@ -157,22 +200,18 @@ export function useFriends(user: StoreUser | null) {
       return;
     }
 
-    fetchFriends();
+    // If socket has already delivered initial friends sync, no need to call getFriendships
+    if (initialFriendsData) return;
 
-    const onFocus = () => {
-      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+    // Fallback: only call getFriendships if socket has not delivered friends sync after a grace period
+    const timeout = setTimeout(() => {
+      if (!useFriendStore.getState().initialFriendsData) {
         fetchFriends();
       }
-    };
+    }, 4000);
 
-    window.addEventListener("focus", onFocus);
-    const interval = setInterval(onFocus, 60000);
-
-    return () => {
-      window.removeEventListener("focus", onFocus);
-      clearInterval(interval);
-    };
-  }, [user, fetchFriends]);
+    return () => clearTimeout(timeout);
+  }, [user, initialFriendsData, fetchFriends]);
 
   // Add friend
   const handleAddFriend = async (e: React.FormEvent) => {
@@ -186,13 +225,42 @@ export function useFriends(user: StoreUser | null) {
       if (res.success) {
         setFriendInput("");
         setFriendAddedToast(res.message || "Friend request sent!");
-        await fetchFriends();
-        if (res.receiverId) {
+
+        if (res.targetUser) {
           if (res.autoAccepted) {
-            acceptFriendRequestSocket(res.receiverId);
+            setRawFriends((prev) => [
+              ...prev.filter((f) => f.id !== res.targetUser!.id),
+              {
+                id: res.targetUser!.id,
+                name: res.targetUser!.name,
+                username: res.targetUser!.username,
+                avatar: res.targetUser!.avatar,
+                status: "online",
+                activity: "In Lobby",
+              },
+            ]);
+            setFriendRequests((prev) => prev.filter((r) => r.id !== res.targetUser!.id));
+            if (res.receiverId) {
+              acceptFriendRequestSocket(res.receiverId);
+            }
           } else {
-            sendFriendRequestSocket(res.receiverId);
+            setFriendRequests((prev) => [
+              ...prev.filter((r) => r.id !== res.targetUser!.id),
+              {
+                id: res.targetUser!.id,
+                name: res.targetUser!.name,
+                username: res.targetUser!.username,
+                avatar: res.targetUser!.avatar,
+                type: "outgoing",
+                createdAt: new Date().toISOString(),
+              },
+            ]);
+            if (res.receiverId) {
+              sendFriendRequestSocket(res.receiverId);
+            }
           }
+        } else {
+          await fetchFriends();
         }
       } else {
         setFriendAddedToast(res.error || "Failed to send friend request");
@@ -207,70 +275,96 @@ export function useFriends(user: StoreUser | null) {
 
   // Accept incoming request
   const handleAcceptRequest = async (requestId: string) => {
+    const targetRequest = friendRequests.find((r) => r.id === requestId);
+    if (targetRequest) {
+      setFriendRequests((prev) => prev.filter((r) => r.id !== requestId));
+      setRawFriends((prev) => [
+        ...prev.filter((f) => f.id !== targetRequest.id),
+        {
+          id: targetRequest.id,
+          name: targetRequest.name,
+          username: targetRequest.username,
+          avatar: targetRequest.avatar,
+          status: "online",
+          activity: "In Lobby",
+        },
+      ]);
+    }
+
     try {
       const res = await acceptFriendRequest(requestId);
       if (res.success) {
         setFriendAddedToast(res.message || "Friend request accepted!");
-        await fetchFriends();
         if (res.requesterId) {
           acceptFriendRequestSocket(res.requesterId);
         }
       } else {
         setFriendAddedToast(res.error || "Failed to accept request");
+        fetchFriends();
       }
     } catch (err: any) {
       setFriendAddedToast(err?.message || "Failed to accept request");
+      fetchFriends();
     }
     setTimeout(() => setFriendAddedToast(""), 4000);
   };
 
   // Decline incoming request
   const handleDeclineRequest = async (requestId: string) => {
+    setFriendRequests((prev) => prev.filter((r) => r.id !== requestId));
+
     try {
       const res = await declineFriendRequest(requestId);
       if (res.success) {
         setFriendAddedToast(res.message || "Friend request declined");
-        await fetchFriends();
         if (res.requesterId) {
           declineFriendRequestSocket(res.requesterId);
         }
       } else {
         setFriendAddedToast(res.error || "Failed to decline request");
+        fetchFriends();
       }
     } catch (err: any) {
       setFriendAddedToast(err?.message || "Failed to decline request");
+      fetchFriends();
     }
     setTimeout(() => setFriendAddedToast(""), 4000);
   };
 
   // Cancel outgoing request
   const handleCancelRequest = async (requestId: string) => {
+    setFriendRequests((prev) => prev.filter((r) => r.id !== requestId));
+
     try {
       const res = await cancelFriendRequest(requestId);
       if (res.success) {
         setFriendAddedToast(res.message || "Friend request cancelled");
-        await fetchFriends();
       } else {
         setFriendAddedToast(res.error || "Failed to cancel request");
+        fetchFriends();
       }
     } catch (err: any) {
       setFriendAddedToast(err?.message || "Failed to cancel request");
+      fetchFriends();
     }
     setTimeout(() => setFriendAddedToast(""), 4000);
   };
 
   // Remove friend
   const handleRemoveFriend = async (friendId: string) => {
+    setRawFriends((prev) => prev.filter((f) => f.id !== friendId));
+
     try {
       const res = await removeFriend(friendId);
       if (res.success) {
         setFriendAddedToast(res.message || "Friend removed");
-        await fetchFriends();
       } else {
         setFriendAddedToast(res.error || "Failed to remove friend");
+        fetchFriends();
       }
     } catch (err: any) {
       setFriendAddedToast(err?.message || "Failed to remove friend");
+      fetchFriends();
     }
     setTimeout(() => setFriendAddedToast(""), 4000);
   };

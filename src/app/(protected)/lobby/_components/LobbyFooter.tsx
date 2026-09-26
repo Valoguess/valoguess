@@ -58,6 +58,8 @@ export function LobbyFooter({
           title={
             !room
               ? "Create or join a party to start"
+              : !isHost
+              ? "Only the party leader can start the match"
               : !opponent
               ? "Waiting for opponent to join"
               : "Start Match"
@@ -69,7 +71,7 @@ export function LobbyFooter({
                 ? opponent
                   ? "START MATCH"
                   : "WAITING FOR PLAYER"
-                : "READY"
+                : "WAITING FOR HOST"
               : "START MATCH"}
           </span>
         </button>

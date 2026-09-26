@@ -127,12 +127,6 @@ export default function LobbyPage() {
     setTimeout(() => setInviteToast(""), 4000);
   }, [lastDeclinedInvite, friendsList]);
 
-  // When incoming invites change, refetch friends list to ensure details are populated
-  useEffect(() => {
-    if (incomingInvites.length > 0) {
-      refetchFriends();
-    }
-  }, [incomingInvites.length, refetchFriends]);
 
   // Enrich incoming invites with known friend info
   const enrichedIncomingInvites = incomingInvites.map((inv) => {
@@ -214,7 +208,11 @@ export default function LobbyPage() {
 
   const you = room?.me;
   const opponent = room?.opponent;
-  const isHost = room ? you?.player.id === room.hostId : true;
+  const myId =
+    you?.player?.id ||
+    user?.id ||
+    (typeof window !== "undefined" ? sessionStorage.getItem("my_player_id") : null);
+  const isHost = room ? Boolean(myId && room.hostId && myId === room.hostId) : true;
 
   const setTimer = (val: number | ((prev: number) => number)) => {
     const nextVal = typeof val === "function" ? val(timer) : val;

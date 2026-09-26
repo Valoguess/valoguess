@@ -69,6 +69,12 @@ export async function sendFriendRequest(targetUsername: string) {
     }
 
     const displayName = targetUser.name || targetUser.username;
+    const targetUserData = {
+      id: targetUser.id,
+      name: targetUser.name || targetUser.username || "Player",
+      username: targetUser.username ? `@${targetUser.username}` : undefined,
+      avatar: targetUser.image || "/agents/icon/phoenix.png",
+    };
 
     // Check existing friendship
     const existing = await getFriendshipService(currUser.id, targetUser.id);
@@ -96,6 +102,7 @@ export async function sendFriendRequest(targetUsername: string) {
             message: `Accepted incoming request from ${displayName}! You are now friends.`,
             receiverId: targetUser.id,
             autoAccepted: true,
+            targetUser: targetUserData,
           };
         }
       }
@@ -114,6 +121,7 @@ export async function sendFriendRequest(targetUsername: string) {
         success: true,
         message: `Friend request sent to ${displayName}!`,
         receiverId: targetUser.id,
+        targetUser: targetUserData,
       };
     }
 
@@ -127,6 +135,7 @@ export async function sendFriendRequest(targetUsername: string) {
       success: true,
       message: `Friend request sent to ${displayName}!`,
       receiverId: targetUser.id,
+      targetUser: targetUserData,
     };
   } catch (err: any) {
     console.error("Error sending friend request:", err);
