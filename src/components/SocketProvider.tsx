@@ -134,11 +134,54 @@ function SocketProvider({
     setError(error);
   };
 
-  const handleFriendsSync = (data: { friends: { userId: string; online: boolean }[] }) => {
+  const handleFriendsSync = (data: {
+    friends?: {
+      friends?: Array<{ id: string; name: string; username?: string | null; image?: string | null; online?: boolean }>;
+      requests?: {
+        incoming?: Array<{ id: string; name: string; username?: string | null; image?: string | null }>;
+        outgoing?: Array<{ id: string; name: string; username?: string | null; image?: string | null }>;
+      };
+    };
+  }) => {
     console.log("Friends sync received in SocketProvider:", data);
-    if (Array.isArray(data?.friends)) {
-      usePresenceStore.getState().setFriendsPresence(data.friends);
+    const syncData = data?.friends;
+    if (!syncData) return;
+
+    if (syncData.friends) {
+      usePresenceStore.getState().setFriendsPresence(
+        syncData.friends.map((f) => ({ userId: f.id, online: Boolean(f.online) }))
+      );
     }
+
+    const friends = (syncData.friends || []).map((f) => ({
+      id: f.id,
+      name: f.name || "Player",
+      username: f.username ? (f.username.startsWith("@") ? f.username : `@${f.username}`) : undefined,
+      avatar: f.image || "/agents/icon/omen.png",
+      status: f.online ? ("online" as const) : ("offline" as const),
+      activity: f.online ? "In Lobby" : "Offline",
+    }));
+
+    const incoming = (syncData.requests?.incoming || []).map((r) => ({
+      id: r.id,
+      name: r.name || "Player",
+      username: r.username ? (r.username.startsWith("@") ? r.username : `@${r.username}`) : undefined,
+      avatar: r.image || "/agents/icon/reyna.png",
+      type: "incoming" as const,
+    }));
+
+    const outgoing = (syncData.requests?.outgoing || []).map((r) => ({
+      id: r.id,
+      name: r.name || "Player",
+      username: r.username ? (r.username.startsWith("@") ? r.username : `@${r.username}`) : undefined,
+      avatar: r.image || "/agents/icon/phoenix.png",
+      type: "outgoing" as const,
+    }));
+
+    useFriendStore.getState().setInitialFriendsData({
+      friends,
+      requests: [...incoming, ...outgoing],
+    });
   };
 
   const handleFriendPresence = (data: { userId: string; online: boolean }) => {
@@ -148,33 +191,48 @@ function SocketProvider({
     }
   };
 
-  const handleFriendRequest = (data: { requesterId: string }) => {
+  const handleFriendRequest = (data: any) => {
     console.log("Friend request received in SocketProvider:", data);
-    if (data?.requesterId) {
+    const userId = data?.id || data?.requesterId || data?.userId;
+    if (userId) {
+      const requester =
+        data?.requester ||
+        (data?.name
+          ? {
+              id: userId,
+              name: data.name,
+              username: data.username,
+              avatar: data.image || data.avatar,
+            }
+          : undefined);
+
       useFriendStore.getState().triggerFriendSync({
         type: "request_received",
-        userId: data.requesterId,
+        userId,
+        requester,
       });
     }
   };
 
-  const handleFriendRequestAccepted = (data: { accepterId: string }) => {
+  const handleFriendRequestAccepted = (data: { userId?: string; accepterId?: string }) => {
     console.log("Friend request accepted received in SocketProvider:", data);
-    if (data?.accepterId) {
+    const targetUserId = data?.userId || data?.accepterId;
+    if (targetUserId) {
       useFriendStore.getState().triggerFriendSync({
         type: "request_accepted",
-        userId: data.accepterId,
+        userId: targetUserId,
       });
-      usePresenceStore.getState().setSinglePresence(data.accepterId, true);
+      usePresenceStore.getState().setSinglePresence(targetUserId, true);
     }
   };
 
-  const handleFriendRequestDeclined = (data: { declinerId: string }) => {
+  const handleFriendRequestDeclined = (data: { userId?: string; declinerId?: string }) => {
     console.log("Friend request declined received in SocketProvider:", data);
-    if (data?.declinerId) {
+    const targetUserId = data?.userId || data?.declinerId;
+    if (targetUserId) {
       useFriendStore.getState().triggerFriendSync({
         type: "request_declined",
-        userId: data.declinerId,
+        userId: targetUserId,
       });
     }
   };
