@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth";
-import { anonymous, username, jwt } from "better-auth/plugins"
-
-import { db, schema } from "@/db";
-import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { nextCookies } from "better-auth/next-js";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { anonymous, username, jwt, magicLink } from "better-auth/plugins"
+
+import resend from "./resend";
+import { db, schema } from "@/db";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
@@ -26,6 +27,19 @@ export const auth = betterAuth({
 
   },
   plugins: [
+    magicLink({ 
+      sendMagicLink: async ({ email, url }) => { 
+        void resend.emails.send({
+          to: email,
+          template: {
+            id: "b727acfa-2a3c-4974-b14f-04336e3159c7",
+            variables: {
+              MAGIC_LINK: url,
+            },
+          },
+        });
+      }
+    }),
     anonymous({
     }),
     username({
@@ -53,6 +67,11 @@ export const auth = betterAuth({
             user.username = `guest-${randomValue}`;
             user.name = `Guest.${randomValue}`;
             user.email = `guest.${randomValue}@valoguess.fun`;
+          }
+          else if (ctx?.path == "/magic-link/verify") { 
+            const randomValue = Math.random().toString(36).substring(2, 8);
+            user.username = user.email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase() + `_${randomValue}`;
+            user.name = user.email.split("@")[0];
           }
         }
       }
