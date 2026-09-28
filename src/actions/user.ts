@@ -4,11 +4,14 @@ import { db, user } from "@/db";
 import { auth } from "@/lib/auth";
 import { welcomeSchema } from "@/schemas/welcomeSchema"
 import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
 import z from "zod";
 
 
 export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
-  const session = await auth.api.getSession()
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
   const currUser = session?.user;
 
   if (!currUser) {
@@ -25,6 +28,7 @@ export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
 
   return updatedUser;
 }
+
 
 export async function getUserById(userId: string) {
   const userData = await db.select().from(user).where(eq(user.id, userId));
