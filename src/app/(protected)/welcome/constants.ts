@@ -57,21 +57,10 @@ export function getOrGenerateGuestPrefix(existingName?: string | null): string {
     return match[0];
   }
 
-  if (typeof window !== "undefined") {
-    const saved = localStorage.getItem("guestPrefix");
-    if (saved && /^Guest\.[a-zA-Z0-9]{5,6}$/.test(saved)) {
-      return saved;
-    }
-  }
-
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
   let code = "";
   for (let i = 0; i < 5; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  const prefix = `Guest.${code}`;
-  if (typeof window !== "undefined") {
-    localStorage.setItem("guestPrefix", prefix);
-  }
-  return prefix;
+  return `Guest.${code}`;
 }

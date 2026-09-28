@@ -37,7 +37,7 @@ export default function LobbyPage() {
   const { room, clearRoom } = useRoomStore();
   const { user } = useAuthStore();
 
-  // Username from authStore / localStorage
+  // Username from authStore
   const [savedUsername, setSavedUsername] = useState<string>("AGENT");
   const [isClient, setIsClient] = useState(false);
 
@@ -166,11 +166,8 @@ export default function LobbyPage() {
 
   useEffect(() => {
     setIsClient(true);
-    const local = localStorage.getItem("username");
     if (user?.name) {
       setSavedUsername(user.name);
-    } else if (local) {
-      setSavedUsername(local);
     }
   }, [user]);
 
@@ -208,10 +205,7 @@ export default function LobbyPage() {
 
   const you = room?.me;
   const opponent = room?.opponent;
-  const myId =
-    you?.player?.id ||
-    user?.id ||
-    (typeof window !== "undefined" ? sessionStorage.getItem("my_player_id") : null);
+  const myId = you?.player?.id || user?.id;
   const isHost = room ? Boolean(myId && room.hostId && myId === room.hostId) : true;
 
   const setTimer = (val: number | ((prev: number) => number)) => {
@@ -424,11 +418,7 @@ export default function LobbyPage() {
         <LobbyFriendsSidebar
           isFriendsCollapsed={isFriendsCollapsed}
           setIsFriendsCollapsed={setIsFriendsCollapsed}
-          isAnonymous={Boolean(
-            user?.isAnonymous ??
-            (typeof window !== "undefined" &&
-              localStorage.getItem("username")?.startsWith("Guest")),
-          )}
+          isAnonymous={Boolean(user?.isAnonymous || user?.name?.startsWith("Guest"))}
           friendsList={friendsList}
           friendRequests={friendRequests}
           friendInput={friendInput}

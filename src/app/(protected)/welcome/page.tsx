@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Loader2, ArrowRight, Flame } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { useAuthStore } from "@/store/authStore";
+import { updateUser } from "@/actions/user";
 import {
   TAKEN_USERNAMES,
   RANDOM_ADJECTIVES,
@@ -31,11 +32,7 @@ export default function WelcomePage() {
     if (typeof (session?.user as any)?.isAnonymous === "boolean") {
       return Boolean((session?.user as any).isAnonymous);
     }
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("username");
-      if (stored && stored.startsWith("Guest")) return true;
-    }
-    return false;
+    return Boolean(user?.name?.startsWith("Guest") || session?.user?.name?.startsWith("Guest"));
   }, [user, session]);
 
   // For anonymous users: fixed prefix Guest.[5-6letters]
@@ -54,33 +51,26 @@ export default function WelcomePage() {
 
   // Initialize values based on user / anonymous status
   useEffect(() => {
-    const existingUsername = localStorage.getItem("username");
-
     if (isAnonymous) {
-      const prefix = getOrGenerateGuestPrefix(user?.name || existingUsername);
+      const prefix = getOrGenerateGuestPrefix(user?.name);
       setGuestPrefix(prefix);
 
-      const currentName = user?.name || existingUsername || "";
+      const currentName = user?.name || "";
       if (currentName.startsWith(prefix)) {
         setDisplayNameSuffix(currentName.slice(prefix.length));
       }
 
       const assignedUsername =
         user?.username ||
-        localStorage.getItem("handle") ||
         prefix.toLowerCase().replace(".", "_");
       setUsername(assignedUsername);
       setUsernameStatus("available");
     } else {
-      const initialDisplayName =
-        session?.user?.name ||
-        user?.name ||
-        (existingUsername && !existingUsername.startsWith("Guest") ? existingUsername : "");
+      const initialDisplayName = session?.user?.name || user?.name || "";
       const initialHandle =
+        user?.username ||
         session?.user?.email?.split("@")[0]?.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase() ||
-        (existingUsername && !existingUsername.startsWith("Guest")
-          ? existingUsername.toLowerCase().replace(/[^a-zA-Z0-9_]/g, "")
-          : "");
+        "";
 
       if (initialDisplayName) {
         setDisplayName(initialDisplayName);
@@ -174,7 +164,7 @@ export default function WelcomePage() {
   };
 
   // Complete Onboarding
-  const handleCompleteOnboarding = (e: React.FormEvent) => {
+  const handleCompleteOnboarding = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let finalDisplayName = "";
@@ -196,13 +186,15 @@ export default function WelcomePage() {
 
     setIsSubmitting(true);
 
-    const playerId = session?.user?.id || user?.id || localStorage.getItem("playerId") || crypto.randomUUID();
+    const playerId = session?.user?.id || user?.id || crypto.randomUUID();
 
-    localStorage.setItem("username", finalDisplayName);
-    sessionStorage.setItem("username", finalDisplayName);
-    localStorage.setItem("handle", finalUsername);
-    localStorage.setItem("playerId", playerId);
-    sessionStorage.setItem("playerId", playerId);
+    try {
+      if (session?.user?.id) {
+        await updateUser({ name: finalDisplayName, username: finalUsername });
+      }
+    } catch (err) {
+      console.error("Failed to update user profile in DB:", err);
+    }
 
     setUser({
       id: playerId,

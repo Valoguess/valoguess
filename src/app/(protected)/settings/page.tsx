@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useAuthStore } from "@/store/authStore";
+import { updateUser } from "@/actions/user";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AGENT_BANNERS } from "./constants";
 import { ProfileCardPreview } from "./_components/ProfileCardPreview";
@@ -25,18 +26,14 @@ import { PrivacyAccountTab } from "./_components/PrivacyAccountTab";
 export default function SettingsPage() {
   const router = useRouter();
   const { data: session } = useSession();
-  const { user, clearUser } = useAuthStore();
+  const { user, setUser, clearUser } = useAuthStore();
 
   const isAnonymous = useMemo(() => {
     if (typeof user?.isAnonymous === "boolean") return user.isAnonymous;
     if (typeof (session?.user as any)?.isAnonymous === "boolean") {
       return Boolean((session?.user as any).isAnonymous);
     }
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("username");
-      if (stored && stored.startsWith("Guest")) return true;
-    }
-    return false;
+    return Boolean(user?.name?.startsWith("Guest") || session?.user?.name?.startsWith("Guest"));
   }, [user, session]);
 
   // Form states
@@ -65,14 +62,13 @@ export default function SettingsPage() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Load initial settings from user/localStorage
+  // Load initial settings from user
   useEffect(() => {
-    const initialName = user?.name || (typeof window !== "undefined" && localStorage.getItem("username")) || "AGENT";
+    const initialName = user?.name || "AGENT";
     setName(initialName);
 
     const initialUsername =
       user?.username ||
-      (typeof window !== "undefined" && localStorage.getItem("handle")) ||
       (initialName.toLowerCase().replace(/[^a-z0-9_]/g, "") || "agent_001");
     setUsername(initialUsername.replace(/^@/, ""));
 
@@ -130,7 +126,17 @@ export default function SettingsPage() {
     setIsSaving(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      if (session?.user?.id) {
+        await updateUser({ name: name.trim(), username: username.trim() });
+      }
+
+      if (user) {
+        setUser({
+          ...user,
+          name: name.trim(),
+          username: username.trim(),
+        });
+      }
 
       if (typeof window !== "undefined") {
         localStorage.setItem("valoguess_tagline", tagline.trim());
@@ -138,13 +144,11 @@ export default function SettingsPage() {
         localStorage.setItem("valoguess_hide_name", hideName ? "true" : "false");
 
         if (usernameCooldownDays === 0 && username.trim()) {
-          localStorage.setItem("handle", username.trim());
           localStorage.setItem("valoguess_username_last_changed", Date.now().toString());
           setUsernameCooldownDays(30);
         }
 
         if (nameCooldownDays === 0 && name.trim()) {
-          localStorage.setItem("username", name.trim());
           localStorage.setItem("valoguess_name_last_changed", Date.now().toString());
           setNameCooldownDays(30);
         }
@@ -166,13 +170,6 @@ export default function SettingsPage() {
     try {
       await signOut();
       clearUser();
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("username");
-        localStorage.removeItem("handle");
-        localStorage.removeItem("playerId");
-        localStorage.removeItem("guestPrefix");
-        sessionStorage.clear();
-      }
       router.replace("/login");
     } catch (err) {
       console.error("Logout error:", err);

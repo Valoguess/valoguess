@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, ArrowRight, CheckCircle2, Users } from "lucide-react";
 import { signIn, googleSignIn, useSession } from "@/lib/auth-client";
-import { useAuthStore } from "@/store/authStore";
 import { AuthBackground } from "@/components/auth/AuthBackground";
 import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { MagicLinkForm } from "@/components/auth/MagicLinkForm";
 
 function SignupContent() {
   const router = useRouter();
@@ -17,38 +17,17 @@ function SignupContent() {
   const redirectUrl = searchParams.get("redirect") || "/welcome";
 
   const { data: session } = useSession();
-  const { setUser } = useAuthStore();
 
   const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
   const [isLoadingGuest, setIsLoadingGuest] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Sync user and redirect when session is active
+  // Redirect when session is active (AuthInitializer handles store hydration)
   useEffect(() => {
     if (session?.user) {
-      const defaultUsername =
-        session.user.name ||
-        session.user.email?.split("@")[0] ||
-        localStorage.getItem("username") ||
-        `Guest_${Math.floor(1000 + Math.random() * 9000)}`;
-
-      localStorage.setItem("username", defaultUsername);
-      sessionStorage.setItem("username", defaultUsername);
-      localStorage.setItem("playerId", session.user.id);
-      sessionStorage.setItem("playerId", session.user.id);
-
-      setUser({
-        id: session.user.id,
-        name: session.user.name,
-        username: defaultUsername,
-        email: session.user.email,
-        image: session.user.image,
-        isAnonymous: (session.user as any).isAnonymous ?? false,
-      });
-
       router.replace(redirectUrl);
     }
-  }, [session, router, redirectUrl, setUser]);
+  }, [session, router, redirectUrl]);
 
   // Google Sign-Up Handler
   const handleGoogleSignUp = async () => {
@@ -68,42 +47,12 @@ function SignupContent() {
     setIsLoadingGuest(true);
     setErrorMessage("");
 
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const guestUsername = `Guest_${randomSuffix}`;
-
     try {
-      const res = await signIn.anonymous();
-      const generatedId = (res as any)?.data?.user?.id || crypto.randomUUID();
-
-      localStorage.setItem("username", guestUsername);
-      sessionStorage.setItem("username", guestUsername);
-      localStorage.setItem("playerId", generatedId);
-      sessionStorage.setItem("playerId", generatedId);
-
-      setUser({
-        id: generatedId,
-        username: guestUsername,
-        name: guestUsername,
-        isAnonymous: true,
-      });
-
+      await signIn.anonymous();
       router.replace("/welcome");
     } catch (err: any) {
       console.error("Anonymous registration error:", err);
-      const fallbackId = localStorage.getItem("playerId") || crypto.randomUUID();
-      localStorage.setItem("username", guestUsername);
-      sessionStorage.setItem("username", guestUsername);
-      localStorage.setItem("playerId", fallbackId);
-      sessionStorage.setItem("playerId", fallbackId);
-
-      setUser({
-        id: fallbackId,
-        username: guestUsername,
-        name: guestUsername,
-        isAnonymous: true,
-      });
-
-      router.replace("/welcome");
+      setErrorMessage(err?.message || "Failed to initialize guest session.");
     } finally {
       setIsLoadingGuest(false);
     }
@@ -117,7 +66,7 @@ function SignupContent() {
       <AuthCard
         badgeText="Protocol Enrollment // New Agent"
         title="Enlist in ValoGuess"
-        description="Create your agent record to customize your handle, climb the ranks, and duel rivals in tactical 1v1s."
+        description="Sign up with Google, dispatch a tactical Magic Link to your email, or jump straight in as a guest."
         errorMessage={errorMessage}
         footer={
           <>
@@ -161,9 +110,22 @@ function SignupContent() {
           label="Sign Up with Google"
         />
 
-        <div className="relative py-2 flex items-center justify-center">
+        <div className="relative py-1 flex items-center justify-center">
           <div className="border-t border-white/10 w-full" />
-          <span className="bg-[#090d16] px-3 text-xs text-zinc-500 uppercase tracking-wider font-semibold">
+          <span className="bg-[#090d16] px-3 text-[11px] text-zinc-500 uppercase tracking-wider font-semibold">
+            or sign up with email
+          </span>
+        </div>
+
+        <MagicLinkForm
+          callbackURL="/welcome"
+          newUserCallbackURL="/welcome"
+          disabled={isLoadingGoogle || isLoadingGuest}
+        />
+
+        <div className="relative py-1 flex items-center justify-center">
+          <div className="border-t border-white/10 w-full" />
+          <span className="bg-[#090d16] px-3 text-[11px] text-zinc-500 uppercase tracking-wider font-semibold">
             or play as guest
           </span>
         </div>
@@ -172,7 +134,7 @@ function SignupContent() {
           type="button"
           onClick={handleGuestLogin}
           disabled={isLoadingGoogle || isLoadingGuest}
-          className="w-full h-12 rounded-xl border border-[#FF4655]/40 bg-[#FF4655]/10 hover:bg-[#FF4655]/20 hover:border-[#FF4655] text-white font-semibold text-sm flex items-center justify-center gap-2.5 transition-all duration-200 shadow-[0_0_20px_rgba(255,70,85,0.15)] cursor-pointer disabled:opacity-50 active:scale-[0.99]"
+          className="w-full h-11 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/30 text-white font-semibold text-xs tracking-wider uppercase flex items-center justify-center gap-2.5 transition-all duration-200 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
         >
           {isLoadingGuest ? (
             <>
