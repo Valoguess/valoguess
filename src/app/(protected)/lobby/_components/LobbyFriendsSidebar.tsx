@@ -43,7 +43,7 @@ interface LobbyFriendsSidebarProps {
   invitedFriendIds?: string[];
   onCancelInviteFriend?: (friend: Friend) => void;
   incomingPartyInvites?: IncomingPartyInvite[];
-  onAcceptPartyInvite?: (inviteId: string, roomId: string) => void;
+  onAcceptPartyInvite?: (inviteId: string, partyId: string) => void;
   onDeclinePartyInvite?: (inviteId: string) => void;
   friendAddedToast: string;
   isAddingFriend?: boolean;
@@ -489,7 +489,7 @@ export function LobbyFriendsSidebar({
                                         ? () =>
                                             onAcceptPartyInvite?.(
                                               incomingInviteForFriend.id,
-                                              incomingInviteForFriend.roomId
+                                              incomingInviteForFriend.partyId || incomingInviteForFriend.roomId || ""
                                             )
                                         : undefined
                                     }

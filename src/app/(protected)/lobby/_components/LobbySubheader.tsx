@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { Party } from "@/types/party";
 
 interface LobbySubheaderProps {
   selectedMode: "duel" | "blitz";
@@ -20,14 +21,18 @@ interface LobbySubheaderProps {
   showModeDropdown: boolean;
   setShowModeDropdown: (show: boolean) => void;
   onOpenSettings: () => void;
-  room: any;
+  party: Party | null;
   copied: boolean;
   handleCopyCode: () => void;
   handleCreateParty: () => void;
   handleJoinParty: (e: React.FormEvent) => void;
-  roomInput: string;
-  setRoomInput: (val: string) => void;
+  partyInput: string;
+  setPartyInput: (val: string) => void;
   isCreatingOrJoining: boolean;
+  // Compatibility
+  room?: any;
+  roomInput?: string;
+  setRoomInput?: (val: string) => void;
 }
 
 export function LobbySubheader({
@@ -36,15 +41,25 @@ export function LobbySubheader({
   showModeDropdown,
   setShowModeDropdown,
   onOpenSettings,
-  room,
+  party,
   copied,
   handleCopyCode,
   handleCreateParty,
   handleJoinParty,
+  partyInput,
+  setPartyInput,
+  isCreatingOrJoining,
+  room,
   roomInput,
   setRoomInput,
-  isCreatingOrJoining,
 }: LobbySubheaderProps) {
+  const currentParty = party || room;
+  const currentInput = partyInput || roomInput || "";
+  const handleInputChange = (val: string) => {
+    if (setPartyInput) setPartyInput(val);
+    if (setRoomInput) setRoomInput(val);
+  };
+
   return (
     <div className="relative z-50 px-8 pt-4 flex items-center justify-between shrink-0">
       {/* GAMEMODE SELECTOR CARD WITH SETTINGS GEAR BUTTON ⚙️ */}
@@ -170,7 +185,7 @@ export function LobbySubheader({
       </div>
 
       {/* Center Party State / Create / Join Controls */}
-      {room ? (
+      {currentParty ? (
         /* When in a party: Show Party Code badge & Copy */
         <div className="flex items-center gap-3 bg-black/60 border border-white/10 rounded-sm p-1.5 px-4 backdrop-blur-md">
           <div className="flex flex-col items-end">
@@ -178,7 +193,7 @@ export function LobbySubheader({
               PARTY CODE
             </span>
             <span className="font-valorant text-xl tracking-[0.2em] text-accent drop-shadow-[0_0_8px_rgba(255,70,85,0.3)]">
-              #{room.id}
+              #{currentParty.id}
             </span>
           </div>
           <button
@@ -208,14 +223,14 @@ export function LobbySubheader({
           <form onSubmit={handleJoinParty} className="flex items-center gap-2">
             <Input
               type="text"
-              value={roomInput}
-              onChange={(e) => setRoomInput(e.target.value.toUpperCase())}
+              value={currentInput}
+              onChange={(e) => handleInputChange(e.target.value)}
               placeholder="PARTY CODE #"
-              className="w-36 h-9 bg-black/60 border-white/10 px-3 font-display text-white text-xs uppercase tracking-wider placeholder-white/30 rounded-sm"
+              className="w-36 h-9 bg-black/60 border-white/10 px-3 font-display text-white text-xs tracking-wider placeholder-white/30 rounded-sm"
             />
             <button
               type="submit"
-              disabled={!roomInput.trim() || isCreatingOrJoining}
+              disabled={!currentInput.trim() || isCreatingOrJoining}
               className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/15 text-white font-display text-[11px] font-bold tracking-wider uppercase rounded-sm transition disabled:opacity-30 cursor-pointer"
             >
               JOIN

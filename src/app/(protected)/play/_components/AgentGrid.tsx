@@ -5,14 +5,15 @@ import { AGENTS } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useState } from "react";
-import { useRoomStore } from "@/store/roomStore";
-
+import { useGameStore } from "@/store/gameStore";
+import { useAuthStore } from "@/store/authStore";
 import { submitGuess } from "@/socket/emitter";
 
 export function AgentGrid() {
   const [eliminated, setEliminated] = useState<Set<string>>(new Set());
   const [guess, setGuess] = useState<string>("");
-  const { room } = useRoomStore();
+  const { game } = useGameStore();
+  const { user } = useAuthStore();
 
   const toggleEliminated = (id: string) => {
     setEliminated((prev) => {
@@ -26,13 +27,19 @@ export function AgentGrid() {
     });
   };
 
+  const myPlayer =
+    game?.players.find(
+      (p) => p.id === user?.id || (p.state && p.state.secretAgent !== null)
+    ) || game?.players[0];
+  const isMyTurn = Boolean(myPlayer?.state?.isMyTurn);
+  const guessesRemaining = myPlayer?.state?.guessesRemaining ?? 0;
+  const yourTurn = isMyTurn && guessesRemaining > 0;
+
   const onGuess = () => {
-    if (!room || !guess || !room.me.state.isMyTurn) return;
-    submitGuess(room.id, guess);
+    if (!game || !guess || !isMyTurn) return;
+    submitGuess(game.id, guess);
     setGuess("");
   };
-
-  const yourTurn = !!room?.me.state.isMyTurn && (room?.me.state.guessesRemaining ?? 0) > 0;
   
   return (
     <div className="clip-notch-both mt-5 flex flex-col border border-white/5 bg-base-850 p-5 shadow-panel">

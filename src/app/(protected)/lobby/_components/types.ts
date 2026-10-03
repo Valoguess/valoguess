@@ -29,14 +29,16 @@ export type SentPartyInvite = {
   friendId: string;
   friendName: string;
   friendAvatar: string;
-  roomId: string;
+  partyId: string;
+  roomId?: string;
   sentAt: number;
 };
 
 export type IncomingPartyInvite = {
   id: string;
   inviteId?: string;
-  roomId: string;
+  partyId: string;
+  roomId?: string;
   sender: {
     id: string;
     name: string;

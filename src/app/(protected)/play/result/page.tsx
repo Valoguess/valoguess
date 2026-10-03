@@ -30,49 +30,92 @@ type TimelineEvent = {
   time: string;
 };
 
-import { useRoomStore } from "@/store/roomStore";
+import { useGameStore } from "@/store/gameStore";
+import { useAuthStore } from "@/store/authStore";
 import { AGENTS, getQuestionLabel } from "@/lib/data";
 
 function ResultContent() {
   const searchParams = useSearchParams();
-  const { room } = useRoomStore();
+  const { game, clearGame } = useGameStore();
+  const { user } = useAuthStore();
 
-  const isVictory = room?.game?.winnerId ? room.game.winnerId === room.me.player.id : searchParams.get("status") === "victory";
+  const myPlayer =
+    game?.players.find((p) => p.id === user?.id) || game?.players[0];
+  const oppPlayer = game?.players.find((p) => p.id !== myPlayer?.id);
 
-  const myAgentId = room?.me.state.secretAgent || "cypher";
-  const myAgentObj = AGENTS.find(a => a.id === myAgentId) || { id: myAgentId, name: myAgentId, role: "Sentinel" };
+  const gameState = game?.state;
+  const gameResult = gameState?.result ?? game?.result;
+  const isVictory = gameResult
+    ? gameResult.result === "WIN" && gameResult.winnerId === myPlayer?.id
+    : searchParams.get("status") === "victory";
 
-  const oppAgentId = room?.opponent?.state.secretAgent || "raze";
-  const oppAgentObj = AGENTS.find(a => a.id === oppAgentId) || { id: oppAgentId, name: oppAgentId, role: "Duelist" };
+  const cachedSecretAgent =
+    typeof window !== "undefined" && game
+      ? sessionStorage.getItem(`secret_agent_${game.id}`)
+      : null;
+  const myAgentId =
+    myPlayer?.state?.secretAgent || cachedSecretAgent || "cypher";
+  const myAgentObj =
+    AGENTS.find((a) => a.id === myAgentId) || {
+      id: myAgentId,
+      name: myAgentId,
+      role: "Sentinel",
+    };
 
-  const userName = room?.me.player.username || "You";
-  const oppName = room?.opponent?.player.username || "Opponent";
+  const oppAgentId = oppPlayer?.state?.secretAgent || "raze";
+  const oppAgentObj =
+    AGENTS.find((a) => a.id === oppAgentId) || {
+      id: oppAgentId,
+      name: oppAgentId,
+      role: "Duelist",
+    };
 
-  const roundsPlayed = Math.max(1, Math.ceil((room?.game?.turnNumber ?? 1) / 2));
-  const history = room?.game?.history || [];
+  const userName = myPlayer?.name || user?.name || "You";
+  const oppName = oppPlayer?.name || "Opponent";
+
+  const roundsPlayed = Math.max(
+    1,
+    Math.ceil((gameState?.turnNumber ?? game?.turnNumber ?? 1) / 2),
+  );
+  const history = gameState?.history ?? game?.history ?? [];
   const totalQuestions = history.length;
-  const maxNos = room?.settings?.maxNos ?? 5;
-  const userNosUsed = maxNos === -1 ? (history.filter(h => h.askedBy !== room?.me.player.id && h.answer === "no").length) : Math.max(0, maxNos - (room?.me.state.nosRemaining ?? maxNos));
-  const opponentNosUsed = maxNos === -1 ? (history.filter(h => h.askedBy === room?.me.player.id && h.answer === "no").length) : Math.max(0, maxNos - (room?.opponent?.state.nosRemaining ?? maxNos));
-  const guessesMade = room?.me.state.guess ? 1 : 0;
+  const maxNos = game?.settings?.maxNos ?? 5;
+  const userNosUsed =
+    maxNos === -1
+      ? history.filter(
+          (h) =>
+            h.askedBy !== myPlayer?.id && h.answer.toUpperCase() === "NO",
+        ).length
+      : Math.max(0, maxNos - (myPlayer?.state?.nosRemaining ?? maxNos));
+  const opponentNosUsed =
+    maxNos === -1
+      ? history.filter(
+          (h) =>
+            h.askedBy === myPlayer?.id && h.answer.toUpperCase() === "NO",
+        ).length
+      : Math.max(0, maxNos - (oppPlayer?.state?.nosRemaining ?? maxNos));
+  const guessesMade = myPlayer?.state?.guess ? 1 : 0;
   const accuracy = isVictory ? "100%" : "0%";
 
   let timeTaken = "Live Match";
-  if (room?.game?.startedAt && room?.game?.endedAt) {
-    const diffMs = Math.max(0, room.game.endedAt - room.game.startedAt);
+  const startedAt = gameState?.startedAt ?? game?.startedAt;
+  const endedAt = gameState?.endedAt ?? game?.endedAt;
+  if (startedAt && endedAt) {
+    const diffMs = Math.max(0, endedAt - startedAt);
     const mins = Math.floor(diffMs / 60000);
     const secs = Math.floor((diffMs % 60000) / 1000);
     timeTaken = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }
 
   const timeline: TimelineEvent[] = history.flatMap((h, i) => {
-    const isMyQuestion = h.askedBy === room?.me.player.id;
+    const isMyQuestion = h.askedBy === myPlayer?.id;
     const qLabel = getQuestionLabel(h.questionId);
     const timeStr = new Date(h.timestamp).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
 
+    const isYes = h.answer.toUpperCase() === "YES";
     return [
       {
         id: `${i}-ask`,
@@ -83,9 +126,9 @@ function ResultContent() {
       },
       {
         id: `${i}-ans`,
-        kind: h.answer === "yes" ? "answered-yes" : "answered-no",
+        kind: isYes ? "answered-yes" : "answered-no",
         actor: isMyQuestion ? "opponent" : "you",
-        text: h.answer === "yes" ? "Yes" : "No",
+        text: isYes ? "Yes" : "No",
         time: timeStr,
       },
     ];
@@ -96,11 +139,12 @@ function ResultContent() {
       {/* Top Header Navigation */}
       <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 bg-[#090B11] px-6 z-10">
         <Link
-          href="/room"
+          href="/lobby"
+          onClick={() => clearGame()}
           className="flex items-center gap-2 rounded-sm border border-white/10 bg-base-900 px-4 py-2 text-xs font-semibold text-ink-300 transition hover:border-white/20 hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
-          BACK TO ROOM
+          BACK TO LOBBY
         </Link>
 
         <div className="flex items-center gap-3">
@@ -110,6 +154,7 @@ function ResultContent() {
 
         <Link
           href="/lobby"
+          onClick={() => clearGame()}
           className="flex items-center gap-2 rounded-sm border border-white/10 bg-base-900 px-4 py-2 text-xs font-semibold text-ink-300 transition hover:border-white/20 hover:text-white"
         >
           MAIN MENU
@@ -187,7 +232,7 @@ function ResultContent() {
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-zinc-400 font-display uppercase tracking-wider">Match Rounds</span>
-                <span className="font-display font-bold text-white">{roundsPlayed} / {room?.settings?.maxRounds === -1 ? "∞" : room?.settings?.maxRounds ?? 10}</span>
+                <span className="font-display font-bold text-white">{roundsPlayed} / {game?.settings?.maxRounds === -1 ? "∞" : game?.settings?.maxRounds ?? 10}</span>
               </div>
             </div>
           </div>
@@ -377,13 +422,15 @@ function ResultContent() {
       {/* Footer Navigation Buttons */}
       <footer className="h-20 shrink-0 border-t border-white/10 bg-[#090B11] p-4 flex items-center justify-center gap-4 z-10">
         <Link
-          href="/room"
+          href="/lobby"
+          onClick={() => clearGame()}
           className="clip-tag flex items-center justify-center gap-2 bg-accent hover:bg-accent-dim py-2.5 px-8 text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(255,70,85,0.15)] transition"
         >
-          BACK TO ROOM
+          BACK TO LOBBY
         </Link>
         <Link
           href="/lobby"
+          onClick={() => clearGame()}
           className="flex items-center justify-center gap-2 rounded-sm border border-white/10 bg-base-900 hover:border-white/20 hover:text-white hover:bg-base-800 py-2.5 px-8 text-xs font-bold uppercase tracking-wider text-ink-300 transition"
         >
           LEAVE GAME

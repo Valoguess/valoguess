@@ -2,7 +2,7 @@ import { ArrowLeft, HelpCircle, Settings, LogOut } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { useRoomStore } from "@/store/roomStore";
+import { useGameStore } from "@/store/gameStore";
 import { useRoomTimer } from "@/hooks/useRoomTimer";
 
 type GameHeaderProps = {
@@ -88,8 +88,8 @@ function CenterHUD({
   maxRounds: number;
 }) {
   const maxRoundsDisplay = maxRounds === -1 || maxRounds <= 0 ? "∞" : maxRounds;
-  const { room } = useRoomStore();
-  const { timeLeft, formattedTime, isTimeUp } = useRoomTimer({ room });
+  const { game } = useGameStore();
+  const { timeLeft, formattedTime } = useRoomTimer({ game });
 
 
   return (
@@ -204,9 +204,16 @@ function PlayerSide({
 
           {/* Turn Indicator */}
           {turn && (
-            <div className="clip-tag border border-accent bg-accent px-2 py-0.5">
+            <div
+              className={cn(
+                "clip-tag border px-2 py-0.5",
+                align === "left"
+                  ? "border-accent bg-accent"
+                  : "border-[#8C7BFF]/50 bg-[#8C7BFF]/20"
+              )}
+            >
               <span className="font-display text-[9px] font-black uppercase tracking-[0.18em] text-white">
-                YOUR TURN
+                {align === "left" ? "YOUR TURN" : "THINKING"}
               </span>
             </div>
           )}

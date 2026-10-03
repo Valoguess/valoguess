@@ -2,28 +2,34 @@
 
 import { MessageCircle, Sliders } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Party } from "@/types/party";
 
 interface LobbyFooterProps {
   showChatDrawer: boolean;
   setShowChatDrawer: (show: boolean) => void;
-  room: any;
+  party: Party | null;
   isHost: boolean;
-  opponent: any;
+  opponent?: any;
   handleStartGame: () => void;
   handleLeaveParty: () => void;
   onOpenSettings: () => void;
+  // Compatibility
+  room?: any;
 }
 
 export function LobbyFooter({
   showChatDrawer,
   setShowChatDrawer,
-  room,
+  party,
   isHost,
   opponent,
   handleStartGame,
   handleLeaveParty,
   onOpenSettings,
+  room,
 }: LobbyFooterProps) {
+  const currentParty = party || room;
+
   return (
     <footer className="relative z-20 w-full h-20 bg-[#080B10]/95 border-t border-white/10 px-8 flex items-center justify-between shrink-0">
       {/* Left: Chat Drawer Button */}
@@ -48,15 +54,15 @@ export function LobbyFooter({
         {/* BIG RED GLOWING START MATCH BUTTON */}
         <button
           onClick={handleStartGame}
-          disabled={!room || !isHost || !opponent}
+          disabled={!currentParty || !isHost || !opponent}
           className={cn(
             "h-14 px-24 font-valorant text-xl tracking-[0.25em] uppercase text-white flex items-center justify-center transition-all duration-300 relative clip-tag border",
-            room && isHost && opponent
+            currentParty && isHost && opponent
               ? "bg-accent hover:bg-accent-dim shadow-[0_0_35px_rgba(255,70,85,0.6)] border-accent cursor-pointer active:scale-95"
               : "bg-white/5 border-white/10 text-white/30 cursor-not-allowed opacity-50"
           )}
           title={
-            !room
+            !currentParty
               ? "Create or join a party to start"
               : !isHost
               ? "Only the party leader can start the match"
@@ -66,7 +72,7 @@ export function LobbyFooter({
           }
         >
           <span>
-            {room
+            {currentParty
               ? isHost
                 ? opponent
                   ? "START MATCH"
@@ -86,9 +92,9 @@ export function LobbyFooter({
         </button>
       </div>
 
-      {/* Right: LEAVE PARTY (If in room) */}
+      {/* Right: LEAVE PARTY (If in party) */}
       <div>
-        {room && (
+        {currentParty && (
           <button
             onClick={handleLeaveParty}
             className="h-11 px-6 rounded-sm border border-accent/40 bg-accent/10 hover:bg-accent/20 text-accent font-display text-xs font-bold uppercase tracking-[0.2em] transition cursor-pointer"

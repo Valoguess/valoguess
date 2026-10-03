@@ -3,25 +3,26 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { socket } from "@/socket";
-import { useRoomStore } from "@/store/roomStore";
+import { usePartyStore } from "@/store/partyStore";
+import { useGameStore } from "@/store/gameStore";
 import {
-  createRoom,
-  joinRoom,
+  createParty,
+  leaveParty,
+  kickPlayerFromParty,
+  sendInviteToParty,
+  acceptInviteToParty,
+  declineInviteToParty,
+  sendMessageToParty,
+  createGame,
   startGame,
-  kickPlayer,
-  leaveRoom,
-  updateRoom,
-  sendInvite,
-  acceptInvite,
-  rejectInvite,
 } from "@/socket/emitter";
 import { ServerEvents } from "@/socket/events";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useAuthStore } from "@/store/authStore";
 import { useInviteStore } from "@/store/inviteStore";
-import { Message, Friend, IncomingPartyInvite } from "./_components/types";
+import { Message, Friend } from "./_components/types";
 import { useFriends } from "@/hooks/useFriends";
 import { LobbyHeader } from "./_components/LobbyHeader";
 import { LobbySubheader } from "./_components/LobbySubheader";
@@ -32,17 +33,29 @@ import { LobbyChat } from "./_components/LobbyChat";
 import { LobbySettings } from "./_components/LobbySettings";
 import { HowToPlayModal } from "./_components/HowToPlayModal";
 
+const DEFAULT_WELCOME_MESSAGE: Message = {
+  id: "welcome-1",
+  sender: "SYSTEM",
+  time: new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  }),
+  text: "Party lobby initialized. Create or join a party to start!",
+  colorClass: "text-[#8C7BFF]",
+  avatar: "/agents/icon/miks.png",
+};
+
 export default function LobbyPage() {
   const router = useRouter();
-  const { room, clearRoom } = useRoomStore();
+  const { party, clearParty, partyMessages } = usePartyStore();
+  const { game } = useGameStore();
   const { user } = useAuthStore();
 
-  // Username from authStore
   const [savedUsername, setSavedUsername] = useState<string>("AGENT");
   const [isClient, setIsClient] = useState(false);
 
-  // Form & Room state
-  const [roomInput, setRoomInput] = useState("");
+  // Form & Party code state
+  const [partyInput, setPartyInput] = useState("");
   const [copied, setCopied] = useState(false);
   const [isCreatingOrJoining, setIsCreatingOrJoining] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -59,15 +72,11 @@ export default function LobbyPage() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChatDrawer, setShowChatDrawer] = useState(false);
 
-  // Settings state synced with room
-  const [timer, setTimerState] = useState(room?.settings?.timePerRound ?? 60);
-  const [maxNos, setMaxNosState] = useState(room?.settings?.maxNos ?? 5);
-  const [maxGuesses, setMaxGuessesState] = useState(
-    room?.settings?.maxGuesses ?? 1,
-  );
-  const [questionCount, setQuestionCountState] = useState(
-    room?.settings?.questionCount ?? 15,
-  );
+  // Settings state for match creation
+  const [timer, setTimerState] = useState(60);
+  const [maxNos, setMaxNosState] = useState(5);
+  const [maxGuesses, setMaxGuessesState] = useState(1);
+  const [questionCount, setQuestionCountState] = useState(15);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
 
   // Friends state & actions managed by dedicated custom hook
@@ -83,33 +92,26 @@ export default function LobbyPage() {
     handleDeclineRequest,
     handleCancelRequest,
     handleRemoveFriend,
-    handleInviteFriend,
   } = useFriends(user);
 
   const [inviteToast, setInviteToast] = useState("");
 
+  // Incoming party invites state from global inviteStore
+  const { incomingInvites, lastDeclinedInvite, removeIncomingInvite } =
+    useInviteStore();
+
   // Handle inviting a friend to the current party
   const onInviteFriendToParty = (friend: Friend) => {
-    // if (!room?.id) {
+    // if (!party?.id) {
     //   setInviteToast("Please create a party first to invite friends!");
     //   setTimeout(() => setInviteToast(""), 3500);
     //   return;
     // }
 
-    sendInvite(
-      {
-        id: friend.id,
-        username: friend.username?.replace(/^@/, "") || friend.name,
-      },
-      room?.id,
-    );
-
+    sendInviteToParty(party?.id, friend.id);
     setInviteToast(`Party invite sent to ${friend.name}!`);
     setTimeout(() => setInviteToast(""), 3000);
   };
-
-  // Incoming party invites state from global inviteStore
-  const { incomingInvites, lastDeclinedInvite, removeIncomingInvite } = useInviteStore();
 
   // Handle declined party invites from friends
   useEffect(() => {
@@ -120,7 +122,6 @@ export default function LobbyPage() {
     setInviteToast(`${friendName} declined the party invite.`);
     setTimeout(() => setInviteToast(""), 4000);
   }, [lastDeclinedInvite, friendsList]);
-
 
   // Enrich incoming invites with known friend info
   const enrichedIncomingInvites = incomingInvites.map((inv) => {
@@ -139,21 +140,20 @@ export default function LobbyPage() {
     return inv;
   });
 
-
   // Handle accepting an incoming party invite
-  const handleAcceptPartyInvite = (inviteId: string, incomingRoomId: string) => {
+  const handleAcceptPartyInvite = (inviteId: string, incomingPartyId: string) => {
     setErrorMsg("");
     setIsCreatingOrJoining(true);
-
-    acceptInvite(incomingRoomId);
-    removeIncomingInvite(inviteId, incomingRoomId);
+    acceptInviteToParty(incomingPartyId);
+    removeIncomingInvite(inviteId, incomingPartyId);
   };
 
   // Handle declining an incoming party invite
   const handleDeclinePartyInvite = (inviteId: string) => {
     const invite = incomingInvites.find((i) => i.id === inviteId);
-    if (invite?.roomId && invite?.sender?.id) {
-      rejectInvite(invite.roomId, invite.sender.id);
+    const targetPartyId = invite?.partyId || invite?.roomId;
+    if (targetPartyId && invite?.sender?.id) {
+      declineInviteToParty(targetPartyId, invite.sender.id);
     }
     removeIncomingInvite(inviteId);
   };
@@ -165,24 +165,33 @@ export default function LobbyPage() {
     }
   }, [user]);
 
+  // When party syncs, clear joining loader
   useEffect(() => {
-    if (room?.settings) {
-      setTimerState(room.settings.timePerRound ?? 60);
-      setMaxNosState(room.settings.maxNos ?? 5);
-      setMaxGuessesState(room.settings.maxGuesses ?? 1);
-      setQuestionCountState(room.settings.questionCount ?? 15);
-    }
-  }, [room?.settings]);
-
-  // Handle room state change
-  useEffect(() => {
-    if (room) {
+    if (party) {
       setIsCreatingOrJoining(false);
     }
-    if (room?.state === "playing") {
-      router.push(`/play?code=${room.id}`);
+  }, [party]);
+
+  const myId = user?.id;
+  const isHost = party ? party.leaderId === myId : true;
+  const me = party?.members.find((m) => m.id === myId) || (user ? { id: user.id, name: user.name || "AGENT" } : null);
+  const opponent = party?.members.find((m) => m.id !== myId);
+
+  // Game lifecycle handling:
+  // 1. If leader created game (game.status === "WAITING"), leader triggers startGame(game.id)
+  // 2. When game.status === "PLAYING", navigate to /play?code=${game.id}
+  useEffect(() => {
+    if (!game) return;
+
+    if (isHost && game.status === "WAITING") {
+      startGame(game.id);
+      return;
     }
-  }, [room, router]);
+
+    if (game.status === "PLAYING") {
+      router.push(`/play?code=${game.id}`);
+    }
+  }, [game, isHost, router]);
 
   // Socket error handler
   useEffect(() => {
@@ -197,119 +206,83 @@ export default function LobbyPage() {
     };
   }, []);
 
-  const you = room?.me;
-  const opponent = room?.opponent;
-  const myId = you?.player?.id || user?.id;
-  const isHost = room ? Boolean(myId && room.hostId && myId === room.hostId) : true;
-
   const setTimer = (val: number | ((prev: number) => number)) => {
     const nextVal = typeof val === "function" ? val(timer) : val;
     setTimerState(nextVal);
-    if (room && isHost) {
-      updateRoom(room.id, {
-        timePerRound: nextVal,
-        maxNos,
-        maxGuesses,
-        questionCount,
-      });
-    }
   };
 
   const setMaxNos = (val: number | ((prev: number) => number)) => {
     const nextVal = typeof val === "function" ? val(maxNos) : val;
     setMaxNosState(nextVal);
-    if (room && isHost) {
-      updateRoom(room.id, {
-        timePerRound: timer,
-        maxNos: nextVal,
-        maxGuesses,
-        questionCount,
-      });
-    }
   };
 
   const setMaxGuesses = (val: number | ((prev: number) => number)) => {
     const nextVal = typeof val === "function" ? val(maxGuesses) : val;
     setMaxGuessesState(nextVal);
-    if (room && isHost) {
-      updateRoom(room.id, {
-        timePerRound: timer,
-        maxNos,
-        maxGuesses: nextVal,
-        questionCount,
-      });
-    }
   };
 
   const setQuestionCount = (val: number | ((prev: number) => number)) => {
     const nextVal = typeof val === "function" ? val(questionCount) : val;
     setQuestionCountState(nextVal);
-    if (room && isHost) {
-      updateRoom(room.id, {
-        timePerRound: timer,
-        maxNos,
-        maxGuesses,
-        questionCount: nextVal,
-      });
-    }
   };
 
   // Chat state
   const [chatInput, setChatInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      sender: "SYSTEM",
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      text: "Lobby initialized. Create or join a party to start!",
-      colorClass: "text-[#8C7BFF]",
-      avatar: "/agents/icon/miks.png",
-    },
-  ]);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const displayMessages =
+    partyMessages.length > 0 ? partyMessages : [DEFAULT_WELCOME_MESSAGE];
 
   // Execute Create Party
   const handleCreateParty = () => {
     setErrorMsg("");
     setIsCreatingOrJoining(true);
-    createRoom();
+    createParty();
   };
 
-  // Execute Join Party
+  // Execute Join Party / Accept Invite
   const handleJoinParty = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomInput.trim()) return;
+    if (!partyInput.trim()) return;
     setErrorMsg("");
     setIsCreatingOrJoining(true);
-    joinRoom(roomInput.trim().toUpperCase());
+    acceptInviteToParty(partyInput.trim());
   };
 
+  // Execute Start Game (Party Leader only, 2 players required)
   const handleStartGame = () => {
-    if (room?.id && isHost && opponent) {
-      startGame(room.id);
+    if (!party?.id || !isHost || !opponent) return;
+
+    // If game already exists in WAITING state, call startGame
+    if (game?.id && game.status === "WAITING") {
+      startGame(game.id);
+      return;
     }
+
+    createGame(party.id, {
+      questionMode: "PRESET",
+      timePerRound: timer,
+      maxNos,
+      maxGuesses,
+      questionCount,
+    });
   };
 
   const handleKickGuest = () => {
-    if (room?.id && opponent?.player?.id && isHost) {
-      kickPlayer(room.id, opponent.player.id);
+    if (party?.id && opponent?.id && isHost) {
+      kickPlayerFromParty(party.id, opponent.id);
     }
   };
 
   const handleLeaveParty = () => {
-    if (room?.id) {
-      leaveRoom(room.id);
-    }
-    clearRoom();
+    leaveParty();
+    clearParty();
     setIsCreatingOrJoining(false);
   };
 
   const handleCopyCode = () => {
-    if (!room?.id) return;
-    navigator.clipboard.writeText(room.id);
+    if (!party?.id) return;
+    navigator.clipboard.writeText(party.id);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -318,21 +291,7 @@ export default function LobbyPage() {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        sender: savedUsername || "YOU",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        text: chatInput.trim(),
-        colorClass: "text-[#3CF2C4]",
-        avatar: "/agents/icon/chamber.png",
-      },
-    ]);
+    sendMessageToParty(chatInput.trim());
     setChatInput("");
   };
 
@@ -368,13 +327,13 @@ export default function LobbyPage() {
         showModeDropdown={showModeDropdown}
         setShowModeDropdown={setShowModeDropdown}
         onOpenSettings={() => setShowSettingsModal(true)}
-        room={room}
+        party={party}
         copied={copied}
         handleCopyCode={handleCopyCode}
         handleCreateParty={handleCreateParty}
         handleJoinParty={handleJoinParty}
-        roomInput={roomInput}
-        setRoomInput={setRoomInput}
+        partyInput={partyInput}
+        setPartyInput={setPartyInput}
         isCreatingOrJoining={isCreatingOrJoining}
       />
 
@@ -398,8 +357,8 @@ export default function LobbyPage() {
       {/* 3. CENTER CONTENT: 4 PLAYER CARDS & COLLAPSIBLE SIDEBAR */}
       <div className="relative z-10 flex-1 flex items-center justify-between gap-6 px-8 py-2 min-h-0">
         <LobbyCenterSlots
-          room={room}
-          you={you}
+          party={party}
+          me={me}
           opponent={opponent}
           isHost={isHost}
           savedUsername={savedUsername}
@@ -435,7 +394,7 @@ export default function LobbyPage() {
       <LobbyFooter
         showChatDrawer={showChatDrawer}
         setShowChatDrawer={setShowChatDrawer}
-        room={room}
+        party={party}
         isHost={isHost}
         opponent={opponent}
         handleStartGame={handleStartGame}
@@ -453,7 +412,7 @@ export default function LobbyPage() {
             className="fixed bottom-24 left-8 z-50 w-96 h-100 shadow-2xl"
           >
             <LobbyChat
-              messages={messages}
+              messages={displayMessages}
               chatInput={chatInput}
               setChatInput={setChatInput}
               handleSendMessage={handleSendMessage}

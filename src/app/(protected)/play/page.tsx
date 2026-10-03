@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flag, Check, X, Loader2, LogOut } from "lucide-react";
 import { GameHeader } from "./_components/GameHeader";
@@ -17,35 +17,47 @@ import {
   ActivityEntry,
   QuestionItem,
 } from "@/lib/data";
-import { useRoomStore } from "@/store/roomStore";
-import { askQuestion as sendAskQuestion, answerQuestion as sendAnswerQuestion, leaveRoom, sendHeartbeat } from "@/socket/emitter";
-
-import { useState } from "react";
+import { useGameStore } from "@/store/gameStore";
+import { useAuthStore } from "@/store/authStore";
+import {
+  askQuestion as sendAskQuestion,
+  answerQuestion as sendAnswerQuestion,
+  leaveParty,
+} from "@/socket/emitter";
 import { socket } from "@/socket";
 import { ServerEvents } from "@/socket/events";
 import { cn } from "@/lib/utils";
 
 function PlayContent() {
   const router = useRouter();
-  const { room, clearRoom } = useRoomStore();
+  const { game, clearGame, hydrated: gameHydrated } = useGameStore();
+  const { user } = useAuthStore();
 
   const [isAsking, setIsAsking] = useState(false);
   const [isAnswering, setIsAnswering] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const myPlayer =
+    game?.players.find(
+      (p) => p.id === user?.id || (p.state && p.state.secretAgent !== null)
+    ) || game?.players[0];
+  const opponentPlayer = game?.players.find((p) => p.id !== myPlayer?.id);
+
   useEffect(() => {
-    if (!room) {
+    if (!gameHydrated) return;
+    if (!game) {
       router.replace("/lobby");
-    } else if (room.state === "finished") {
-      const isVictory = room.game?.winnerId === room.me?.player?.id;
+    } else if (game.status === "FINISHED") {
+      const result = game.state?.result ?? game.result;
+      const isVictory =
+        result?.result === "WIN" && result.winnerId === myPlayer?.id;
       router.replace(`/play/result?status=${isVictory ? "victory" : "defeat"}`);
     } else {
-      // Clear pending action states when room sync arrives
       setIsAsking(false);
       setIsAnswering(false);
     }
-  }, [room, router]);
+  }, [game, gameHydrated, router, myPlayer?.id]);
 
   useEffect(() => {
     const onError = (err: any) => {
@@ -61,18 +73,7 @@ function PlayContent() {
     };
   }, []);
 
-  useEffect(() => { 
-    if (!room?.id) return;
-    const interval = setInterval(() => {
-      sendHeartbeat(room.id);
-    }, 5000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [room?.id]);
-
-  if (!room || !room.me) {
+  if (!gameHydrated || !game || !myPlayer) {
     return (
       <main className="min-h-screen bg-base-950 flex flex-col items-center justify-center text-white select-none">
         <div className="flex flex-col items-center gap-3">
@@ -82,17 +83,18 @@ function PlayContent() {
             <path d="M58 15 L88 15 L78 85 Z" fill="#FF4655" />
           </svg>
           <span className="font-valorant text-xs text-white/50 tracking-widest mt-2">
-            Returning to Lobby...
+            {!gameHydrated ? "Loading Game..." : "Returning to Lobby..."}
           </span>
         </div>
       </main>
     );
   }
 
-  const isMyTurn = room.me.state.isMyTurn;
-  const pendingQuestion = room.game?.pendingQuestion;
-  const isOpponentAskingMe = pendingQuestion?.targetPlayer === room.me.player.id;
-  const isIWaitingForAnswer = pendingQuestion?.askedBy === room.me.player.id;
+  const gameState = game.state;
+  const isMyTurn = Boolean(myPlayer.state?.isMyTurn);
+  const pendingQuestion = gameState?.pendingQuestion ?? game.pendingQuestion;
+  const isOpponentAskingMe = pendingQuestion?.targetPlayer === myPlayer.id;
+  const isIWaitingForAnswer = pendingQuestion?.askedBy === myPlayer.id;
 
   const turnOwner: "you" | "opponent" | "opponent-thinking" = isOpponentAskingMe
     ? "opponent"
@@ -100,10 +102,15 @@ function PlayContent() {
       ? "you"
       : "opponent-thinking";
 
+  const cachedSecretAgent =
+    typeof window !== "undefined"
+      ? sessionStorage.getItem(`secret_agent_${game.id}`)
+      : null;
+  const secretAgentId = myPlayer.state?.secretAgent || cachedSecretAgent;
   const activeSecretAgent =
-    AGENTS.find((a) => a.id === room.me.state.secretAgent) || AGENTS[0];
+    AGENTS.find((a) => a.id === secretAgentId) || AGENTS[0];
 
-  const questionPoolIds = room.game?.questionPool || [];
+  const questionPoolIds = game.settings?.questionPool || [];
   const gameQuestions: QuestionItem[] =
     questionPoolIds.length > 0
       ? questionPoolIds.map(
@@ -116,8 +123,8 @@ function PlayContent() {
             }
         )
       : getRandomQuestions(
-          room.settings?.questionCount || 15,
-          room.id || room.game?.startedAt
+          game.settings?.questionCount || 15,
+          game.id || gameState?.startedAt || game.startedAt
         );
 
   const opponentQuestionObj = pendingQuestion
@@ -130,15 +137,16 @@ function PlayContent() {
       }
     : null;
 
+  const gameHistory = gameState?.history ?? game.history ?? [];
   const askedQuestionsMap: Record<string, "yes" | "no"> = {};
-  (room.game?.history || []).forEach((h) => {
-    if (h.askedBy === room.me.player.id) {
-      askedQuestionsMap[h.questionId] = h.answer;
+  gameHistory.forEach((h) => {
+    if (h.askedBy === myPlayer.id) {
+      askedQuestionsMap[h.questionId] = h.answer.toLowerCase() as "yes" | "no";
     }
   });
 
-  const activity: ActivityEntry[] = (room.game?.history || []).flatMap((h, i) => {
-    const isMyQuestion = h.askedBy === room.me.player.id;
+  const activity: ActivityEntry[] = gameHistory.flatMap((h, i) => {
+    const isMyQuestion = h.askedBy === myPlayer.id;
     const qLabel = getQuestionLabel(h.questionId);
     const timeStr = new Date(h.timestamp).toLocaleTimeString([], {
       hour: "2-digit",
@@ -155,53 +163,54 @@ function PlayContent() {
       },
       {
         id: `${i}-ans`,
-        kind: h.answer === "yes" ? "answered-yes" : "answered-no",
+        kind: h.answer === "YES" ? "answered-yes" : "answered-no",
         actor: isMyQuestion ? "opponent" : "you",
-        text: h.answer === "yes" ? "Yes" : "No",
+        text: h.answer === "YES" ? "Yes" : "No",
         time: timeStr,
       },
     ];
   });
 
   const handleAskQuestion = (q: QuestionItem) => {
-    if (room && isMyTurn && !pendingQuestion && !isAsking) {
+    if (game && isMyTurn && !pendingQuestion && !isAsking) {
       setIsAsking(true);
       setErrorMsg(null);
-      sendAskQuestion(room.id, q.id);
+      sendAskQuestion(game.id, q.id);
     }
   };
 
   const handleAnswerQuestion = (answer: "yes" | "no") => {
-    if (room && isOpponentAskingMe && !isAnswering) {
+    if (game && isOpponentAskingMe && !isAnswering) {
       setIsAnswering(true);
       setErrorMsg(null);
-      sendAnswerQuestion(room.id, answer);
+      sendAnswerQuestion(game.id, answer.toUpperCase() as "YES" | "NO");
     }
   };
 
   const handleLeaveGame = () => {
-    if (room) {
-      leaveRoom(room.id);
-      clearRoom();
-      router.replace("/lobby");
-    }
+    leaveParty();
+    clearGame();
+    router.replace("/lobby");
   };
 
-  const currentRound = Math.max(1, Math.ceil((room.game?.turnNumber ?? 1) / 2));
+  const turnNumber = gameState?.turnNumber ?? game.turnNumber ?? 1;
+  const currentRound = Math.max(1, Math.ceil(turnNumber / 2));
 
   return (
     <main className="min-h-screen bg-base-950">
       <GameHeader
         turnOwner={turnOwner}
-        userNosUsed={(room.settings.maxNos ?? 5) - (room.me.state.nosRemaining ?? 0)}
-        opponentNosUsed={
-          (room.settings.maxNos ?? 5) - (room.opponent?.state.nosRemaining ?? 0)
+        userNosUsed={
+          (game.settings.maxNos ?? 5) - (myPlayer.state?.nosRemaining ?? 0)
         }
-        userName={room.me.player.name || room.me.player.username || "You"}
-        opponentName={room.opponent?.player.name || room.opponent?.player.username || "Opponent"}
-        nosMax={room.settings.maxNos ?? 5}
+        opponentNosUsed={
+          (game.settings.maxNos ?? 5) - (opponentPlayer?.state?.nosRemaining ?? 0)
+        }
+        userName={myPlayer.name || user?.name || "You"}
+        opponentName={opponentPlayer?.name || "Opponent"}
+        nosMax={game.settings.maxNos ?? 5}
         round={currentRound}
-        maxRounds={room.settings.maxRounds ?? -1}
+        maxRounds={-1}
         onLeave={() => setShowLeaveModal(true)}
       />
 
@@ -220,7 +229,7 @@ function PlayContent() {
             agent={activeSecretAgent}
             time="01:00"
             round={currentRound}
-            maxRounds={room.settings.maxRounds ?? -1}
+            maxRounds={-1}
             yourTurn={isMyTurn}
             map="Ascent"
           />
@@ -246,7 +255,7 @@ function PlayContent() {
                   : isIWaitingForAnswer
                     ? "Opponent is answering your question..."
                     : !isMyTurn
-                      ? `${room.opponent?.player.name || room.opponent?.player.username || "Opponent"} is thinking...`
+                      ? `${opponentPlayer?.name || "Opponent"} is thinking...`
                       : undefined
               }
               questions={gameQuestions}
@@ -337,8 +346,8 @@ function PlayContent() {
           <ActivityFeed
             entries={activity}
             yourTurn={isMyTurn}
-            userName={room.me.player.name || room.me.player.username || "You"}
-            opponentName={room.opponent?.player.name || room.opponent?.player.username || "Opponent"}
+            userName={myPlayer.name || user?.name || "You"}
+            opponentName={opponentPlayer?.name || "Opponent"}
           />
         </div>
       </div>
@@ -379,18 +388,22 @@ function PlayContent() {
 
 export default function Page() {
   return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-base-950 flex flex-col items-center justify-center text-white select-none">
-        <div className="flex flex-col items-center gap-3">
-          <svg viewBox="0 0 100 100" className="w-12 h-12 animate-pulse">
-            <path d="M15 15 L45 15 L25 85 Z" fill="#FFFFFF" />
-            <path d="M32 15 L52 15 L37 75 Z" fill="#FF4655" />
-            <path d="M58 15 L88 15 L78 85 Z" fill="#FF4655" />
-          </svg>
-          <span className="font-valorant text-xs text-white/50 tracking-widest mt-2">Loading Game...</span>
-        </div>
-      </main>
-    }>
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-base-950 flex flex-col items-center justify-center text-white select-none">
+          <div className="flex flex-col items-center gap-3">
+            <svg viewBox="0 0 100 100" className="w-12 h-12 animate-pulse">
+              <path d="M15 15 L45 15 L25 85 Z" fill="#FFFFFF" />
+              <path d="M32 15 L52 15 L37 75 Z" fill="#FF4655" />
+              <path d="M58 15 L88 15 L78 85 Z" fill="#FF4655" />
+            </svg>
+            <span className="font-valorant text-xs text-white/50 tracking-widest mt-2">
+              Loading Game...
+            </span>
+          </div>
+        </main>
+      }
+    >
       <PlayContent />
     </Suspense>
   );

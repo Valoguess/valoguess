@@ -3,12 +3,22 @@ import { IncomingPartyInvite } from "@/app/(protected)/lobby/_components/types";
 
 interface InviteStore {
   incomingInvites: IncomingPartyInvite[];
-  lastDeclinedInvite: { otherPlayerId: string; roomId: string; timestamp: number } | null;
+  lastDeclinedInvite: {
+    otherPlayerId: string;
+    partyId?: string;
+    roomId?: string;
+    timestamp: number;
+  } | null;
   addIncomingInvite: (invite: IncomingPartyInvite) => void;
-  removeIncomingInvite: (inviteId: string, roomId?: string) => void;
+  removeIncomingInvite: (inviteId: string, partyOrRoomId?: string) => void;
   clearIncomingInvites: () => void;
   setLastDeclinedInvite: (
-    declined: { otherPlayerId: string; roomId: string; timestamp: number } | null,
+    declined: {
+      otherPlayerId: string;
+      partyId?: string;
+      roomId?: string;
+      timestamp: number;
+    } | null,
   ) => void;
 }
 
@@ -23,16 +33,19 @@ export const useInviteStore = create<InviteStore>((set) => ({
         ...state.incomingInvites.filter(
           (i) =>
             i.id !== invite.id &&
-            i.roomId !== invite.roomId &&
+            (i.partyId || i.roomId) !== (invite.partyId || invite.roomId) &&
             i.sender.id !== invite.sender.id,
         ),
       ],
     })),
 
-  removeIncomingInvite: (inviteId, roomId) =>
+  removeIncomingInvite: (inviteId, partyOrRoomId) =>
     set((state) => ({
       incomingInvites: state.incomingInvites.filter(
-        (i) => i.id !== inviteId && (!roomId || i.roomId !== roomId),
+        (i) =>
+          i.id !== inviteId &&
+          (!partyOrRoomId ||
+            (i.partyId !== partyOrRoomId && i.roomId !== partyOrRoomId)),
       ),
     })),
 
