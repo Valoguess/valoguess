@@ -3,7 +3,7 @@ import { nextCookies } from "better-auth/next-js";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { anonymous, username, jwt, magicLink } from "better-auth/plugins"
 
-import resend from "./resend";
+import { sendMagicLinkEmail } from "./resend";
 import { db, schema } from "@/db";
 
 export const auth = betterAuth({
@@ -29,15 +29,7 @@ export const auth = betterAuth({
   plugins: [
     magicLink({ 
       sendMagicLink: async ({ email, url }) => { 
-        void resend.emails.send({
-          to: email,
-          template: {
-            id: "b727acfa-2a3c-4974-b14f-04336e3159c7",
-            variables: {
-              MAGIC_LINK: url,
-            },
-          },
-        });
+        void sendMagicLinkEmail(email, url);
       }
     }),
     anonymous({
