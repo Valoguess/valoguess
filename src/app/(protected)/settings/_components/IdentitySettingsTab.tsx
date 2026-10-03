@@ -2,6 +2,7 @@
 
 import { AtSign, User, Clock, Check, Lock, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { ProfileAvatarUploadCard } from "./ProfileAvatarUploadCard";
 
 interface IdentitySettingsTabProps {
   isAnonymous: boolean;
@@ -13,6 +14,7 @@ interface IdentitySettingsTabProps {
   setName: (val: string) => void;
   nameCooldownDays: number;
   toggleNameCooldownDemo?: () => void;
+  defaultIconPath: string;
 }
 
 export function IdentitySettingsTab({
@@ -25,10 +27,18 @@ export function IdentitySettingsTab({
   setName,
   nameCooldownDays,
   toggleNameCooldownDemo,
+  defaultIconPath,
 }: IdentitySettingsTabProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
-      {/* 1. USERNAME FIELD */}
+    <div className="space-y-6 animate-fade-in">
+      {/* AVATAR UPLOAD SECTION */}
+      <ProfileAvatarUploadCard
+        isAnonymous={isAnonymous}
+        defaultIconPath={defaultIconPath}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 1. USERNAME FIELD */}
       <div className="bg-[#080B10]/70 border border-white/10 rounded-sm p-6 flex flex-col justify-between text-left space-y-4">
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
@@ -153,5 +163,6 @@ export function IdentitySettingsTab({
         </div>
       </div>
     </div>
+  </div>
   );
 }

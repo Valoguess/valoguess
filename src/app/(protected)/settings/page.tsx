@@ -41,7 +41,6 @@ export default function SettingsPage() {
   const [username, setUsername] = useState<string>("");
   const [tagline, setTagline] = useState<string>("");
   const [selectedBannerId, setSelectedBannerId] = useState<string>("omen");
-  const [hideName, setHideName] = useState<boolean>(false);
 
   // 30-Day Cooldown states (in days remaining, 0 means eligible)
   const [nameCooldownDays, setNameCooldownDays] = useState<number>(0);
@@ -79,9 +78,6 @@ export default function SettingsPage() {
     if (savedBanner && AGENT_BANNERS.some((b) => b.id === savedBanner)) {
       setSelectedBannerId(savedBanner);
     }
-
-    const savedHideName = typeof window !== "undefined" ? localStorage.getItem("valoguess_hide_name") : null;
-    setHideName(savedHideName === "true");
 
     if (typeof window !== "undefined") {
       const lastUsernameChange = localStorage.getItem("valoguess_username_last_changed");
@@ -141,7 +137,6 @@ export default function SettingsPage() {
       if (typeof window !== "undefined") {
         localStorage.setItem("valoguess_tagline", tagline.trim());
         localStorage.setItem("valoguess_banner", selectedBannerId);
-        localStorage.setItem("valoguess_hide_name", hideName ? "true" : "false");
 
         if (usernameCooldownDays === 0 && username.trim()) {
           localStorage.setItem("valoguess_username_last_changed", Date.now().toString());
@@ -284,7 +279,7 @@ export default function SettingsPage() {
           name={name}
           username={username}
           tagline={tagline}
-          hideName={hideName}
+          avatarUrl={user?.image}
         />
 
         {/* NAVIGATION TABS */}
@@ -299,7 +294,7 @@ export default function SettingsPage() {
             )}
           >
             <User className="h-4 w-4 text-accent" />
-            <span>1. USERNAME & NAME</span>
+            <span>1. IDENTITY & AVATAR</span>
           </button>
 
           <button
@@ -341,6 +336,7 @@ export default function SettingsPage() {
             setName={setName}
             nameCooldownDays={nameCooldownDays}
             toggleNameCooldownDemo={toggleNameCooldownDemo}
+            defaultIconPath={currentBanner.iconPath}
           />
         )}
 
@@ -362,8 +358,6 @@ export default function SettingsPage() {
         {/* TAB 3: PRIVACY & ACCOUNT */}
         {activeTab === "privacy" && (
           <PrivacyAccountTab
-            hideName={hideName}
-            setHideName={setHideName}
             currentBanner={currentBanner}
             name={name}
             username={username}

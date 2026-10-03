@@ -9,7 +9,7 @@ interface ProfileCardPreviewProps {
   name: string;
   username: string;
   tagline: string;
-  hideName: boolean;
+  avatarUrl?: string | null;
 }
 
 export function ProfileCardPreview({
@@ -17,8 +17,10 @@ export function ProfileCardPreview({
   name,
   username,
   tagline,
-  hideName,
+  avatarUrl,
 }: ProfileCardPreviewProps) {
+  const displayAvatar = avatarUrl || currentBanner.iconPath;
+
   return (
     <div className="w-full bg-[#080B10]/80 border border-white/10 rounded-sm p-6 backdrop-blur-xl relative overflow-hidden shadow-2xl">
       {/* Subtle Top Red Edge */}
@@ -63,7 +65,7 @@ export function ProfileCardPreview({
             {/* Floating Avatar */}
             <div className="relative -mt-8 h-16 w-16 rounded-sm overflow-hidden border-2 border-accent shrink-0 shadow-[0_0_15px_rgba(255,70,85,0.4)] bg-black">
               <Image
-                src={currentBanner.iconPath}
+                src={displayAvatar}
                 alt={name || "Agent"}
                 fill
                 className="object-cover object-top"
@@ -77,14 +79,6 @@ export function ProfileCardPreview({
                 <span className="font-valorant text-lg tracking-wider text-white truncate max-w-[180px]">
                   {name || "AGENT"}
                 </span>
-                {hideName && (
-                  <span
-                    className="px-1.5 py-0.2 rounded text-[8px] font-mono font-bold bg-[#FF4655]/20 text-[#FF4655] border border-[#FF4655]/40"
-                    title="Hidden from strangers"
-                  >
-                    HIDDEN
-                  </span>
-                )}
               </div>
 
               <span className="font-mono text-xs text-accent truncate">
