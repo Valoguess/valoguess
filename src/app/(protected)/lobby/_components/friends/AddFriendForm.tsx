@@ -9,6 +9,7 @@ interface AddFriendFormProps {
   onSubmit: (e: React.FormEvent) => void;
   isAddingFriend?: boolean;
   friendAddedToast?: string;
+  currentUsername?: string;
 }
 
 export function AddFriendForm({
@@ -17,6 +18,7 @@ export function AddFriendForm({
   onSubmit,
   isAddingFriend = false,
   friendAddedToast = "",
+  currentUsername,
 }: AddFriendFormProps) {
   const isErrorToast =
     friendAddedToast.toLowerCase().includes("not found") ||
@@ -31,7 +33,7 @@ export function AddFriendForm({
         <span className="text-[9px] uppercase tracking-widest text-white/50 font-display font-bold block text-left">
           ADD FRIEND
         </span>
-        <span className="text-[9px] font-mono text-zinc-500">UNIQUE USERNAME</span>
+        <span className="text-[9px] font-mono text-zinc-500 cursor-text select-text">@{currentUsername}</span>
       </div>
 
       <form onSubmit={onSubmit} className="flex items-center gap-1.5">
@@ -39,8 +41,8 @@ export function AddFriendForm({
           type="text"
           value={friendInput}
           onChange={(e) => setFriendInput(e.target.value)}
-          placeholder="USERNAME (E.G. JETTWIND)"
-          className="h-8.5 bg-black/70 border-white/15 text-[10px] font-display uppercase tracking-wider text-white placeholder-white/30 px-2.5 focus:border-accent"
+          placeholder="Username (E.G. NHero)"
+          className="h-8.5 bg-black/70 border-white/15 text-[10px] font-display tracking-wider text-white placeholder-white/30 px-2.5 focus:border-accent"
         />
         <button
           type="submit"

@@ -84,30 +84,24 @@ export default function LobbyPage() {
     handleCancelRequest,
     handleRemoveFriend,
     handleInviteFriend,
-    refetchFriends,
   } = useFriends(user);
-
-  const friendsListRef = useRef(friendsList);
-  friendsListRef.current = friendsList;
-  const refetchFriendsRef = useRef(refetchFriends);
-  refetchFriendsRef.current = refetchFriends;
 
   const [inviteToast, setInviteToast] = useState("");
 
   // Handle inviting a friend to the current party
   const onInviteFriendToParty = (friend: Friend) => {
-    if (!room?.id) {
-      setInviteToast("Please create a party first to invite friends!");
-      setTimeout(() => setInviteToast(""), 3500);
-      return;
-    }
+    // if (!room?.id) {
+    //   setInviteToast("Please create a party first to invite friends!");
+    //   setTimeout(() => setInviteToast(""), 3500);
+    //   return;
+    // }
 
     sendInvite(
       {
         id: friend.id,
         username: friend.username?.replace(/^@/, "") || friend.name,
       },
-      room.id,
+      room?.id,
     );
 
     setInviteToast(`Party invite sent to ${friend.name}!`);

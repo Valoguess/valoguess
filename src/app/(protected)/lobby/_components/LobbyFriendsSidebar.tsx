@@ -14,9 +14,11 @@ import {
   Lock,
   Radio,
   Check,
+  Copy,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/authStore";
 import { Friend, FriendRequest, IncomingPartyInvite } from "./types";
 import { FriendRow } from "./friends/FriendRow";
 import { IncomingRequestRow, OutgoingRequestRow } from "./friends/FriendRequestRow";
@@ -69,6 +71,16 @@ export function LobbyFriendsSidebar({
   friendAddedToast,
   isAddingFriend = false,
 }: LobbyFriendsSidebarProps) {
+  const { user } = useAuthStore();
+  const [copiedId, setCopiedId] = useState(false);
+
+  const handleCopyUsername = () => {
+    if (!user?.username) return;
+    navigator.clipboard.writeText(user.username);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
+
   // Confirmation modal state for removing a friend
   const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null);
   const [isRemovingFriend, setIsRemovingFriend] = useState(false);
@@ -136,7 +148,7 @@ export function LobbyFriendsSidebar({
             {isAnonymous ? (
               <>
                 <Lock className="h-4 w-4 text-[#FF4655] shrink-0" />
-                <span>SOCIAL HUB</span>
+                <span>FRIENDS</span>
                 <span className="text-[9px] font-mono text-[#FF4655] bg-[#FF4655]/10 px-1.5 py-0.2 rounded border border-[#FF4655]/20">
                   LOCKED
                 </span>
@@ -144,7 +156,7 @@ export function LobbyFriendsSidebar({
             ) : (
               <>
                 <Users className="h-4 w-4 text-accent shrink-0" />
-                <span>SOCIAL HUB ({friendsList.length})</span>
+                <span>FRIENDS ({friendsList.length})</span>
               </>
             )}
           </div>
@@ -176,7 +188,53 @@ export function LobbyFriendsSidebar({
         </button>
       </div>
 
-      {/* 2. TAB SWITCHER (Shown when expanded AND NOT anonymous) */}
+      {/* 2. MY IDENTITY QUICK-SHARE (Shown when expanded AND NOT anonymous) */}
+      {!isFriendsCollapsed && !isAnonymous && user?.username && (
+        <div className="mx-2.5 mt-2.5 p-2 rounded-xs bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 flex items-center justify-between gap-2 transition group shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="relative h-8 w-8 overflow-hidden shrink-0">
+              <Image
+                src={user.image || "/agents/icon/omen.png"}
+                alt={user.name || "Me"}
+                fill
+                className="object-cover object-top rounded-full"
+              />
+              <div className="absolute bottom-0 right-0 h-1.5 w-1.5 z-10 bg-mint rounded-full" />
+            </div>
+
+            <div className="flex flex-col min-w-0 text-left">
+              <span className="text-[12px] font-display font-bold text-accent tracking-wider truncate leading-tight cursor-text select-text">
+                {/* {user.name || "AGENT"} */}
+                @{user.username}
+              </span>
+              <span className="text-[9px] font-normal text-white truncate leading-tight ">
+                You
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleCopyUsername}
+            className="px-2 py-1 bg-accent/10 hover:bg-accent text-accent hover:text-white border border-accent/30 rounded-xs text-[9px] font-mono font-bold flex items-center gap-1 transition shrink-0 cursor-pointer active:scale-95"
+            title="Copy username to share with friends"
+          >
+            {copiedId ? (
+              <>
+                <Check className="h-3 w-3 text-mint" />
+                <span className="text-mint">COPIED</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-3 w-3" />
+                <span>COPY</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* 3. TAB SWITCHER (Shown when expanded AND NOT anonymous) */}
       {!isFriendsCollapsed && !isAnonymous && (
         <div className="flex items-center border-b border-white/10 bg-white/2 p-1.5 gap-1 shrink-0 text-[10px] font-display font-bold uppercase tracking-wider">
           <button
@@ -497,6 +555,7 @@ export function LobbyFriendsSidebar({
           onSubmit={handleAddFriend}
           isAddingFriend={isAddingFriend}
           friendAddedToast={friendAddedToast}
+          currentUsername={user?.username}
         />
       )}
 
