@@ -1,19 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 
-const protectedRoutes = ['/', '/settings'];
-const authRoutes = ['/login', '/signup',];
+const authRoutes = ["/login", "/signup", "/register"];
 
 export async function proxy(request: NextRequest) {
-  const session = await auth.api.getSession({
-    headers: await headers()
-  })
-  
   const path = request.nextUrl.pathname;
 
-  if(!session && path !== "/login" && path !== "/signup") {
+  let session = null;
+  try {
+    session = await auth.api.getSession({
+      headers: request.headers,
+    });
+  } catch (e) {
+    console.error("Session verification in proxy middleware failed:", e);
+  }
+
+  const isAuthRoute = authRoutes.some((route) => path.startsWith(route));
+
+  if (!session && !isAuthRoute) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (session && isAuthRoute) {
+    return NextResponse.redirect(new URL("/lobby", request.url));
   }
 
   return NextResponse.next();
@@ -22,12 +31,12 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     * Match all request paths except for:
+     * - api routes
+     * - _next/static, _next/image
+     * - all static media, fonts, and assets (.png, .jpg, .svg, .ttf, etc.)
+     * - metadata files (favicon, sitemap, robots, webmanifest)
      */
-    '/((?!api|_next/static|_next/image|.*\\.png$|favicon.ico|sitemap.xml|robots.txt).*)',
+    "/((?!api|_next/static|_next/image|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|ttf|woff|woff2|mp3|wav|webmanifest)$|favicon\\.ico|sitemap\\.xml|robots\\.txt).*)",
   ],
 };
