@@ -1,10 +1,12 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
+import { redisStorage } from "@better-auth/redis-storage";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { anonymous, username, jwt, magicLink } from "better-auth/plugins"
 
-import { sendMagicLinkEmail } from "./resend";
+import { redis } from "./redis";
 import { db, schema } from "@/db";
+import { sendMagicLinkEmail } from "./resend";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
@@ -12,6 +14,24 @@ export const auth = betterAuth({
     provider: "pg",
     schema
   }),
+  secondaryStorage: redisStorage({
+		client: redis,
+		keyPrefix: "better-auth:",
+  }),
+  rateLimit: {
+    enabled: true,
+    storage: "secondary-storage",
+    customRules: {
+      "/sign-in/magic-link": {
+        window: 60,
+        max: 3,
+      },
+      "/sign-in/anonymous": {
+        window: 900,
+        max: 10,
+      }
+    }
+  },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
