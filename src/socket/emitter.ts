@@ -63,12 +63,19 @@ export function createGame(
   settings: GuessAgentSettings,
   mode: "GUESS_AGENT" = "GUESS_AGENT",
 ) {
+  const isInfiniteTimer =
+    settings.timePerRound === -1 ||
+    settings.timePerRound === 0 ||
+    Number(settings.timePerRound) <= 0 ||
+    Number(settings.timePerRound) >= 999999 ||
+    isNaN(Number(settings.timePerRound));
+
   const cleanSettings = {
     questionMode: settings.questionMode ?? "PRESET",
     maxNos: Math.max(1, Math.floor(Number(settings.maxNos) || 5)),
     maxGuesses: Math.max(1, Math.floor(Number(settings.maxGuesses) || 1)),
     questionCount: Math.max(1, Math.floor(Number(settings.questionCount) || 15)),
-    timePerRound: Math.floor(Number(settings.timePerRound) ?? -1),
+    timePerRound: isInfiniteTimer ? -1 : Math.floor(Number(settings.timePerRound)),
   };
   socket.emit(ClientEvents.GAME_CREATE, { partyId, mode, settings: cleanSettings });
 }
@@ -78,6 +85,10 @@ export function startGame(gameId: string) {
 }
 
 // ==== GUESS AGENT SPECIFIC GAME EVENTS ====
+
+export function changeTurn() {
+  socket.emit(ClientEvents.CHANGE_TURN);
+}
 
 export function askQuestion(gameId: string, questionId: string) {
   socket.emit(ClientEvents.QUESTION_ASK, { gameId, questionId });
