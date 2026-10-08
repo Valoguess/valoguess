@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Tag, Image as ImageIcon, Search, Check } from "lucide-react";
+import { Tag, Image as ImageIcon, Search, Check, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { AgentBanner, PRESET_TAGLINES } from "../constants";
@@ -16,6 +16,9 @@ interface BannerTaglineTabProps {
   filteredBanners: AgentBanner[];
   selectedBannerId: string;
   setSelectedBannerId: (val: string) => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  saveToast?: string;
 }
 
 export function BannerTaglineTab({
@@ -28,6 +31,9 @@ export function BannerTaglineTab({
   filteredBanners,
   selectedBannerId,
   setSelectedBannerId,
+  onSave,
+  isSaving = false,
+  saveToast,
 }: BannerTaglineTabProps) {
   return (
     <div className="space-y-6 animate-fade-in text-left">
@@ -163,6 +169,43 @@ export function BannerTaglineTab({
           })}
         </div>
       </div>
+
+      {/* Dedicated Save Action Bar for Banner & Tagline */}
+      {onSave && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/10 bg-[#080B10]/40 border border-white/5 rounded-sm p-4">
+          <div>
+            {saveToast ? (
+              <span className="text-xs font-display font-bold text-mint flex items-center gap-1.5 animate-fade-in">
+                <Check className="h-4 w-4" />
+                {saveToast}
+              </span>
+            ) : (
+              <span className="text-[11px] text-zinc-500">
+                Save chosen banner card and custom tagline to your player card.
+              </span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={isSaving}
+            className="w-full sm:w-auto py-2.5 px-6 bg-[#FF4655] hover:bg-[#FF4655]/90 text-white font-display text-xs font-bold uppercase tracking-wider rounded-sm shadow-[0_0_15px_rgba(255,70,85,0.4)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98"
+          >
+            {isSaving ? (
+              <>
+                <div className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                <span>SAVING...</span>
+              </>
+            ) : (
+              <>
+                <Save className="h-3.5 w-3.5" />
+                <span>SAVE BANNER & TAGLINE</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

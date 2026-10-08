@@ -9,7 +9,6 @@ import {
   Shield,
   Image as ImageIcon,
   ArrowLeft,
-  Save,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -234,32 +233,8 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Header Actions: Feedback + Single Save Button + Logout Button */}
+        {/* Header Actions: Logout Button */}
         <div className="flex items-center gap-3">
-          {saveToast && (
-            <span className="text-[11px] font-display font-bold text-mint animate-fade-in hidden md:inline truncate">
-              {saveToast}
-            </span>
-          )}
-
-          <button
-            onClick={() => handleSaveSettings()}
-            disabled={isSaving}
-            className="py-2 px-5 bg-accent hover:bg-accent-dim text-white font-display text-xs font-bold uppercase tracking-widest rounded-sm shadow-[0_0_20px_rgba(255,70,85,0.35)] transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98"
-          >
-            {isSaving ? (
-              <>
-                <div className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                <span>SAVING...</span>
-              </>
-            ) : (
-              <>
-                <Save className="h-3.5 w-3.5" />
-                <span>SAVE CHANGES</span>
-              </>
-            )}
-          </button>
-
           <button
             onClick={() => setShowLogoutModal(true)}
             className="py-2 px-3.5 rounded-sm border border-white/10 bg-white/3 hover:bg-[#FF4655]/15 hover:border-[#FF4655]/40 text-white/60 hover:text-[#FF4655] font-display text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer"
@@ -337,6 +312,9 @@ export default function SettingsPage() {
             nameCooldownDays={nameCooldownDays}
             toggleNameCooldownDemo={toggleNameCooldownDemo}
             defaultIconPath={currentBanner.iconPath}
+            onSave={() => handleSaveSettings()}
+            isSaving={isSaving}
+            saveToast={saveToast}
           />
         )}
 
@@ -352,6 +330,9 @@ export default function SettingsPage() {
             filteredBanners={filteredBanners}
             selectedBannerId={selectedBannerId}
             setSelectedBannerId={setSelectedBannerId}
+            onSave={() => handleSaveSettings()}
+            isSaving={isSaving}
+            saveToast={saveToast}
           />
         )}
 

@@ -6,7 +6,9 @@ import { Flag, Check, X, Loader2, LogOut } from "lucide-react";
 import { GameHeader } from "./_components/GameHeader";
 import { SecretAgentCard } from "./_components/SecretAgentCard";
 import { QuestionPanel } from "./_components/QuestionPanel";
+import { FreeformTurnPanel } from "./_components/FreeformTurnPanel";
 import { AgentGrid } from "./_components/AgentGrid";
+import { AgentGuessModal } from "./_components/AgentGuessModal";
 import { ActivityFeed } from "./_components/ActivityFeed";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
@@ -23,26 +25,48 @@ import {
   askQuestion as sendAskQuestion,
   answerQuestion as sendAnswerQuestion,
   leaveParty,
+  changeTurn,
+  submitGuess,
 } from "@/socket/emitter";
 import { socket } from "@/socket";
 import { ServerEvents } from "@/socket/events";
 import { cn } from "@/lib/utils";
+import { MatchIntroOverlay } from "./_components/MatchIntroOverlay";
+import { PartyChatOverlay } from "@/components/chat/PartyChatOverlay";
+import { useRoomTimer } from "@/hooks/useRoomTimer";
 
 function PlayContent() {
   const router = useRouter();
   const { game, clearGame, hydrated: gameHydrated } = useGameStore();
   const { user } = useAuthStore();
 
+  const [hasCompletedIntro, setHasCompletedIntro] = useState<boolean>(false);
   const [isAsking, setIsAsking] = useState(false);
   const [isAnswering, setIsAnswering] = useState(false);
+  const [isEndingTurn, setIsEndingTurn] = useState(false);
+  const [showGuessModal, setShowGuessModal] = useState(false);
+  const [eliminatedIds, setEliminatedIds] = useState<Set<string>>(new Set());
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Hook must be called unconditionally at top level
+  const { timeLeft, formattedTime, isInfinite } = useRoomTimer({ game });
 
   const myPlayer =
     game?.players.find(
       (p) => p.id === user?.id || (p.state && p.state.secretAgent !== null)
     ) || game?.players[0];
   const opponentPlayer = game?.players.find((p) => p.id !== myPlayer?.id);
+
+  // Check if intro was already seen during this match session
+  useEffect(() => {
+    if (typeof window !== "undefined" && game?.id) {
+      const seen = sessionStorage.getItem(`intro_seen_${game.id}`) === "true";
+      if (seen && game.status === "PLAYING") {
+        setHasCompletedIntro(true);
+      }
+    }
+  }, [game?.id, game?.status]);
 
   useEffect(() => {
     if (!gameHydrated) return;
@@ -109,6 +133,26 @@ function PlayContent() {
   const secretAgentId = myPlayer.state?.secretAgent || cachedSecretAgent;
   const activeSecretAgent =
     AGENTS.find((a) => a.id === secretAgentId) || AGENTS[0];
+
+  // Render Match Intro (Card Roulette & VS screen) before gameplay begins
+  if (!hasCompletedIntro || game.status === "STARTING") {
+    return (
+      <MatchIntroOverlay
+        secretAgentId={secretAgentId}
+        userName={myPlayer.name || user?.name || "You"}
+        opponentName={opponentPlayer?.name || "Opponent"}
+        gameStatus={game.status}
+        startingAt={game.startingAt}
+        startingEndsAt={game.startingEndsAt}
+        onComplete={() => {
+          setHasCompletedIntro(true);
+          if (game?.id) {
+            sessionStorage.setItem(`intro_seen_${game.id}`, "true");
+          }
+        }}
+      />
+    );
+  }
 
   const questionPoolIds = game.settings?.questionPool || [];
   const gameQuestions: QuestionItem[] =
@@ -187,6 +231,29 @@ function PlayContent() {
     }
   };
 
+  const handleEndTurn = () => {
+    if (isMyTurn && !isEndingTurn) {
+      setIsEndingTurn(true);
+      changeTurn();
+      setTimeout(() => setIsEndingTurn(false), 800);
+    }
+  };
+
+  const handleToggleEliminated = (id: string) => {
+    setEliminatedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleGuessConfirm = (agentId: string) => {
+    if (!game || !isMyTurn) return;
+    submitGuess(game.id, agentId);
+    setShowGuessModal(false);
+  };
+
   const handleLeaveGame = () => {
     leaveParty();
     clearGame();
@@ -196,19 +263,25 @@ function PlayContent() {
   const turnNumber = gameState?.turnNumber ?? game.turnNumber ?? 1;
   const currentRound = Math.max(1, Math.ceil(turnNumber / 2));
 
+  const nosMax = game.settings?.maxNos ?? 5;
+  const userNosUsed = Math.max(
+    0,
+    nosMax - (myPlayer?.state?.nosRemaining ?? nosMax)
+  );
+  const opponentNosUsed = Math.max(
+    0,
+    nosMax - (opponentPlayer?.state?.nosRemaining ?? nosMax)
+  );
+
   return (
     <main className="min-h-screen bg-base-950">
       <GameHeader
         turnOwner={turnOwner}
-        userNosUsed={
-          (game.settings.maxNos ?? 5) - (myPlayer.state?.nosRemaining ?? 0)
-        }
-        opponentNosUsed={
-          (game.settings.maxNos ?? 5) - (opponentPlayer?.state?.nosRemaining ?? 0)
-        }
-        userName={myPlayer.name || user?.name || "You"}
+        userNosUsed={userNosUsed}
+        opponentNosUsed={opponentNosUsed}
+        userName={myPlayer?.name || user?.name || "You"}
         opponentName={opponentPlayer?.name || "Opponent"}
-        nosMax={game.settings.maxNos ?? 5}
+        nosMax={nosMax}
         round={currentRound}
         maxRounds={-1}
         onLeave={() => setShowLeaveModal(true)}
@@ -227,7 +300,7 @@ function PlayContent() {
         <div className="flex flex-col gap-4">
           <SecretAgentCard
             agent={activeSecretAgent}
-            time="01:00"
+            time={isInfinite || timeLeft === -1 ? "∞" : formattedTime}
             round={currentRound}
             maxRounds={-1}
             yourTurn={isMyTurn}
@@ -242,103 +315,120 @@ function PlayContent() {
           </button>
         </div>
 
-        {/* Center Panel: Question Panel / Opponent Asked Card */}
+        {/* Center Panel: Question Panel / Opponent Asked Card / Freeform Panel */}
         <div className="flex flex-col">
-          {!isOpponentAskingMe && (
-            <QuestionPanel
-              onAsk={handleAskQuestion}
-              askedQuestions={askedQuestionsMap}
-              disabled={!isMyTurn || !!pendingQuestion || isAsking}
-              disabledReason={
-                isAsking
-                  ? "Sending question to opponent..."
-                  : isIWaitingForAnswer
-                    ? "Opponent is answering your question..."
-                    : !isMyTurn
-                      ? `${opponentPlayer?.name || "Opponent"} is thinking...`
-                      : undefined
-              }
-              questions={gameQuestions}
+          {game.settings?.questionMode === "FREEFORM" ? (
+            <FreeformTurnPanel
+              isMyTurn={isMyTurn}
+              onEndTurn={handleEndTurn}
+              onOpenGuessModal={() => setShowGuessModal(true)}
+              opponentName={opponentPlayer?.name || "Opponent"}
+              guessesRemaining={myPlayer?.state?.guessesRemaining ?? 0}
+              isEndingTurn={isEndingTurn}
             />
+          ) : (
+            <>
+              {!isOpponentAskingMe && (
+                <QuestionPanel
+                  onAsk={handleAskQuestion}
+                  askedQuestions={askedQuestionsMap}
+                  disabled={!isMyTurn || !!pendingQuestion || isAsking}
+                  disabledReason={
+                    isAsking
+                      ? "Sending question to opponent..."
+                      : isIWaitingForAnswer
+                        ? "Opponent is answering your question..."
+                        : !isMyTurn
+                          ? `${opponentPlayer?.name || "Opponent"} is thinking...`
+                          : undefined
+                  }
+                  questions={gameQuestions}
+                />
+              )}
+
+              {isOpponentAskingMe && opponentQuestionObj && (
+                <div className="clip-notch-both flex flex-col border border-accent/20 bg-base-850 p-6 shadow-[0_0_24px_rgba(255,70,85,0.1)] relative min-h-[300px] justify-between mb-5">
+                  {/* Corner accent decorations */}
+                  <div className="absolute left-0 top-0 h-4 w-4">
+                    <div className="absolute left-0 top-0 h-px w-4 bg-accent/60" />
+                    <div className="absolute left-0 top-0 h-4 w-px bg-accent/60" />
+                  </div>
+                  <div className="absolute right-0 top-0 h-4 w-4">
+                    <div className="absolute right-0 top-0 h-px w-4 bg-accent/60" />
+                    <div className="absolute right-0 top-0 h-4 w-px bg-accent/60" />
+                  </div>
+
+                  {/* Tag / Header */}
+                  <div className="flex justify-center items-center gap-2 mb-6">
+                    <span className="text-accent font-display text-xs tracking-[0.25em] font-semibold">{`{`}</span>
+                    <span className="text-accent font-display text-sm tracking-[0.25em] font-bold uppercase">
+                      OPPONENT ASKED
+                    </span>
+                    <span className="text-accent font-display text-xs tracking-[0.25em] font-semibold">{`}`}</span>
+                  </div>
+
+                  {/* Question text */}
+                  <div className="text-center my-auto flex flex-col gap-2">
+                    <h2 className="text-white font-display text-4xl md:text-5xl font-black uppercase tracking-[0.05em]">
+                      {opponentQuestionObj.label.toUpperCase()}?
+                    </h2>
+                    <p className="text-ink-400 text-sm max-w-md mx-auto leading-relaxed">
+                      {opponentQuestionObj.description ||
+                        `Does your secret agent match the characteristic: "${opponentQuestionObj.label}"?`}
+                    </p>
+                  </div>
+
+                  {/* Options */}
+                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 mt-8">
+                    {/* YES Button */}
+                    <button
+                      onClick={() => handleAnswerQuestion("yes")}
+                      disabled={isAnswering}
+                      className={cn(
+                        "flex items-center justify-center gap-3 rounded-sm border-2 border-mint bg-mint/5 py-4 px-6 text-mint transition-all duration-200 hover:bg-mint/15 font-display text-xl font-bold uppercase tracking-widest cursor-pointer",
+                        isAnswering && "opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      {isAnswering ? (
+                        <Loader2 className="h-5 w-5 animate-spin text-mint" />
+                      ) : (
+                        <Check className="h-5 w-5 stroke-[3.5]" />
+                      )}
+                      YES
+                    </button>
+
+                    {/* OR divider */}
+                    <span className="text-ink-600 font-display text-xs tracking-widest uppercase select-none px-2">
+                      — OR —
+                    </span>
+
+                    {/* NO Button */}
+                    <button
+                      onClick={() => handleAnswerQuestion("no")}
+                      disabled={isAnswering}
+                      className={cn(
+                        "flex items-center justify-center gap-3 rounded-sm border-2 border-accent bg-accent/5 py-4 px-6 text-accent transition-all duration-200 hover:bg-accent/15 font-display text-xl font-bold uppercase tracking-widest cursor-pointer",
+                        isAnswering && "opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      {isAnswering ? (
+                        <Loader2 className="h-5 w-5 animate-spin text-accent" />
+                      ) : (
+                        <X className="h-5 w-5 stroke-[3.5]" />
+                      )}
+                      NO
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
-          {isOpponentAskingMe && opponentQuestionObj && (
-            <div className="clip-notch-both flex flex-col border border-accent/20 bg-base-850 p-6 shadow-[0_0_24px_rgba(255,70,85,0.1)] relative min-h-[300px] justify-between mb-5">
-              {/* Corner accent decorations */}
-              <div className="absolute left-0 top-0 h-4 w-4">
-                <div className="absolute left-0 top-0 h-px w-4 bg-accent/60" />
-                <div className="absolute left-0 top-0 h-4 w-px bg-accent/60" />
-              </div>
-              <div className="absolute right-0 top-0 h-4 w-4">
-                <div className="absolute right-0 top-0 h-px w-4 bg-accent/60" />
-                <div className="absolute right-0 top-0 h-4 w-px bg-accent/60" />
-              </div>
-
-              {/* Tag / Header */}
-              <div className="flex justify-center items-center gap-2 mb-6">
-                <span className="text-accent font-display text-xs tracking-[0.25em] font-semibold">{`{`}</span>
-                <span className="text-accent font-display text-sm tracking-[0.25em] font-bold uppercase">
-                  OPPONENT ASKED
-                </span>
-                <span className="text-accent font-display text-xs tracking-[0.25em] font-semibold">{`}`}</span>
-              </div>
-
-              {/* Question text */}
-              <div className="text-center my-auto flex flex-col gap-2">
-                <h2 className="text-white font-display text-4xl md:text-5xl font-black uppercase tracking-[0.05em]">
-                  {opponentQuestionObj.label.toUpperCase()}?
-                </h2>
-                <p className="text-ink-400 text-sm max-w-md mx-auto leading-relaxed">
-                  {opponentQuestionObj.description ||
-                    `Does your secret agent match the characteristic: "${opponentQuestionObj.label}"?`}
-                </p>
-              </div>
-
-              {/* Options */}
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 mt-8">
-                {/* YES Button */}
-                <button
-                  onClick={() => handleAnswerQuestion("yes")}
-                  disabled={isAnswering}
-                  className={cn(
-                    "flex items-center justify-center gap-3 rounded-sm border-2 border-mint bg-mint/5 py-4 px-6 text-mint transition-all duration-200 hover:bg-mint/15 font-display text-xl font-bold uppercase tracking-widest cursor-pointer",
-                    isAnswering && "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  {isAnswering ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-mint" />
-                  ) : (
-                    <Check className="h-5 w-5 stroke-[3.5]" />
-                  )}
-                  YES
-                </button>
-
-                {/* OR divider */}
-                <span className="text-ink-600 font-display text-xs tracking-widest uppercase select-none px-2">
-                  — OR —
-                </span>
-
-                {/* NO Button */}
-                <button
-                  onClick={() => handleAnswerQuestion("no")}
-                  disabled={isAnswering}
-                  className={cn(
-                    "flex items-center justify-center gap-3 rounded-sm border-2 border-accent bg-accent/5 py-4 px-6 text-accent transition-all duration-200 hover:bg-accent/15 font-display text-xl font-bold uppercase tracking-widest cursor-pointer",
-                    isAnswering && "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  {isAnswering ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-accent" />
-                  ) : (
-                    <X className="h-5 w-5 stroke-[3.5]" />
-                  )}
-                  NO
-                </button>
-              </div>
-            </div>
-          )}
-
-          <AgentGrid />
+          <AgentGrid
+            externalEliminated={eliminatedIds}
+            onToggleEliminated={handleToggleEliminated}
+            onOpenGuessModal={() => setShowGuessModal(true)}
+          />
         </div>
 
         {/* Right Side: activity feed */}
@@ -351,6 +441,15 @@ function PlayContent() {
           />
         </div>
       </div>
+
+      {/* TACTICAL FINAL GUESS MODAL */}
+      <AgentGuessModal
+        isOpen={showGuessModal}
+        onClose={() => setShowGuessModal(false)}
+        onConfirmGuess={handleGuessConfirm}
+        eliminatedIds={eliminatedIds}
+        guessesRemaining={myPlayer?.state?.guessesRemaining ?? 0}
+      />
 
       {/* LEAVE MATCH CONFIRMATION MODAL */}
       <Dialog open={showLeaveModal} onOpenChange={setShowLeaveModal}>
@@ -382,6 +481,9 @@ function PlayContent() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* IN-GAME FLOATING PARTY CHAT */}
+      <PartyChatOverlay className="bottom-6 left-6" />
     </main>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { AtSign, User, Clock, Check, Lock, Info } from "lucide-react";
+import { AtSign, User, Clock, Check, Lock, Info, Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ProfileAvatarUploadCard } from "./ProfileAvatarUploadCard";
 
@@ -15,6 +15,9 @@ interface IdentitySettingsTabProps {
   nameCooldownDays: number;
   toggleNameCooldownDemo?: () => void;
   defaultIconPath: string;
+  onSave?: () => void;
+  isSaving?: boolean;
+  saveToast?: string;
 }
 
 export function IdentitySettingsTab({
@@ -28,6 +31,9 @@ export function IdentitySettingsTab({
   nameCooldownDays,
   toggleNameCooldownDemo,
   defaultIconPath,
+  onSave,
+  isSaving = false,
+  saveToast,
 }: IdentitySettingsTabProps) {
   return (
     <div className="space-y-6 animate-fade-in">
@@ -163,6 +169,43 @@ export function IdentitySettingsTab({
         </div>
       </div>
     </div>
+
+    {/* Dedicated Save Changes Action for Identity Tab */}
+    {onSave && (
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 bg-[#080B10]/40 border border-white/5 rounded-sm p-4">
+        <div>
+          {saveToast ? (
+            <span className="text-xs font-display font-bold text-mint flex items-center gap-1.5 animate-fade-in">
+              <Check className="h-4 w-4" />
+              {saveToast}
+            </span>
+          ) : (
+            <span className="text-[11px] text-zinc-500">
+              Update username and display name. Profile picture saves automatically.
+            </span>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={isSaving}
+          className="w-full sm:w-auto py-2.5 px-6 bg-[#FF4655] hover:bg-[#FF4655]/90 text-white font-display text-xs font-bold uppercase tracking-wider rounded-sm shadow-[0_0_15px_rgba(255,70,85,0.4)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98"
+        >
+          {isSaving ? (
+            <>
+              <div className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+              <span>SAVING...</span>
+            </>
+          ) : (
+            <>
+              <Save className="h-3.5 w-3.5" />
+              <span>SAVE IDENTITY CHANGES</span>
+            </>
+          )}
+        </button>
+      </div>
+    )}
   </div>
   );
 }

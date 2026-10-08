@@ -89,8 +89,7 @@ function CenterHUD({
 }) {
   const maxRoundsDisplay = maxRounds === -1 || maxRounds <= 0 ? "∞" : maxRounds;
   const { game } = useGameStore();
-  const { timeLeft, formattedTime } = useRoomTimer({ game });
-
+  const { timeLeft, formattedTime, isInfinite } = useRoomTimer({ game });
 
   return (
     <div className="flex flex-col items-center">
@@ -108,7 +107,7 @@ function CenterHUD({
             ROUND {round} / {maxRoundsDisplay}
           </div>
           <div className="font-display text-4xl font-black tabular-nums text-white leading-none mt-1">
-            {timeLeft === -1 ? "∞" : (timeLeft > 0 ? formattedTime : "00:00")}
+            {isInfinite || timeLeft === -1 ? "∞" : (timeLeft > 0 ? formattedTime : "00:00")}
           </div>
           <div className="text-[9px] text-zinc-400 mt-1 uppercase tracking-wider">
             First player to guess the agent wins!

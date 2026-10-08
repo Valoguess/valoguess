@@ -6,6 +6,7 @@ import { Camera, Upload, Trash2, CheckCircle2, AlertCircle, Loader2, Sparkles, L
 import { uploadUserAvatar, removeUserAvatar } from "@/actions/upload";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
+import { ImageCropModal } from "./ImageCropModal";
 
 interface ProfileAvatarUploadCardProps {
   isAnonymous: boolean;
@@ -26,10 +27,15 @@ export function ProfileAvatarUploadCard({
   const [successMessage, setSuccessMessage] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
 
+  // Image Cropper Modal State
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [selectedRawFile, setSelectedRawFile] = useState<File | null>(null);
+
   const currentAvatar = previewUrl || user?.image || defaultIconPath;
   const hasCustomAvatar = Boolean(previewUrl || user?.image);
 
-  const handleFileSelect = async (file: File) => {
+  // Initial file select intercepts to show ImageCropModal
+  const handleFileSelect = (file: File) => {
     setErrorMessage("");
     setSuccessMessage("");
 
@@ -40,19 +46,28 @@ export function ProfileAvatarUploadCard({
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setErrorMessage("File exceeds 5 MB limit. Please select a smaller image.");
+    if (file.size > 15 * 1024 * 1024) {
+      setErrorMessage("File exceeds 15 MB limit. Please select a smaller image.");
       return;
     }
 
-    // Local instant preview
-    const localUrl = URL.createObjectURL(file);
+    setSelectedRawFile(file);
+    setShowCropModal(true);
+  };
+
+  // Called after user confirms and crops image in modal
+  const uploadCroppedFile = async (croppedFile: File) => {
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    // Local instant preview of the cropped result
+    const localUrl = URL.createObjectURL(croppedFile);
     setPreviewUrl(localUrl);
     setIsUploading(true);
 
     try {
       const formData = new FormData();
-      formData.append("avatar", file);
+      formData.append("avatar", croppedFile);
 
       const res = await uploadUserAvatar(formData);
 
@@ -69,7 +84,7 @@ export function ProfileAvatarUploadCard({
       }
 
       setPreviewUrl(res.url);
-      setSuccessMessage("Avatar deployed and synced successfully!");
+      setSuccessMessage("Avatar cropped, deployed and synced successfully!");
       setTimeout(() => setSuccessMessage(""), 4000);
     } catch (err: any) {
       console.error("Avatar upload failed:", err);
@@ -77,6 +92,7 @@ export function ProfileAvatarUploadCard({
       setPreviewUrl(null);
     } finally {
       setIsUploading(false);
+      setSelectedRawFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -290,6 +306,14 @@ export function ProfileAvatarUploadCard({
           </div>
         </div>
       </div>
+
+      {/* Interactive Crop & Size Modal */}
+      <ImageCropModal
+        isOpen={showCropModal}
+        onClose={() => setShowCropModal(false)}
+        imageFile={selectedRawFile}
+        onApplyCrop={uploadCroppedFile}
+      />
     </div>
   );
 }

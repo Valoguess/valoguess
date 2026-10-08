@@ -33,6 +33,7 @@ type TimelineEvent = {
 import { useGameStore } from "@/store/gameStore";
 import { useAuthStore } from "@/store/authStore";
 import { AGENTS, getQuestionLabel } from "@/lib/data";
+import { PartyChatOverlay } from "@/components/chat/PartyChatOverlay";
 
 function ResultContent() {
   const searchParams = useSearchParams();
@@ -436,6 +437,9 @@ function ResultContent() {
           LEAVE GAME
         </Link>
       </footer>
+
+      {/* FLOATING PARTY CHAT */}
+      <PartyChatOverlay className="bottom-20 left-6" />
     </main>
   );
 }

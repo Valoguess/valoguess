@@ -14,10 +14,10 @@ import {
   sendInviteToParty,
   acceptInviteToParty,
   declineInviteToParty,
-  sendMessageToParty,
   createGame,
   startGame,
 } from "@/socket/emitter";
+import { cn } from "@/lib/utils";
 import { ServerEvents } from "@/socket/events";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useAuthStore } from "@/store/authStore";
@@ -26,30 +26,22 @@ import { Message, Friend } from "./_components/types";
 import { useFriends } from "@/hooks/useFriends";
 import { LobbyHeader } from "./_components/LobbyHeader";
 import { LobbySubheader } from "./_components/LobbySubheader";
+import { LobbyLeftPanel } from "./_components/LobbyLeftPanel";
 import { LobbyCenterSlots } from "./_components/LobbyCenterSlots";
 import { LobbyFriendsSidebar } from "./_components/LobbyFriendsSidebar";
-import { LobbyFooter } from "./_components/LobbyFooter";
-import { LobbyChat } from "./_components/LobbyChat";
+import { PartyChatOverlay } from "@/components/chat/PartyChatOverlay";
 import { LobbySettings } from "./_components/LobbySettings";
 import { HowToPlayModal } from "./_components/HowToPlayModal";
 
-const DEFAULT_WELCOME_MESSAGE: Message = {
-  id: "welcome-1",
-  sender: "SYSTEM",
-  time: new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  }),
-  text: "Party lobby initialized. Create or join a party to start!",
-  colorClass: "text-[#8C7BFF]",
-  avatar: "/agents/icon/miks.png",
-};
+
 
 export default function LobbyPage() {
   const router = useRouter();
   const { party, clearParty, partyMessages } = usePartyStore();
-  const { game } = useGameStore();
+  const { game, clearGame } = useGameStore();
   const { user } = useAuthStore();
+
+  const startedGameRef = useRef<string | null>(null);
 
   const [savedUsername, setSavedUsername] = useState<string>("AGENT");
   const [isClient, setIsClient] = useState(false);
@@ -60,12 +52,11 @@ export default function LobbyPage() {
   const [isCreatingOrJoining, setIsCreatingOrJoining] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Gamemode Selector State
-  const [selectedMode, setSelectedMode] = useState<"duel" | "blitz">("duel");
-  const [showModeDropdown, setShowModeDropdown] = useState(false);
+  // Gamemode & Question Submode State
+  const [questionMode, setQuestionMode] = useState<"PRESET" | "FREEFORM">("PRESET");
 
-  // Friends Menu Collapsible State
-  const [isFriendsCollapsed, setIsFriendsCollapsed] = useState(false);
+  // Friends Menu Collapsible State (closed by default)
+  const [isFriendsCollapsed, setIsFriendsCollapsed] = useState(true);
 
   // Modals & Drawers state
   const [showHowToPlay, setShowHowToPlay] = useState(false);
@@ -177,18 +168,30 @@ export default function LobbyPage() {
   const me = party?.members.find((m) => m.id === myId) || (user ? { id: user.id, name: user.name || "AGENT" } : null);
   const opponent = party?.members.find((m) => m.id !== myId);
 
+  // Clear any finished or waiting stale game state on lobby entry
+  useEffect(() => {
+    if (game && (game.status === "FINISHED" || game.status === "WAITING")) {
+      clearGame();
+    }
+  }, []);
+
+
+
   // Game lifecycle handling:
   // 1. If leader created game (game.status === "WAITING"), leader triggers startGame(game.id)
-  // 2. When game.status === "PLAYING", navigate to /play?code=${game.id}
+  // 2. When game.status === "STARTING" || game.status === "PLAYING", navigate to /play?code=${game.id}
   useEffect(() => {
     if (!game) return;
 
     if (isHost && game.status === "WAITING") {
-      startGame(game.id);
+      if (startedGameRef.current !== game.id) {
+        startedGameRef.current = game.id;
+        startGame(game.id);
+      }
       return;
     }
 
-    if (game.status === "PLAYING") {
+    if (game.status === "STARTING" || game.status === "PLAYING") {
       router.push(`/play?code=${game.id}`);
     }
   }, [game, isHost, router]);
@@ -197,6 +200,11 @@ export default function LobbyPage() {
   useEffect(() => {
     const onError = (err: any) => {
       setIsCreatingOrJoining(false);
+      startedGameRef.current = null;
+      if (err?.code === "GAME_ALREADY_STARTED" && game?.id) {
+        router.push(`/play?code=${game.id}`);
+        return;
+      }
       setErrorMsg(err?.message || "An error occurred");
       setTimeout(() => setErrorMsg(""), 4000);
     };
@@ -204,7 +212,7 @@ export default function LobbyPage() {
     return () => {
       socket.off(ServerEvents.ERROR, onError);
     };
-  }, []);
+  }, [game?.id, router]);
 
   const setTimer = (val: number | ((prev: number) => number)) => {
     const nextVal = typeof val === "function" ? val(timer) : val;
@@ -226,12 +234,7 @@ export default function LobbyPage() {
     setQuestionCountState(nextVal);
   };
 
-  // Chat state
-  const [chatInput, setChatInput] = useState("");
-  const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const displayMessages =
-    partyMessages.length > 0 ? partyMessages : [DEFAULT_WELCOME_MESSAGE];
 
   // Execute Create Party
   const handleCreateParty = () => {
@@ -255,12 +258,16 @@ export default function LobbyPage() {
 
     // If game already exists in WAITING state, call startGame
     if (game?.id && game.status === "WAITING") {
-      startGame(game.id);
+      if (startedGameRef.current !== game.id) {
+        startedGameRef.current = game.id;
+        startGame(game.id);
+      }
       return;
     }
 
+    startedGameRef.current = null;
     createGame(party.id, {
-      questionMode: "PRESET",
+      questionMode: questionMode ?? "PRESET",
       timePerRound: timer,
       maxNos,
       maxGuesses,
@@ -277,6 +284,8 @@ export default function LobbyPage() {
   const handleLeaveParty = () => {
     leaveParty();
     clearParty();
+    clearGame();
+    startedGameRef.current = null;
     setIsCreatingOrJoining(false);
   };
 
@@ -287,13 +296,7 @@ export default function LobbyPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Send Chat Message
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatInput.trim()) return;
-    sendMessageToParty(chatInput.trim());
-    setChatInput("");
-  };
+
 
   if (!isClient) return null;
 
@@ -320,107 +323,106 @@ export default function LobbyPage() {
         onOpenSettings={() => setShowSettingsModal(true)}
       />
 
-      {/* 2. SUB-HEADER BAR (Mode Selector + Party Controls) */}
-      <LobbySubheader
-        selectedMode={selectedMode}
-        setSelectedMode={setSelectedMode}
-        showModeDropdown={showModeDropdown}
-        setShowModeDropdown={setShowModeDropdown}
-        onOpenSettings={() => setShowSettingsModal(true)}
-        party={party}
-        copied={copied}
-        handleCopyCode={handleCopyCode}
-        handleCreateParty={handleCreateParty}
-        handleJoinParty={handleJoinParty}
-        partyInput={partyInput}
-        setPartyInput={setPartyInput}
-        isCreatingOrJoining={isCreatingOrJoining}
-      />
+      <div className="relative w-full flex-1 min-h-0 flex justify-between">
+        <div className="relative flex-1 min-w-0 flex flex-col min-h-0">
 
-      {errorMsg && (
-        <div className="relative z-10 w-full max-w-md mx-auto mt-2 px-4">
-          <div className="bg-accent/15 border border-accent/40 text-accent text-xs font-display font-bold uppercase tracking-wider p-2.5 rounded text-center">
-            {errorMsg}
+
+          {/* 2. SUB-HEADER BAR (Party Status & Controls) */}
+          <LobbySubheader
+            party={party}
+            copied={copied}
+            handleCopyCode={handleCopyCode}
+            handleCreateParty={handleCreateParty}
+            handleJoinParty={handleJoinParty}
+            partyInput={partyInput}
+            setPartyInput={setPartyInput}
+            isCreatingOrJoining={isCreatingOrJoining}
+          />
+
+          {errorMsg && (
+            <div className="relative z-10 w-full max-w-md mx-auto mt-2 px-4">
+              <div className="bg-accent/15 border border-accent/40 text-accent text-xs font-display font-bold uppercase tracking-wider p-2.5 rounded text-center">
+                {errorMsg}
+              </div>
+            </div>
+          )}
+
+          {inviteToast && (
+            <div className="relative z-20 w-full max-w-md mx-auto mt-2 px-4 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="bg-[#090d14]/90 border border-mint/40 text-mint text-xs font-display font-bold uppercase tracking-wider p-2 rounded text-center shadow-[0_0_15px_rgba(60,242,196,0.2)] flex items-center justify-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-mint animate-ping" />
+                {inviteToast}
+              </div>
+            </div>
+          )}
+
+          {/* 3. MAIN WORKSPACE: LEFT CONTROL PANEL & CHAT, CENTER SLOTS*/}
+          <div className="relative z-10 flex-1 flex items-stretch justify-between gap-5 pl-6 lg:pl-8 py-2 overflow-hidden">
+            {/* Left Column: Valorant Game Mode & Permanent Room Chat */}
+            <aside className="w-70 flex flex-col justify-center shrink-0 select-none z-20 h-full min-h-0 gap-2.5 pb-1">
+              <LobbyLeftPanel
+                questionMode={questionMode}
+                setQuestionMode={setQuestionMode}
+                isHost={isHost}
+                party={party}
+                opponent={opponent}
+                onStartGame={handleStartGame}
+                onOpenSettings={() => setShowSettingsModal(true)}
+                onLeaveParty={handleLeaveParty}
+                timer={timer}
+                maxNos={maxNos}
+                maxGuesses={maxGuesses}
+                isCreatingOrJoining={isCreatingOrJoining}
+                handleCreateParty={handleCreateParty}
+              />
+
+            </aside>
+
+            {/* Center: Player Slots */}
+            <div className="flex-1 flex items-center justify-center min-w-0 h-full">
+              <LobbyCenterSlots
+                party={party}
+                me={me}
+                opponent={opponent}
+                isHost={isHost}
+                savedUsername={savedUsername}
+                isCreatingOrJoining={isCreatingOrJoining}
+                handleCreateParty={handleCreateParty}
+                handleKickGuest={handleKickGuest}
+                handleCopyCode={handleCopyCode}
+              />
+            </div>
           </div>
         </div>
-      )}
 
-      {inviteToast && (
-        <div className="relative z-20 w-full max-w-md mx-auto mt-2 px-4 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="bg-[#090d14]/90 border border-mint/40 text-mint text-xs font-display font-bold uppercase tracking-wider p-2 rounded text-center shadow-[0_0_15px_rgba(60,242,196,0.2)] flex items-center justify-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-mint animate-ping" />
-            {inviteToast}
-          </div>
+        {/* Right Column: Friends Sidebar (w-16 when closed, w-80 on expand) */}
+        <div className={cn("transition-all duration-300 h-full shrink-0 z-30", isFriendsCollapsed ? "w-16" : "w-80 lg:w-84")}>
+          <LobbyFriendsSidebar
+            isFriendsCollapsed={isFriendsCollapsed}
+            setIsFriendsCollapsed={setIsFriendsCollapsed}
+            isAnonymous={Boolean(user?.isAnonymous || user?.name?.startsWith("Guest"))}
+            friendsList={friendsList}
+            friendRequests={friendRequests}
+            friendInput={friendInput}
+            setFriendInput={setFriendInput}
+            handleAddFriend={handleAddFriend}
+            handleAcceptRequest={handleAcceptRequest}
+            handleDeclineRequest={handleDeclineRequest}
+            handleCancelRequest={handleCancelRequest}
+            handleRemoveFriend={handleRemoveFriend}
+            handleInviteFriend={onInviteFriendToParty}
+            incomingPartyInvites={enrichedIncomingInvites}
+            onAcceptPartyInvite={handleAcceptPartyInvite}
+            onDeclinePartyInvite={handleDeclinePartyInvite}
+            friendAddedToast={friendAddedToast || inviteToast}
+            isAddingFriend={isAddingFriend}
+          />
         </div>
-      )}
-
-      {/* 3. CENTER CONTENT: 4 PLAYER CARDS & COLLAPSIBLE SIDEBAR */}
-      <div className="relative z-10 flex-1 flex items-center justify-between gap-6 px-8 py-2 min-h-0">
-        <LobbyCenterSlots
-          party={party}
-          me={me}
-          opponent={opponent}
-          isHost={isHost}
-          savedUsername={savedUsername}
-          isCreatingOrJoining={isCreatingOrJoining}
-          handleCreateParty={handleCreateParty}
-          handleKickGuest={handleKickGuest}
-          handleCopyCode={handleCopyCode}
-        />
-
-        <LobbyFriendsSidebar
-          isFriendsCollapsed={isFriendsCollapsed}
-          setIsFriendsCollapsed={setIsFriendsCollapsed}
-          isAnonymous={Boolean(user?.isAnonymous || user?.name?.startsWith("Guest"))}
-          friendsList={friendsList}
-          friendRequests={friendRequests}
-          friendInput={friendInput}
-          setFriendInput={setFriendInput}
-          handleAddFriend={handleAddFriend}
-          handleAcceptRequest={handleAcceptRequest}
-          handleDeclineRequest={handleDeclineRequest}
-          handleCancelRequest={handleCancelRequest}
-          handleRemoveFriend={handleRemoveFriend}
-          handleInviteFriend={onInviteFriendToParty}
-          incomingPartyInvites={enrichedIncomingInvites}
-          onAcceptPartyInvite={handleAcceptPartyInvite}
-          onDeclinePartyInvite={handleDeclinePartyInvite}
-          friendAddedToast={friendAddedToast || inviteToast}
-          isAddingFriend={isAddingFriend}
-        />
       </div>
 
-      {/* 4. BOTTOM CONTROL ACTION BAR */}
-      <LobbyFooter
-        showChatDrawer={showChatDrawer}
-        setShowChatDrawer={setShowChatDrawer}
-        party={party}
-        isHost={isHost}
-        opponent={opponent}
-        handleStartGame={handleStartGame}
-        handleLeaveParty={handleLeaveParty}
-        onOpenSettings={() => setShowSettingsModal(true)}
-      />
-
-      {/* SLIDING CHAT DRAWER */}
-      <AnimatePresence>
-        {showChatDrawer && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.95 }}
-            className="fixed bottom-24 left-8 z-50 w-96 h-100 shadow-2xl"
-          >
-            <LobbyChat
-              messages={displayMessages}
-              chatInput={chatInput}
-              setChatInput={setChatInput}
-              handleSendMessage={handleSendMessage}
-              chatEndRef={chatEndRef}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* 4. IN-GAME / LOBBY FLOATING PARTY CHAT (matches exact Valorant design from screenshot) */}
+      <PartyChatOverlay className="bottom-6 left-6" />
+        
 
       {/* CUSTOM GAME SETTINGS MODAL */}
       <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
@@ -436,6 +438,8 @@ export default function LobbyPage() {
               setMaxGuesses={setMaxGuesses}
               questionCount={questionCount}
               setQuestionCount={setQuestionCount}
+              questionMode={questionMode}
+              setQuestionMode={setQuestionMode}
               showMoreOptions={showMoreOptions}
               setShowMoreOptions={setShowMoreOptions}
             />

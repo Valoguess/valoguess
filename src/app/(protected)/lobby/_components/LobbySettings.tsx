@@ -20,6 +20,8 @@ type LobbySettingsProps = {
   setMaxGuesses: (val: number | ((prev: number) => number)) => void;
   questionCount?: number;
   setQuestionCount?: (val: number | ((prev: number) => number)) => void;
+  questionMode?: "PRESET" | "FREEFORM";
+  setQuestionMode?: (val: "PRESET" | "FREEFORM") => void;
   showMoreOptions: boolean;
   setShowMoreOptions: (val: boolean) => void;
 };
@@ -34,6 +36,8 @@ export function LobbySettings({
   setMaxGuesses,
   questionCount = 15,
   setQuestionCount,
+  questionMode = "PRESET",
+  setQuestionMode,
   showMoreOptions,
   setShowMoreOptions,
 }: LobbySettingsProps) {
@@ -52,6 +56,49 @@ export function LobbySettings({
 
       {/* Settings list container - Scrollable */}
       <div className="flex-1 flex flex-col gap-5 overflow-y-auto pr-1 scrollbar-thin">
+
+        {/* SETTING 0: QUESTION MODE (PRESET vs FREEFORM) */}
+        <div className="flex flex-col text-left">
+          <div className="flex items-start gap-2 mb-2">
+            <Compass className="h-4.5 w-4.5 text-accent mt-0.5 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-valorant text-[11px] tracking-wider text-white">QUESTION MODE</span>
+              <span className="text-[9.5px] font-sans text-white/60 uppercase tracking-wide">
+                {questionMode === "PRESET" ? "Preset questions pool" : "Freeform player-directed questions"}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setQuestionMode?.("PRESET")}
+              disabled={!isHost}
+              className={cn(
+                "p-2.5 rounded-sm border text-left transition-all cursor-pointer",
+                questionMode === "PRESET"
+                  ? "border-[#FF4655] bg-[#FF4655]/15 text-white shadow-[0_0_12px_rgba(255,70,85,0.2)]"
+                  : "border-white/10 bg-white/[0.02] text-white/60 hover:text-white hover:bg-white/[0.05]"
+              )}
+            >
+              <div className="font-valorant text-xs text-white">PRESET</div>
+              <div className="text-[9px] text-white/50 mt-0.5">Select from curated questions</div>
+            </button>
+
+            <button
+              onClick={() => setQuestionMode?.("FREEFORM")}
+              disabled={!isHost}
+              className={cn(
+                "p-2.5 rounded-sm border text-left transition-all cursor-pointer",
+                questionMode === "FREEFORM"
+                  ? "border-[#FF4655] bg-[#FF4655]/15 text-white shadow-[0_0_12px_rgba(255,70,85,0.2)]"
+                  : "border-white/10 bg-white/[0.02] text-white/60 hover:text-white hover:bg-white/[0.05]"
+              )}
+            >
+              <div className="font-valorant text-xs text-white">FREEFORM</div>
+              <div className="text-[9px] text-white/50 mt-0.5">Ask questions yourself & end turn</div>
+            </button>
+          </div>
+        </div>
         
         {/* SETTING 1: TIMER */}
         <div className="flex flex-col text-left">

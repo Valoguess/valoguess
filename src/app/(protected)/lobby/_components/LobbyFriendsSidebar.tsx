@@ -135,62 +135,79 @@ export function LobbyFriendsSidebar({
 
 
   return (
-    <div
-      className={cn(
-        "hidden md:flex flex-col h-full max-h-130 bg-black/60 border border-white/10 rounded-sm backdrop-blur-md transition-all duration-300 shrink-0 select-none overflow-hidden",
-        isFriendsCollapsed ? "w-16 p-2 justify-between" : "w-80 p-0 justify-between"
+    <>
+      {/* Background click to close overlay on smaller viewports when expanded */}
+      {!isFriendsCollapsed && (
+        <div
+          className="fixed inset-0 z-45 bg-black/40 backdrop-blur-xs md:hidden"
+          onClick={() => setIsFriendsCollapsed(true)}
+        />
       )}
-    >
-      {/* 1. TOP HEADER BAR */}
-      <div className="flex items-center justify-between border-b border-white/10 p-3 shrink-0 bg-black/40">
-        {!isFriendsCollapsed ? (
-          <div className="flex items-center gap-2 text-xs font-display font-bold uppercase tracking-wider text-white truncate">
-            {isAnonymous ? (
-              <>
-                <Lock className="h-4 w-4 text-[#FF4655] shrink-0" />
-                <span>FRIENDS</span>
-                <span className="text-[9px] font-mono text-[#FF4655] bg-[#FF4655]/10 px-1.5 py-0.2 rounded border border-[#FF4655]/20">
-                  LOCKED
-                </span>
-              </>
-            ) : (
-              <>
-                <Users className="h-4 w-4 text-accent shrink-0" />
-                <span>FRIENDS ({friendsList.length})</span>
-              </>
-            )}
-          </div>
-        ) : (
-          <div className="mx-auto flex flex-col items-center gap-1">
-            {isAnonymous ? (
-              <Lock className="h-4 w-4 text-[#FF4655]" />
-            ) : (
-              <>
-                <Users className="h-4 w-4 text-accent" />
-                {incomingRequests.length > 0 && (
-                  <span className="h-2 w-2 rounded-full bg-[#FF4655] animate-ping" />
-                )}
-              </>
-            )}
-          </div>
-        )}
 
-        <button
-          onClick={() => setIsFriendsCollapsed(!isFriendsCollapsed)}
-          className="p-1 hover:bg-white/10 rounded text-white/60 hover:text-white transition mx-auto md:mx-0 cursor-pointer"
-          title={isFriendsCollapsed ? "Expand Friends Menu" : "Collapse Friends Menu"}
+      <aside
+        className={cn(
+          "flex flex-col h-full w-full bg-[#070a12]/95 border-l border-white/10 backdrop-blur-xl shadow-[0_4px_25px_rgba(0,0,0,0.6)] transition-all duration-300 shrink-0 select-none overflow-hidden justify-between z-20"
+        )}
+      >
+        {/* 1. TOP HEADER BAR */}
+        <div
+          onClick={isFriendsCollapsed ? () => setIsFriendsCollapsed(false) : undefined}
+          className={cn(
+            "border-b border-white/10 shrink-0 bg-black/40 transition-colors",
+            isFriendsCollapsed
+              ? "p-2.5 flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-white/5 group"
+              : "flex items-center justify-between p-3"
+          )}
+          title={isFriendsCollapsed ? "Expand Friends Menu (Click)" : undefined}
         >
           {isFriendsCollapsed ? (
-            <ChevronLeft className="h-4 w-4 text-accent" />
+            <div className="flex flex-col items-center gap-1 w-full">
+              {isAnonymous ? (
+                <Lock className="h-4 w-4 text-[#FF4655]" />
+              ) : (
+                <div className="relative">
+                  <Users className="h-4 w-4 text-accent group-hover:scale-110 transition-transform" />
+                  {(incomingRequests.length > 0 || incomingPartyInvites.length > 0) && (
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#FF4655] animate-ping" />
+                  )}
+                </div>
+              )}
+              <ChevronLeft className="h-3.5 w-3.5 text-white/40 group-hover:text-accent transition-colors" />
+            </div>
           ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-        </button>
-      </div>
+            <>
+              <div className="flex items-center gap-2 text-xs font-display font-bold uppercase tracking-wider text-white truncate">
+                {isAnonymous ? (
+                  <>
+                    <Lock className="h-4 w-4 text-[#FF4655] shrink-0" />
+                    <span>FRIENDS</span>
+                    <span className="text-[9px] font-mono text-[#FF4655] bg-[#FF4655]/10 px-1.5 py-0.2 rounded border border-[#FF4655]/20">
+                      LOCKED
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Users className="h-4 w-4 text-accent shrink-0" />
+                    <span>FRIENDS ({friendsList.length})</span>
+                  </>
+                )}
+              </div>
 
-      {/* 2. MY IDENTITY QUICK-SHARE (Shown when expanded AND NOT anonymous) */}
-      {!isFriendsCollapsed && !isAnonymous && user?.username && (
-        <div className="mx-2.5 mt-2.5 p-2 rounded-xs bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 flex items-center justify-between gap-2 transition group shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsFriendsCollapsed(true)}
+                className="p-1 hover:bg-white/10 rounded text-white/60 hover:text-white transition cursor-pointer"
+                title="Collapse Friends Menu"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* 2. MY IDENTITY QUICK-SHARE (Shown when expanded AND NOT anonymous) */}
+        {!isFriendsCollapsed && !isAnonymous && user?.username && (
+          <div className="mx-2.5 mt-2.5 p-2 rounded-xs bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 flex items-center justify-between gap-2 transition group shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <div className="relative h-8 w-8 overflow-hidden shrink-0">
               <Image
@@ -311,11 +328,16 @@ export function LobbyFriendsSidebar({
               </div>
             )}
 
-            {friendsList.map((friend) => (
+            {[...friendsList]
+              .sort((a, b) => {
+                const score = (s: string) => (s === "ingame" ? 2 : s === "online" ? 1 : 0);
+                return score(b.status) - score(a.status);
+              })
+              .map((friend) => (
               <div
                 key={friend.id}
                 onClick={() => setIsFriendsCollapsed(false)}
-                className="relative h-8 w-8 rounded-full overflow-hidden border border-white/10 hover:border-accent transition cursor-pointer hover:scale-105"
+                className="relative h-8 w-8 rounded-full overflow-hidden border border-white/10 hover:border-accent transition cursor-pointer hover:scale-105 shrink-0"
                 title={`${friend.name} (${friend.status})`}
               >
                 <Image
@@ -566,6 +588,7 @@ export function LobbyFriendsSidebar({
         onConfirm={confirmRemoveFriend}
         isRemoving={isRemovingFriend}
       />
-    </div>
+    </aside>
+    </>
   );
 }

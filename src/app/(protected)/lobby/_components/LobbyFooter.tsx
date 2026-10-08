@@ -82,13 +82,13 @@ export function LobbyFooter({
           </span>
         </button>
 
-        {/* CUSTOM GAME / ROOM SETTINGS OVERLAY BUTTON */}
+        {/* GAME SETTINGS OVERLAY BUTTON */}
         <button
           onClick={onOpenSettings}
           className="h-12 px-6 rounded-sm border border-white/15 bg-white/3 hover:bg-white/10 font-display text-xs font-bold uppercase tracking-[0.2em] text-white transition flex items-center gap-2 cursor-pointer"
         >
           <Sliders className="h-4 w-4 text-accent" />
-          <span>CUSTOM GAME</span>
+          <span>GAME SETTINGS</span>
         </button>
       </div>
 
