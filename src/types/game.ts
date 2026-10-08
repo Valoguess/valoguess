@@ -22,8 +22,8 @@ export const DefaultGuessAgentSettings: GuessAgentSettings = {
 export type Settings = GuessAgentSettings;
 export const DefaultSettings = DefaultGuessAgentSettings;
 
-export type GameStatus = "WAITING" | "PLAYING" | "FINISHED";
-export type RoomState = "waiting" | "playing" | "finished";
+export type GameStatus = "WAITING" | "STARTING" | "PLAYING" | "FINISHED";
+export type RoomState = "waiting" | "starting" | "playing" | "finished";
 
 export interface GuessAgentPrivateStateDTO {
   isMyTurn: boolean;
@@ -82,6 +82,8 @@ export interface GuessAgentGameDTO {
   state?: GuessAgentStateDTO;
 
   // Flattened fallbacks for resilience
+  startingAt?: number;
+  startingEndsAt?: number;
   startedAt?: number;
   turnNumber?: number;
   currentTurn?: string;
