@@ -84,10 +84,14 @@ export function startGame(gameId: string) {
   socket.emit(ClientEvents.GAME_START, { gameId });
 }
 
+export function leaveGame() {
+  socket.emit(ClientEvents.GAME_LEAVE);
+}
+
 // ==== GUESS AGENT SPECIFIC GAME EVENTS ====
 
-export function changeTurn() {
-  socket.emit(ClientEvents.CHANGE_TURN);
+export function consumeNo() {
+  socket.emit(ClientEvents.CONSUME_NO);
 }
 
 export function askQuestion(gameId: string, questionId: string) {

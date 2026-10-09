@@ -64,10 +64,10 @@ export type GuessAgentResult =
     };
 
 export interface GuessAgentStateDTO {
-  startedAt: number;
-  turnNumber: number;
-  currentTurn: string;
-  turnEndTime: number | null;
+  startedAt?: number;
+  turnNumber?: number;
+  currentTurn?: string;
+  turnEndTime?: number | null;
   pendingQuestion?: PendingQuestion;
   history: QuestionHistory[];
   result?: GuessAgentResult;
@@ -77,6 +77,8 @@ export interface GuessAgentStateDTO {
 export interface GuessAgentGameDTO {
   id: string;
   status: GameStatus;
+  hostId?: string;
+  createdAt?: number;
   players: GuessAgentPlayerDTO[];
   settings: GuessAgentSettings;
   state?: GuessAgentStateDTO;
