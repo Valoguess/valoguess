@@ -184,15 +184,15 @@ export function ProfileAvatarUploadCard({
         <div className="relative group shrink-0">
           <div
             className={cn(
-              "relative h-24 w-24 rounded-sm overflow-hidden border-2 bg-black shadow-[0_0_20px_rgba(0,0,0,0.8)] transition-all",
-              hasCustomAvatar ? "border-accent shadow-[0_0_20px_rgba(255,70,85,0.3)]" : "border-white/20"
+              "relative h-24 w-24 rounded-full bg-black shadow-[0_0_20px_rgba(0,0,0,0.8)] transition-all",
+              hasCustomAvatar ? "shadow-[0_0_20px_rgba(255,70,85,0.3)]" : "border-white/20"
             )}
           >
             <Image
               src={currentAvatar}
               alt="Avatar Preview"
               fill
-              className="object-cover object-top"
+              className="object-cover object-top rounded-full"
               unoptimized={currentAvatar.startsWith("blob:")}
             />
 
@@ -205,7 +205,7 @@ export function ProfileAvatarUploadCard({
             )}
 
             {/* Online indicator */}
-            <div className="absolute bottom-0 right-0 h-3 w-3 bg-mint rounded-tl-sm border-t border-l border-black shadow-[0_0_8px_#3cf2c4]" />
+            <div className="absolute bottom-1 right-1 h-4 w-4 z-100 bg-mint rounded-full border-t border-l border-black shadow-[0_0_8px_#3cf2c4]" />
           </div>
 
           {!isAnonymous && !isUploading && (

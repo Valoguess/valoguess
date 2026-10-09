@@ -6,7 +6,7 @@ import { useGameStore } from "@/store/gameStore";
 import { useRoomTimer } from "@/hooks/useRoomTimer";
 
 type GameHeaderProps = {
-  turnOwner: "you" | "opponent" | "opponent-thinking";
+  turnOwner: "you" | "opponent" | "opponent-thinking" | "freeform";
   userNosUsed: number;
   opponentNosUsed: number;
   userName?: string;
@@ -48,7 +48,7 @@ export function GameHeader({
           <PlayerSide
             align="left"
             name={userName}
-            rank="Player 1"
+            rank="You"
             rankColor="#3CF2C4"
             avatar="/agents/icon/iso.png"
             nosUsed={userNosUsed}
@@ -66,7 +66,7 @@ export function GameHeader({
         <PlayerSide
           align="right"
           name={opponentName}
-          rank="Player 2"
+          rank="Enemy"
           rankColor="#8C7BFF"
           avatar="/agents/icon/yoru.png"
           nosUsed={opponentNosUsed}

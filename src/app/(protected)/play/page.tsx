@@ -24,9 +24,9 @@ import { useAuthStore } from "@/store/authStore";
 import {
   askQuestion as sendAskQuestion,
   answerQuestion as sendAnswerQuestion,
-  leaveParty,
-  changeTurn,
+  consumeNo,
   submitGuess,
+  leaveGame,
 } from "@/socket/emitter";
 import { socket } from "@/socket";
 import { ServerEvents } from "@/socket/events";
@@ -43,7 +43,7 @@ function PlayContent() {
   const [hasCompletedIntro, setHasCompletedIntro] = useState<boolean>(false);
   const [isAsking, setIsAsking] = useState(false);
   const [isAnswering, setIsAnswering] = useState(false);
-  const [isEndingTurn, setIsEndingTurn] = useState(false);
+  const [isConsumingNo, setIsConsumingNo] = useState(false);
   const [showGuessModal, setShowGuessModal] = useState(false);
   const [eliminatedIds, setEliminatedIds] = useState<Set<string>>(new Set());
   const [showLeaveModal, setShowLeaveModal] = useState(false);
@@ -119,12 +119,15 @@ function PlayContent() {
   const pendingQuestion = gameState?.pendingQuestion ?? game.pendingQuestion;
   const isOpponentAskingMe = pendingQuestion?.targetPlayer === myPlayer.id;
   const isIWaitingForAnswer = pendingQuestion?.askedBy === myPlayer.id;
+  const isFreeform = game.settings?.questionMode === "FREEFORM";
 
-  const turnOwner: "you" | "opponent" | "opponent-thinking" = isOpponentAskingMe
-    ? "opponent"
-    : isMyTurn
-      ? "you"
-      : "opponent-thinking";
+  const turnOwner: "you" | "opponent" | "opponent-thinking" | "freeform" = isFreeform
+    ? "freeform"
+    : isOpponentAskingMe
+      ? "opponent"
+      : isMyTurn
+        ? "you"
+        : "opponent-thinking";
 
   const cachedSecretAgent =
     typeof window !== "undefined"
@@ -231,11 +234,11 @@ function PlayContent() {
     }
   };
 
-  const handleEndTurn = () => {
-    if (isMyTurn && !isEndingTurn) {
-      setIsEndingTurn(true);
-      changeTurn();
-      setTimeout(() => setIsEndingTurn(false), 800);
+  const handleConsumeNo = () => {
+    if (!isConsumingNo && (myPlayer.state?.nosRemaining ?? 0) > 0) {
+      setIsConsumingNo(true);
+      consumeNo();
+      setTimeout(() => setIsConsumingNo(false), 600);
     }
   };
 
@@ -249,13 +252,18 @@ function PlayContent() {
   };
 
   const handleGuessConfirm = (agentId: string) => {
-    if (!game || !isMyTurn) return;
+    if (!game) return;
+    if (isFreeform) {
+      if ((myPlayer.state?.guessesRemaining ?? 0) <= 0) return;
+    } else {
+      if (!isMyTurn) return;
+    }
     submitGuess(game.id, agentId);
     setShowGuessModal(false);
   };
 
   const handleLeaveGame = () => {
-    leaveParty();
+    leaveGame();
     clearGame();
     router.replace("/lobby");
   };
@@ -317,14 +325,16 @@ function PlayContent() {
 
         {/* Center Panel: Question Panel / Opponent Asked Card / Freeform Panel */}
         <div className="flex flex-col">
-          {game.settings?.questionMode === "FREEFORM" ? (
+          {isFreeform ? (
             <FreeformTurnPanel
-              isMyTurn={isMyTurn}
-              onEndTurn={handleEndTurn}
+              onConsumeNo={handleConsumeNo}
               onOpenGuessModal={() => setShowGuessModal(true)}
               opponentName={opponentPlayer?.name || "Opponent"}
+              nosRemaining={myPlayer?.state?.nosRemaining ?? 0}
               guessesRemaining={myPlayer?.state?.guessesRemaining ?? 0}
-              isEndingTurn={isEndingTurn}
+              opponentNosRemaining={opponentPlayer?.state?.nosRemaining}
+              opponentGuessesRemaining={opponentPlayer?.state?.guessesRemaining}
+              isConsumingNo={isConsumingNo}
             />
           ) : (
             <>

@@ -7,15 +7,10 @@ interface UseRoomTimerProps {
 }
 
 export const useRoomTimer = ({ room, game }: UseRoomTimerProps) => {
-  const turnEndTime =
-    game?.state?.turnEndTime ?? game?.turnEndTime ?? room?.game?.turnEndTime;
-  const turnNumber =
-    game?.state?.turnNumber ?? game?.turnNumber ?? room?.game?.turnNumber;
-  const isPlaying = game
-    ? game.status === "PLAYING"
-    : room?.state === "playing";
-  const rawTimePerRound =
-    game?.settings?.timePerRound ?? room?.settings?.timePerRound;
+  const turnEndTime = game?.state?.turnEndTime
+  const turnNumber = game?.state?.turnNumber;;
+  const isPlaying = game?.status === "PLAYING"
+  const rawTimePerRound = game?.settings?.timePerRound;
 
   // Determine if round timer is set to infinite / unlimited
   const isInfinite =

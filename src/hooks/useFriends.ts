@@ -155,26 +155,8 @@ export function useFriends(user: StoreUser | null) {
       setFriendAddedToast("Your friend request was accepted!");
       const targetUserId = lastFriendEvent.userId;
 
-      setFriendRequests((prev) => {
-        const matched = prev.find((r) => r.id === targetUserId);
-        if (matched) {
-          setRawFriends((fPrev) => [
-            ...fPrev.filter((f) => f.id !== targetUserId),
-            {
-              id: matched.id,
-              name: matched.name,
-              username: matched.username,
-              avatar: matched.avatar,
-              status: "online",
-              activity: "In Lobby",
-            },
-          ]);
-          return prev.filter((r) => r.id !== targetUserId);
-        }
-        // If not found in current memory, sync from database
-        fetchFriends();
-        return prev;
-      });
+      setFriendRequests((prev) => prev.filter((r) => r.id !== targetUserId));
+      fetchFriends();
       setTimeout(() => setFriendAddedToast(""), 4000);
     } else if (lastFriendEvent.type === "request_declined") {
       setFriendAddedToast("Friend request was declined.");

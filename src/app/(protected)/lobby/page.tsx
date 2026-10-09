@@ -252,6 +252,13 @@ export default function LobbyPage() {
     acceptInviteToParty(partyInput.trim());
   };
 
+  const handleJoinPartyWithCode = (code: string) => {
+    if (!code.trim()) return;
+    setErrorMsg("");
+    setIsCreatingOrJoining(true);
+    acceptInviteToParty(code.trim());
+  };
+
   // Execute Start Game (Party Leader only, 2 players required)
   const handleStartGame = () => {
     if (!party?.id || !isHost || !opponent) return;
@@ -370,10 +377,20 @@ export default function LobbyPage() {
                 onOpenSettings={() => setShowSettingsModal(true)}
                 onLeaveParty={handleLeaveParty}
                 timer={timer}
+                setTimer={setTimer}
                 maxNos={maxNos}
+                setMaxNos={setMaxNos}
                 maxGuesses={maxGuesses}
+                setMaxGuesses={setMaxGuesses}
+                questionCount={questionCount}
+                setQuestionCount={setQuestionCount}
+                showMoreOptions={showMoreOptions}
+                setShowMoreOptions={setShowMoreOptions}
                 isCreatingOrJoining={isCreatingOrJoining}
                 handleCreateParty={handleCreateParty}
+                handleJoinPartyWithCode={handleJoinPartyWithCode}
+                handleKickGuest={handleKickGuest}
+                myId={myId}
               />
 
             </aside>
@@ -396,27 +413,30 @@ export default function LobbyPage() {
         </div>
 
         {/* Right Column: Friends Sidebar (w-16 when closed, w-80 on expand) */}
-        <div className={cn("transition-all duration-300 h-full shrink-0 z-30", isFriendsCollapsed ? "w-16" : "w-80 lg:w-84")}>
-          <LobbyFriendsSidebar
-            isFriendsCollapsed={isFriendsCollapsed}
-            setIsFriendsCollapsed={setIsFriendsCollapsed}
-            isAnonymous={Boolean(user?.isAnonymous || user?.name?.startsWith("Guest"))}
-            friendsList={friendsList}
-            friendRequests={friendRequests}
-            friendInput={friendInput}
-            setFriendInput={setFriendInput}
-            handleAddFriend={handleAddFriend}
-            handleAcceptRequest={handleAcceptRequest}
-            handleDeclineRequest={handleDeclineRequest}
-            handleCancelRequest={handleCancelRequest}
-            handleRemoveFriend={handleRemoveFriend}
-            handleInviteFriend={onInviteFriendToParty}
-            incomingPartyInvites={enrichedIncomingInvites}
-            onAcceptPartyInvite={handleAcceptPartyInvite}
-            onDeclinePartyInvite={handleDeclinePartyInvite}
-            friendAddedToast={friendAddedToast || inviteToast}
-            isAddingFriend={isAddingFriend}
-          />
+        <div className="relative h-full w-16">
+          {/* <div className={cn( isFriendsCollapsed ? "w-0": "w-16")}></div> */}
+          <div className={cn("transition-all duration-300 h-full shrink-0 z-30 absolute right-0", isFriendsCollapsed ? "w-16" : "w-80 lg:w-84")}>
+            <LobbyFriendsSidebar
+              isFriendsCollapsed={isFriendsCollapsed}
+              setIsFriendsCollapsed={setIsFriendsCollapsed}
+              isAnonymous={Boolean(user?.isAnonymous || user?.name?.startsWith("Guest"))}
+              friendsList={friendsList}
+              friendRequests={friendRequests}
+              friendInput={friendInput}
+              setFriendInput={setFriendInput}
+              handleAddFriend={handleAddFriend}
+              handleAcceptRequest={handleAcceptRequest}
+              handleDeclineRequest={handleDeclineRequest}
+              handleCancelRequest={handleCancelRequest}
+              handleRemoveFriend={handleRemoveFriend}
+              handleInviteFriend={onInviteFriendToParty}
+              incomingPartyInvites={enrichedIncomingInvites}
+              onAcceptPartyInvite={handleAcceptPartyInvite}
+              onDeclinePartyInvite={handleDeclinePartyInvite}
+              friendAddedToast={friendAddedToast || inviteToast}
+              isAddingFriend={isAddingFriend}
+            />
+          </div>
         </div>
       </div>
 
