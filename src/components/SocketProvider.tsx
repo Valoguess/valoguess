@@ -263,6 +263,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     socket.on(ServerEvents.PARTY_CHAT_SYNC, handlePartyChatSync);
     socket.on(ServerEvents.PARTY_INVITE_SYNC, handlePartyInviteSync);
     socket.on(ServerEvents.GAME_SYNC, handleGameSync);
+    socket.on(ServerEvents.GAME_END, handleGameSync);
     socket.on(ServerEvents.ERROR, handleError);
 
     socket.on(ServerEvents.FRIENDS_SYNC, handleFriendsSync);
@@ -291,6 +292,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       socket.off(ServerEvents.PARTY_CHAT_SYNC, handlePartyChatSync);
       socket.off(ServerEvents.PARTY_INVITE_SYNC, handlePartyInviteSync);
       socket.off(ServerEvents.GAME_SYNC, handleGameSync);
+      socket.off(ServerEvents.GAME_END, handleGameSync);
       socket.off(ServerEvents.ERROR, handleError);
 
       socket.off(ServerEvents.FRIENDS_SYNC, handleFriendsSync);

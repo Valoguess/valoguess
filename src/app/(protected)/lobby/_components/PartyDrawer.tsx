@@ -84,9 +84,6 @@ export function PartyDrawer({
                 PARTY
               </h2>
             </div>
-            <p className="text-[10px] font-mono tracking-wider text-white/50 uppercase mt-1">
-              Party &amp; Squad Settings
-            </p>
           </div>
 
           <button
@@ -110,18 +107,14 @@ export function PartyDrawer({
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
                     <Shield className="h-3.5 w-3.5 text-accent" />
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-white/60">
-                      PARTY CODE (STREAM SAFE)
+                    <span className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-white/60">
+                      PARTY CODE
                     </span>
                   </div>
-
-                  <span className="text-[8.5px] font-mono px-1.5 py-0.5 rounded-xs bg-white/5 text-white/40 border border-white/10">
-                    {showPartyCode ? "REVEALED" : "PROTECTED"}
-                  </span>
                 </div>
 
                 {/* Password-like code display */}
-                <div className="flex items-center justify-between gap-3 bg-black/60 border border-white/10 rounded-sm p-3 my-2">
+                <div className="flex items-center justify-between gap-3 bg-black/60 border border-white/10 rounded-sm py-2 px-3">
                   <div className="flex flex-col min-w-0">
                     <span className="text-[8px] font-mono uppercase text-white/40 tracking-widest">
                       INVITE CODE
@@ -155,12 +148,10 @@ export function PartyDrawer({
                       {showPartyCode ? (
                         <>
                           <EyeOff className="h-3.5 w-3.5 text-accent" />
-                          <span className="text-[9px] hidden sm:inline">HIDE</span>
                         </>
                       ) : (
                         <>
                           <Eye className="h-3.5 w-3.5" />
-                          <span className="text-[9px] hidden sm:inline">REVEAL</span>
                         </>
                       )}
                     </button>
@@ -191,10 +182,6 @@ export function PartyDrawer({
                     </button>
                   </div>
                 </div>
-
-                <p className="text-[9px] text-white/40 font-sans leading-relaxed">
-                  Code is hidden by default to prevent leaking while streaming. Click &apos;REVEAL&apos; to view or &apos;COPY&apos; to send directly.
-                </p>
               </div>
 
               {/* PARTY MEMBERS LIST */}
@@ -301,17 +288,6 @@ export function PartyDrawer({
           ) : (
             /* =================== USER IS NOT IN A PARTY =================== */
             <>
-              {/* Standalone Status */}
-              <div className="clip-notch-both border border-white/10 bg-[#090d14]/90 p-4 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-white/20" />
-                <h3 className="font-valorant text-sm text-white tracking-wider mb-1">
-                  STANDALONE LOBBY
-                </h3>
-                <p className="text-xs text-white/50 font-sans leading-relaxed">
-                  You are not currently in a squad. Create a party to host 1v1 duels or enter a code to join an existing friend&apos;s lobby.
-                </p>
-              </div>
-
               {/* CREATE PARTY CTA */}
               <div className="space-y-2">
                 <span className="text-[9.5px] font-mono font-bold uppercase tracking-[0.2em] text-white/50 block">

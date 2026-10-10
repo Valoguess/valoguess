@@ -44,7 +44,7 @@ export function AgentGuessModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl bg-[#090d14]/98 border border-[#FF4655]/40 text-white backdrop-blur-2xl shadow-[0_0_50px_rgba(255,70,85,0.25)] p-6 rounded-sm select-none">
+      <DialogContent className="w-full min-w-0 max-w-md sm:max-w-md bg-[#090d14]/98 border border-[#FF4655]/40 text-white backdrop-blur-2xl shadow-[0_0_50px_rgba(255,70,85,0.25)] py-6 rounded-sm select-none">
         <DialogHeader className="border-b border-white/10 pb-4 text-left">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -61,13 +61,6 @@ export function AgentGuessModal({
                 </p>
               </div>
             </div>
-
-            <button
-              onClick={onClose}
-              className="p-1.5 hover:bg-white/10 rounded text-white/50 hover:text-white transition cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
         </DialogHeader>
 
@@ -80,7 +73,7 @@ export function AgentGuessModal({
                 key={r}
                 onClick={() => setRoleFilter(r)}
                 className={cn(
-                  "px-2.5 py-1 text-[10px] font-display font-bold uppercase tracking-wider rounded-xs transition-all cursor-pointer",
+                  "px-2 py-1 text-[10px] font-display font-bold uppercase tracking-wider rounded-xs transition-all cursor-pointer",
                   roleFilter === r
                     ? "bg-[#FF4655] text-white shadow-[0_0_10px_rgba(255,70,85,0.3)]"
                     : "text-white/50 hover:text-white hover:bg-white/5"
@@ -92,20 +85,20 @@ export function AgentGuessModal({
           </div>
 
           {/* Search Box */}
-          <div className="relative w-full sm:w-48">
+          <div className="relative w-full">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
             <Input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search agent..."
+              placeholder="Search..."
               className="pl-8 h-8 bg-black/40 border-white/10 text-xs text-white placeholder-white/30 rounded-sm"
             />
           </div>
         </div>
 
         {/* Agents Grid */}
-        <div className="mt-4 max-h-[340px] overflow-y-auto pr-1 scrollbar-thin grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 gap-2.5">
+        <div className="mt-4 max-h-85 overflow-y-auto pr-1 scrollbar-thin grid grid-cols-5 gap-2.5">
           {filteredAgents.map((agent) => {
             const isEliminated = eliminatedIds.has(agent.id);
             const isSelected = selectedAgentId === agent.id;
@@ -113,7 +106,9 @@ export function AgentGuessModal({
             return (
               <button
                 key={agent.id}
-                onClick={() => setSelectedAgentId(agent.id)}
+                onClick={() => {
+                  selectedAgentId === agent.id ? setSelectedAgentId(null) : setSelectedAgentId(agent.id);
+                }}
                 className={cn(
                   "flex flex-col items-center p-2 rounded-sm border transition-all text-left relative group cursor-pointer",
                   isSelected
@@ -124,7 +119,7 @@ export function AgentGuessModal({
                 )}
               >
                 {/* Agent Icon */}
-                <div className="relative h-14 w-14 rounded-xs overflow-hidden bg-black/60 border border-white/10 mb-1.5 shrink-0">
+                <div className="relative h-14 w-14 rounded-xs overflow-hidden bg-black/60 border border-white/10 mb-1.5 shrink">
                   <Image
                     src={`/agents/icon/${agent.id}.png`}
                     alt={agent.name}
@@ -172,32 +167,21 @@ export function AgentGuessModal({
                 />
               </div>
               <div className="flex flex-col text-left">
-                <div className="flex items-center gap-2">
                   <span className="text-[9px] font-mono text-accent uppercase font-bold tracking-widest">
                     TARGET LOCKED:
                   </span>
                   <span className="font-valorant text-base text-white tracking-wider">
                     {selectedAgent.name}
                   </span>
-                </div>
-                <span className="text-[9.5px] text-white/40 font-mono">
-                  Role: {selectedAgent.role} {eliminatedIds.has(selectedAgent.id) && "• (Marked Eliminated)"}
-                </span>
               </div>
             </div>
           ) : (
             <div className="text-xs text-white/40 font-mono">
-              Click an agent above to lock in your guess.
+              Click to lock in your guess.
             </div>
           )}
 
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
-            <button
-              onClick={onClose}
-              className="flex-1 sm:flex-initial px-4 py-2 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white font-display text-xs font-bold uppercase tracking-wider transition cursor-pointer"
-            >
-              Cancel
-            </button>
 
             <button
               onClick={handleConfirm}
@@ -205,7 +189,7 @@ export function AgentGuessModal({
               className="flex-1 sm:flex-initial px-6 py-2 rounded-sm bg-[#FF4655] hover:bg-[#ff5a67] disabled:opacity-40 disabled:pointer-events-none text-white font-valorant text-xs tracking-[0.15em] uppercase shadow-[0_0_18px_rgba(255,70,85,0.4)] transition flex items-center justify-center gap-2 cursor-pointer active:scale-98"
             >
               <Check className="h-4 w-4" />
-              <span>CONFIRM GUESS</span>
+              <span>CONFIRM</span>
             </button>
           </div>
         </div>

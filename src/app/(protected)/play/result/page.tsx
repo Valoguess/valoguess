@@ -17,6 +17,7 @@ import {
   Shield,
   HelpCircle,
   TrendingUp,
+  Swords,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SummaryRow } from "./_components/SummaryRow";
@@ -49,6 +50,8 @@ function ResultContent() {
   const isVictory = gameResult
     ? gameResult.result === "WIN" && gameResult.winnerId === myPlayer?.id
     : searchParams.get("status") === "victory";
+  const isTie = gameResult?.result === "TIE";
+  const isDefeat = !isVictory && !isTie;
 
   const cachedSecretAgent =
     typeof window !== "undefined" && game
@@ -135,6 +138,26 @@ function ResultContent() {
     ];
   });
 
+  if (gameResult?.result === "TIE") {
+    timeline.push({
+      id: "match-end-tie",
+      kind: "system-win",
+      actor: "system",
+      text: "Match ended in a DRAW — all guesses exhausted",
+      time: timeTaken,
+    });
+  } else if (gameResult?.result === "WIN") {
+    timeline.push({
+      id: "match-end-win",
+      kind: isVictory ? "system-win" : "system-lose",
+      actor: "system",
+      text: isVictory
+        ? `${userName} unmasked ${oppAgentObj.name.toUpperCase()} — VICTORY`
+        : `${oppName} unmasked ${myAgentObj.name.toUpperCase()} — DEFEAT`,
+      time: timeTaken,
+    });
+  }
+
   return (
     <main className="h-screen w-screen overflow-hidden bg-base-950 text-white select-none flex flex-col font-body">
       {/* Top Header Navigation */}
@@ -189,15 +212,17 @@ function ResultContent() {
               Agent Duelist
             </span>
 
-            {/* Winner / Defeated Tag */}
+            {/* Winner / Defeated / Tie Tag */}
             <div className={cn(
               "clip-tag border w-full flex items-center justify-center gap-2 py-1.5 mt-4 font-display font-black text-xs uppercase tracking-widest",
-              isVictory
-                ? "border-accent bg-accent/15 text-accent shadow-[0_0_12px_rgba(255,70,85,0.15)]"
-                : "border-zinc-500 bg-zinc-800/30 text-zinc-400"
+              isTie
+                ? "border-amber-500/40 bg-amber-500/15 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
+                : isVictory
+                  ? "border-[#3CF2C4] bg-[#3CF2C4]/15 text-[#3CF2C4] shadow-[0_0_12px_rgba(60,242,196,0.2)]"
+                  : "border-zinc-500 bg-zinc-800/30 text-zinc-400"
             )}>
-              <Trophy className="h-3.5 w-3.5" />
-              {isVictory ? "WINNER" : "DEFEATED"}
+              {isTie ? <Swords className="h-3.5 w-3.5" /> : <Trophy className="h-3.5 w-3.5" />}
+              {isTie ? "DRAW" : isVictory ? "WINNER" : "DEFEATED"}
             </div>
           </div>
 
@@ -211,7 +236,7 @@ function ResultContent() {
               <SummaryRow icon={<HelpCircle className="h-3.5 w-3.5 text-ink-400" />} label="Questions Asked" value={String(totalQuestions)} />
               <SummaryRow icon={<X className="h-3.5 w-3.5 text-accent" />} label="No Answers Used" value={`${userNosUsed} / ${maxNos === -1 ? "∞" : maxNos}`} valueClass="text-accent" />
               <SummaryRow icon={<Target className="h-3.5 w-3.5 text-mint" />} label="Guesses Made" value={String(guessesMade)} />
-              <SummaryRow icon={<Check className="h-3.5 w-3.5 text-mint" />} label="Correct Guess" value={isVictory ? "Yes" : "No"} valueClass={isVictory ? "text-mint" : "text-accent"} />
+              <SummaryRow icon={<Check className="h-3.5 w-3.5 text-mint" />} label="Correct Guess" value={isTie ? "Draw" : isVictory ? "Yes" : "No"} valueClass={isTie ? "text-amber-400" : isVictory ? "text-mint" : "text-accent"} />
               <SummaryRow icon={<Clock className="h-3.5 w-3.5 text-ink-400" />} label="Time Taken" value={timeTaken} valueClass="font-mono" />
             </div>
           </div>
@@ -225,7 +250,7 @@ function ResultContent() {
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-center py-1 border-b border-white/5">
                 <span className="text-zinc-400 font-display uppercase tracking-wider">Victor</span>
-                <span className="font-display font-bold text-white uppercase">{isVictory ? userName : oppName}</span>
+                <span className="font-display font-bold text-white uppercase">{isTie ? "NONE (DRAW)" : isVictory ? userName : oppName}</span>
               </div>
               <div className="flex justify-between items-center py-1 border-b border-white/5">
                 <span className="text-zinc-400 font-display uppercase tracking-wider">Opponent Agent</span>
@@ -247,12 +272,16 @@ function ResultContent() {
           <div className="flex flex-col items-center text-center">
             <h1 className={cn(
               "font-valorant text-6xl font-black uppercase tracking-[0.1em] text-shadow-glow leading-none select-none",
-              isVictory ? "text-accent" : "text-zinc-500"
+              isTie ? "text-amber-400" : isVictory ? "text-[#3CF2C4]" : "text-zinc-500"
             )}>
-              {isVictory ? "VICTORY" : "DEFEAT"}
+              {isTie ? "DRAW" : isVictory ? "VICTORY" : "DEFEAT"}
             </h1>
             <p className="text-ink-400 text-xs tracking-wide mt-2 font-medium">
-              {isVictory ? `${userName} guessed ${oppAgentObj.name.toUpperCase()} correctly!` : `${oppName} guessed your agent first!`}
+              {isTie
+                ? "All guesses consumed without a winner. Match ended in a draw."
+                : isVictory
+                  ? `${userName} guessed ${oppAgentObj.name.toUpperCase()} correctly!`
+                  : `${oppName} guessed your agent first!`}
             </p>
           </div>
 
@@ -262,7 +291,11 @@ function ResultContent() {
             {/* User's Secret Agent Card */}
             <div className={cn(
               "clip-notch-both border p-3 bg-[#0d1119] flex flex-col transition-all duration-300 relative",
-              isVictory ? "border-accent/40 shadow-[0_0_20px_rgba(255,70,85,0.08)]" : "border-white/5"
+              isVictory
+                ? "border-[#3CF2C4]/50 shadow-[0_0_20px_rgba(60,242,196,0.15)]"
+                : isTie
+                  ? "border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.08)]"
+                  : "border-white/5"
             )}>
               {/* Corner decor */}
               <div className="absolute left-0 top-0 h-4 w-4">
@@ -295,7 +328,11 @@ function ResultContent() {
             {/* Opponent's Agent Card */}
             <div className={cn(
               "clip-notch-both border p-3 bg-[#0d1119] flex flex-col transition-all duration-300 relative",
-              !isVictory ? "border-accent/40 shadow-[0_0_20px_rgba(255,70,85,0.08)]" : "border-white/5"
+              isDefeat
+                ? "border-accent/40 shadow-[0_0_20px_rgba(255,70,85,0.08)]"
+                : isTie
+                  ? "border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.08)]"
+                  : "border-white/5"
             )}>
               {/* Corner decor */}
               <div className="absolute right-0 top-0 h-4 w-4">
@@ -325,15 +362,19 @@ function ResultContent() {
           {/* Reveal Status Alert Banner */}
           <div className={cn(
             "rounded-sm border p-2.5 text-center flex items-center justify-center gap-2 font-semibold text-xs my-3",
-            isVictory
-              ? "border-mint bg-mint/5 text-mint shadow-[0_0_15px_rgba(60,242,196,0.05)]"
-              : "border-accent bg-accent/5 text-accent shadow-[0_0_15px_rgba(255,70,85,0.05)]"
+            isTie
+              ? "border-amber-500/40 bg-amber-500/10 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.1)]"
+              : isVictory
+                ? "border-mint bg-mint/5 text-mint shadow-[0_0_15px_rgba(60,242,196,0.05)]"
+                : "border-accent bg-accent/5 text-accent shadow-[0_0_15px_rgba(255,70,85,0.05)]"
           )}>
-            <span>★</span>
+            <span>{isTie ? "⚖️" : "★"}</span>
             <span>
-              {isVictory
-                ? `Correct Guess! ${userName} guessed ${oppAgentObj.name.toUpperCase()}!`
-                : `${oppName} guessed your agent ${myAgentObj.name.toUpperCase()} correctly!`}
+              {isTie
+                ? "Stalemate! All guesses exhausted without a winning identification."
+                : isVictory
+                  ? `Correct Guess! ${userName} guessed ${oppAgentObj.name.toUpperCase()}!`
+                  : `${oppName} guessed your agent ${myAgentObj.name.toUpperCase()} correctly!`}
             </span>
           </div>
 
@@ -348,7 +389,7 @@ function ResultContent() {
               <StatCol icon="❌" label="No Answers (You)" val={String(userNosUsed)} />
               <StatCol icon="❌" label="No Answers (Opponent)" val={String(opponentNosUsed)} />
               <StatCol icon="🔍" label="Guesses Made" val={String(guessesMade)} />
-              <StatCol icon="📈" label="Accuracy" val={accuracy} valClass={isVictory ? "text-mint" : "text-accent"} />
+              <StatCol icon="📈" label="Accuracy" val={isTie ? "0%" : accuracy} valClass={isTie ? "text-amber-400" : isVictory ? "text-mint" : "text-accent"} />
             </div>
           </div>
 

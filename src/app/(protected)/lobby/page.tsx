@@ -32,6 +32,7 @@ import { LobbyFriendsSidebar } from "./_components/LobbyFriendsSidebar";
 import { PartyChatOverlay } from "@/components/chat/PartyChatOverlay";
 import { LobbySettings } from "./_components/LobbySettings";
 import { HowToPlayModal } from "./_components/HowToPlayModal";
+import { useGameSettingsStore } from "@/store/gameSettingsStore";
 
 
 
@@ -52,9 +53,6 @@ export default function LobbyPage() {
   const [isCreatingOrJoining, setIsCreatingOrJoining] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Gamemode & Question Submode State
-  const [questionMode, setQuestionMode] = useState<"PRESET" | "FREEFORM">("PRESET");
-
   // Friends Menu Collapsible State (closed by default)
   const [isFriendsCollapsed, setIsFriendsCollapsed] = useState(true);
 
@@ -63,12 +61,21 @@ export default function LobbyPage() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChatDrawer, setShowChatDrawer] = useState(false);
 
-  // Settings state for match creation
-  const [timer, setTimerState] = useState(60);
-  const [maxNos, setMaxNosState] = useState(5);
-  const [maxGuesses, setMaxGuessesState] = useState(1);
-  const [questionCount, setQuestionCountState] = useState(15);
-  const [showMoreOptions, setShowMoreOptions] = useState(false);
+  // Gamemode & Match Settings State (persisted in localStorage)
+  const {
+    questionMode,
+    setQuestionMode,
+    timer,
+    setTimer,
+    maxNos,
+    setMaxNos,
+    maxGuesses,
+    setMaxGuesses,
+    questionCount,
+    setQuestionCount,
+    showMoreOptions,
+    setShowMoreOptions,
+  } = useGameSettingsStore();
 
   // Friends state & actions managed by dedicated custom hook
   const {
@@ -99,7 +106,7 @@ export default function LobbyPage() {
     //   return;
     // }
 
-    sendInviteToParty(party?.id, friend.id);
+    sendInviteToParty(friend.id);
     setInviteToast(`Party invite sent to ${friend.name}!`);
     setTimeout(() => setInviteToast(""), 3000);
   };
@@ -186,13 +193,13 @@ export default function LobbyPage() {
     if (isHost && game.status === "WAITING") {
       if (startedGameRef.current !== game.id) {
         startedGameRef.current = game.id;
-        startGame(game.id);
+        startGame();
       }
       return;
     }
 
     if (game.status === "STARTING" || game.status === "PLAYING") {
-      router.push(`/play?code=${game.id}`);
+      router.push("/play");
     }
   }, [game, isHost, router]);
 
@@ -202,7 +209,7 @@ export default function LobbyPage() {
       setIsCreatingOrJoining(false);
       startedGameRef.current = null;
       if (err?.code === "GAME_ALREADY_STARTED" && game?.id) {
-        router.push(`/play?code=${game.id}`);
+        router.push("/play");
         return;
       }
       setErrorMsg(err?.message || "An error occurred");
@@ -213,26 +220,6 @@ export default function LobbyPage() {
       socket.off(ServerEvents.ERROR, onError);
     };
   }, [game?.id, router]);
-
-  const setTimer = (val: number | ((prev: number) => number)) => {
-    const nextVal = typeof val === "function" ? val(timer) : val;
-    setTimerState(nextVal);
-  };
-
-  const setMaxNos = (val: number | ((prev: number) => number)) => {
-    const nextVal = typeof val === "function" ? val(maxNos) : val;
-    setMaxNosState(nextVal);
-  };
-
-  const setMaxGuesses = (val: number | ((prev: number) => number)) => {
-    const nextVal = typeof val === "function" ? val(maxGuesses) : val;
-    setMaxGuessesState(nextVal);
-  };
-
-  const setQuestionCount = (val: number | ((prev: number) => number)) => {
-    const nextVal = typeof val === "function" ? val(questionCount) : val;
-    setQuestionCountState(nextVal);
-  };
 
 
 
@@ -267,13 +254,13 @@ export default function LobbyPage() {
     if (game?.id && game.status === "WAITING") {
       if (startedGameRef.current !== game.id) {
         startedGameRef.current = game.id;
-        startGame(game.id);
+        startGame();
       }
       return;
     }
 
     startedGameRef.current = null;
-    createGame(party.id, {
+    createGame({
       questionMode: questionMode ?? "PRESET",
       timePerRound: timer,
       maxNos,
@@ -284,7 +271,7 @@ export default function LobbyPage() {
 
   const handleKickGuest = () => {
     if (party?.id && opponent?.id && isHost) {
-      kickPlayerFromParty(party.id, opponent.id);
+      kickPlayerFromParty(opponent.id);
     }
   };
 

@@ -80,9 +80,6 @@ export function GamemodeDrawer({
                 GAME MODE &amp; SETTINGS
               </h2>
             </div>
-            <p className="text-[10px] font-mono tracking-wider text-white/50 uppercase mt-1">
-              Select mode &amp; configure match parameters
-            </p>
           </div>
 
           <button
@@ -107,7 +104,7 @@ export function GamemodeDrawer({
               <div className="clip-notch-both border border-[#FF4655] bg-[#FF4655]/10 p-3.5 relative overflow-hidden shadow-[0_0_20px_rgba(255,70,85,0.2)]">
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-[#FF4655]" />
 
-                <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="h-7 w-7 rounded-xs bg-[#FF4655] flex items-center justify-center text-white shadow-sm">
                       <Swords className="h-4 w-4" />
@@ -127,10 +124,6 @@ export function GamemodeDrawer({
                     ACTIVE
                   </span>
                 </div>
-
-                <p className="text-[10px] text-white/60 font-sans leading-relaxed mt-2 pl-0.5">
-                  Uncover your opponent&apos;s secret Valorant agent through tactical questions and deductions before they classify yours.
-                </p>
               </div>
             </div>
           </div>
@@ -191,12 +184,6 @@ export function GamemodeDrawer({
                 </p>
               </button>
             </div>
-
-            {!isHost && (
-              <p className="text-[9px] font-mono text-white/40 italic">
-                * Only the party host can modify match submodes and settings.
-              </p>
-            )}
           </div>
 
           {/* 3. DYNAMIC SETTINGS BASED ON SUBMODE */}
@@ -208,36 +195,17 @@ export function GamemodeDrawer({
             {/* ===================== FREEFORM MODE ===================== */}
             {questionMode === "FREEFORM" ? (
               <div className="space-y-4">
-                <div className="bg-[#FF4655]/5 border border-[#FF4655]/20 rounded-sm p-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Sparkles className="h-3.5 w-3.5 text-accent" />
-                    <span className="font-valorant text-xs text-white">FREEFORM RULES</span>
-                  </div>
-                  <p className="text-[10px] text-white/60 font-sans leading-relaxed">
-                    In Freeform mode, there are no turn timers or question decks.
-                    Both players speak or type questions openly. Configure the allowed{" "}
-                    <span className="text-white font-semibold">Max NOs</span> and{" "}
-                    <span className="text-white font-semibold">Number of Guesses</span>.
-                  </p>
-                </div>
-
-                {/* SETTING 1: MAX NUMBER OF NOS */}
-                <div className="flex flex-col text-left bg-black/40 border border-white/10 rounded-sm p-4">
-                  <div className="flex items-start gap-2 mb-3">
-                    <MessageSquare className="h-4.5 w-4.5 text-violet mt-0.5 shrink-0" />
+                {/* SETTING: MAX NOS */}
+                <div className="flex flex-col text-left bg-black/30 border border-white/10 rounded-sm p-3.5">
+                  <div className="flex items-start gap-2 mb-2">
+                    <MessageSquare className="h-4 w-4 text-violet mt-0.5 shrink-0" />
                     <div className="flex flex-col">
-                      <span className="font-valorant text-xs tracking-wider text-white">
-                        MAX NUMBER OF NOS
-                      </span>
-                      <span className="text-[9.5px] font-mono text-white/50 uppercase tracking-wide">
-                        Allowed &quot;No&quot; answers before running out
-                      </span>
+                      <span className="font-valorant text-xs tracking-wider text-white">MAX NOS</span>
+                      <span className="text-[9px] font-mono text-white/50 uppercase">Allowed &apos;No&apos; answers</span>
                     </div>
                   </div>
 
-                  {/* Value Adjuster */}
-                  <div className="flex items-center justify-between px-8 py-2 mb-3 bg-black/40 rounded-sm border border-white/5">
-                    {/* Decrement */}
+                  <div className="flex items-center justify-between px-6 py-1 mb-2">
                     <button
                       type="button"
                       onClick={() => {
@@ -247,22 +215,20 @@ export function GamemodeDrawer({
                         else if (idx === -1) setMaxNos(10);
                       }}
                       disabled={!isHost || maxNos === 0}
-                      className="h-8 w-8 rounded-sm border border-white/15 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-lg cursor-pointer"
+                      className="h-7 w-7 rounded-xs border border-white/10 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-base cursor-pointer"
                     >
                       -
                     </button>
 
-                    {/* Display Number */}
                     <div className="flex flex-col items-center">
-                      <span className="font-valorant text-4xl text-violet leading-none drop-shadow-[0_0_10px_rgba(140,123,255,0.4)]">
+                      <span className="font-display text-2xl font-black text-white leading-none">
                         {maxNos === -1 ? "∞" : maxNos}
                       </span>
-                      <span className="text-[9px] font-mono text-white/50 uppercase tracking-widest mt-1">
+                      <span className="text-[8px] text-white/50 uppercase tracking-widest font-mono mt-0.5">
                         {maxNos === -1 ? "INFINITE" : "NOS"}
                       </span>
                     </div>
 
-                    {/* Increment */}
                     <button
                       type="button"
                       onClick={() => {
@@ -272,13 +238,12 @@ export function GamemodeDrawer({
                         else if (idx === -1) setMaxNos(-1);
                       }}
                       disabled={!isHost || maxNos === -1}
-                      className="h-8 w-8 rounded-sm border border-white/15 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-lg cursor-pointer"
+                      className="h-7 w-7 rounded-xs border border-white/10 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-base cursor-pointer"
                     >
                       +
                     </button>
                   </div>
 
-                  {/* Quick Presets */}
                   <div className="grid grid-cols-4 gap-1.5">
                     {[3, 5, 10, -1].map((preset) => (
                       <button
@@ -287,92 +252,82 @@ export function GamemodeDrawer({
                         onClick={() => isHost && setMaxNos(preset)}
                         disabled={!isHost}
                         className={cn(
-                          "py-1.5 rounded-xs text-[10px] font-display font-bold uppercase tracking-wider transition border cursor-pointer",
+                          "py-1 rounded-xs text-[9px] font-display font-bold uppercase tracking-wider transition border cursor-pointer",
                           maxNos === preset
-                            ? "bg-violet/20 border-violet text-white shadow-[0_0_10px_rgba(140,123,255,0.4)]"
-                            : "bg-white/[0.02] border-white/10 text-white/60 hover:text-white hover:bg-white/[0.05]",
-                          !isHost && "cursor-not-allowed opacity-50"
+                            ? "bg-violet/20 border-violet text-white shadow-[0_0_8px_rgba(140,123,255,0.25)]"
+                            : "bg-white/[0.01] border-white/5 text-white/60 hover:text-white"
                         )}
                       >
-                        {preset === -1 ? "∞" : preset} NOS
+                        {preset === -1 ? "∞" : preset}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* NUMBER OF GUESSES SETTING */}
-                <div className="flex flex-col text-left bg-black/40 border border-white/10 rounded-sm p-4">
-                  <div className="flex items-start gap-2 mb-3">
-                    <Target className="h-4.5 w-4.5 text-accent mt-0.5 shrink-0" />
+                {/* SETTING: MAX GUESSES */}
+                <div className="flex flex-col text-left bg-black/30 border border-white/10 rounded-sm p-3.5">
+                  <div className="flex items-start gap-2 mb-2">
+                    <Target className="h-4 w-4 text-accent mt-0.5 shrink-0" />
                     <div className="flex flex-col">
-                      <span className="font-valorant text-xs tracking-wider text-white">
-                        NUMBER OF GUESSES
-                      </span>
-                      <span className="text-[9.5px] font-mono text-white/50 uppercase tracking-wide">
-                        Total secret agent guesses allowed per player
-                      </span>
+                      <span className="font-valorant text-xs tracking-wider text-white">MAX GUESSES</span>
+                      <span className="text-[9px] font-mono text-white/50 uppercase">Guesses per game</span>
                     </div>
                   </div>
 
-                  {/* Value Adjuster */}
-                  <div className="flex items-center justify-between px-8 py-2 mb-3 bg-black/40 rounded-sm border border-white/5">
-                    {/* Decrement */}
+                  <div className="flex items-center justify-between px-6 py-1 mb-2">
                     <button
                       type="button"
                       onClick={() => {
-                        const guessOpts = [1, 2, 3, 5, 10];
+                        const guessOpts = [1, 2, 3, 5, 10, -1];
                         const idx = guessOpts.indexOf(maxGuesses);
                         if (idx > 0) setMaxGuesses(guessOpts[idx - 1]);
+                        else if (idx === -1) setMaxGuesses(10);
                       }}
-                      disabled={!isHost || maxGuesses <= 1}
-                      className="h-8 w-8 rounded-sm border border-white/15 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-lg cursor-pointer"
+                      disabled={!isHost || maxGuesses === 1}
+                      className="h-7 w-7 rounded-xs border border-white/10 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-base cursor-pointer"
                     >
                       -
                     </button>
 
-                    {/* Display Number */}
                     <div className="flex flex-col items-center">
-                      <span className="font-valorant text-4xl text-accent leading-none drop-shadow-[0_0_10px_rgba(255,70,85,0.4)]">
-                        {maxGuesses}
+                      <span className="font-display text-2xl font-black text-white leading-none">
+                        {maxGuesses === -1 ? "∞" : maxGuesses}
                       </span>
-                      <span className="text-[9px] font-mono text-white/50 uppercase tracking-widest mt-1">
-                        {maxGuesses === 1 ? "GUESS" : "GUESSES"}
+                      <span className="text-[8px] text-white/50 uppercase tracking-widest font-mono mt-0.5">
+                        {maxGuesses === -1 ? "INFINITE" : "GUESSES"}
                       </span>
                     </div>
 
-                    {/* Increment */}
                     <button
                       type="button"
                       onClick={() => {
-                        const guessOpts = [1, 2, 3, 5, 10];
+                        const guessOpts = [1, 2, 3, 5, 10, -1];
                         const idx = guessOpts.indexOf(maxGuesses);
                         if (idx >= 0 && idx < guessOpts.length - 1) setMaxGuesses(guessOpts[idx + 1]);
-                        else if (idx === -1) setMaxGuesses(2);
+                        else if (idx === -1) setMaxGuesses(-1);
                       }}
-                      disabled={!isHost || maxGuesses >= 10}
-                      className="h-8 w-8 rounded-sm border border-white/15 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-lg cursor-pointer"
+                      disabled={!isHost || maxGuesses === -1}
+                      className="h-7 w-7 rounded-xs border border-white/10 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-base cursor-pointer"
                     >
                       +
                     </button>
                   </div>
 
-                  {/* Quick Presets */}
                   <div className="grid grid-cols-4 gap-1.5">
-                    {[1, 2, 3, 5].map((preset) => (
+                    {[1, 3, 5, -1].map((preset) => (
                       <button
                         key={preset}
                         type="button"
                         onClick={() => isHost && setMaxGuesses(preset)}
                         disabled={!isHost}
                         className={cn(
-                          "py-1.5 rounded-xs text-[10px] font-display font-bold uppercase tracking-wider transition border cursor-pointer",
+                          "py-1 rounded-xs text-[9px] font-display font-bold uppercase tracking-wider transition border cursor-pointer",
                           maxGuesses === preset
-                            ? "bg-[#FF4655] border-[#FF4655] text-white shadow-[0_0_10px_rgba(255,70,85,0.4)]"
-                            : "bg-white/[0.02] border-white/10 text-white/60 hover:text-white hover:bg-white/[0.05]",
-                          !isHost && "cursor-not-allowed opacity-50"
+                            ? "bg-[#FF4655]/20 border-[#FF4655] text-white shadow-[0_0_8px_rgba(255,70,85,0.25)]"
+                            : "bg-white/[0.01] border-white/5 text-white/60 hover:text-white"
                         )}
                       >
-                        {preset} {preset === 1 ? "GUESS" : "GUESSES"}
+                        {preset === -1 ? "∞" : preset}
                       </button>
                     ))}
                   </div>

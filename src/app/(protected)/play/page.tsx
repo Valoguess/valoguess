@@ -32,6 +32,7 @@ import { socket } from "@/socket";
 import { ServerEvents } from "@/socket/events";
 import { cn } from "@/lib/utils";
 import { MatchIntroOverlay } from "./_components/MatchIntroOverlay";
+import { MatchEndingOverlay } from "./_components/MatchEndingOverlay";
 import { PartyChatOverlay } from "@/components/chat/PartyChatOverlay";
 import { useRoomTimer } from "@/hooks/useRoomTimer";
 
@@ -72,16 +73,23 @@ function PlayContent() {
     if (!gameHydrated) return;
     if (!game) {
       router.replace("/lobby");
-    } else if (game.status === "FINISHED") {
-      const result = game.state?.result ?? game.result;
-      const isVictory =
-        result?.result === "WIN" && result.winnerId === myPlayer?.id;
-      router.replace(`/play/result?status=${isVictory ? "victory" : "defeat"}`);
-    } else {
+    } else if (game.status !== "FINISHED") {
       setIsAsking(false);
       setIsAnswering(false);
     }
-  }, [game, gameHydrated, router, myPlayer?.id]);
+  }, [game, gameHydrated, router]);
+
+  useEffect(() => {
+    const handleGameEnd = (endedGame: any) => {
+      if (endedGame) {
+        useGameStore.getState().setGame(endedGame);
+      }
+    };
+    socket.on(ServerEvents.GAME_END, handleGameEnd);
+    return () => {
+      socket.off(ServerEvents.GAME_END, handleGameEnd);
+    };
+  }, []);
 
   useEffect(() => {
     const onError = (err: any) => {
@@ -157,6 +165,32 @@ function PlayContent() {
     );
   }
 
+  // Render Match Ending Sequence (Victory/Defeat/Draw cinematic face-off)
+  if (game.status === "FINISHED") {
+    const result = game.state?.result ?? game.result;
+    const isVictory =
+      result?.result === "WIN" && result.winnerId === myPlayer.id;
+    const isTie = result?.result === "TIE";
+
+    return (
+      <MatchEndingOverlay
+        isVictory={isVictory}
+        isTie={isTie}
+        userName={myPlayer.name || user?.name || "You"}
+        opponentName={opponentPlayer?.name || "Opponent"}
+        myAgentId={secretAgentId}
+        oppAgentId={opponentPlayer?.state?.secretAgent}
+        roundsPlayed={Math.max(
+          1,
+          Math.ceil((game.state?.turnNumber ?? game.turnNumber ?? 1) / 2)
+        )}
+        onComplete={() => {
+          router.replace("/play/result");
+        }}
+      />
+    );
+  }
+
   const questionPoolIds = game.settings?.questionPool || [];
   const gameQuestions: QuestionItem[] =
     questionPoolIds.length > 0
@@ -222,7 +256,7 @@ function PlayContent() {
     if (game && isMyTurn && !pendingQuestion && !isAsking) {
       setIsAsking(true);
       setErrorMsg(null);
-      sendAskQuestion(game.id, q.id);
+      sendAskQuestion(q.id);
     }
   };
 
@@ -230,7 +264,7 @@ function PlayContent() {
     if (game && isOpponentAskingMe && !isAnswering) {
       setIsAnswering(true);
       setErrorMsg(null);
-      sendAnswerQuestion(game.id, answer.toUpperCase() as "YES" | "NO");
+      sendAnswerQuestion(answer.toUpperCase() as "YES" | "NO");
     }
   };
 
@@ -258,7 +292,7 @@ function PlayContent() {
     } else {
       if (!isMyTurn) return;
     }
-    submitGuess(game.id, agentId);
+    submitGuess(agentId);
     setShowGuessModal(false);
   };
 

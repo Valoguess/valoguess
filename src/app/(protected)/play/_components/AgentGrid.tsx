@@ -58,7 +58,7 @@ export function AgentGrid({
 
   const handleGuessConfirm = (agentId: string) => {
     if (!game || !isMyTurn) return;
-    submitGuess(game.id, agentId);
+    submitGuess(agentId);
   };
 
   const handleOpenModal = () => {

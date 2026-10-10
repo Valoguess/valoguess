@@ -32,8 +32,8 @@ export function leaveParty() {
   socket.emit(ClientEvents.PARTY_LEAVE);
 }
 
-export function sendInviteToParty(partyId: string | undefined, invitedPlayerId: string) {
-  socket.emit(ClientEvents.PARTY_INVITE_SEND, { partyId, invitedPlayerId });
+export function sendInviteToParty(invitedPlayerId: string) {
+  socket.emit(ClientEvents.PARTY_INVITE_SEND, { invitedPlayerId });
 }
 
 export function acceptInviteToParty(partyId: string) {
@@ -45,10 +45,8 @@ export function declineInviteToParty(partyId: string, inviterId: string) {
 }
 
 export function kickPlayerFromParty(
-  kickedPlayerIdOrPartyId: string,
-  maybeKickedPlayerId?: string,
+  kickedPlayerId: string,
 ) {
-  const kickedPlayerId = maybeKickedPlayerId || kickedPlayerIdOrPartyId;
   socket.emit(ClientEvents.PARTY_KICK, { kickedPlayerId });
 }
 
@@ -59,7 +57,6 @@ export function sendMessageToParty(message: string) {
 // ==== GAME EVENTS ====
 
 export function createGame(
-  partyId: string,
   settings: GuessAgentSettings,
   mode: "GUESS_AGENT" = "GUESS_AGENT",
 ) {
@@ -77,11 +74,11 @@ export function createGame(
     questionCount: Math.max(1, Math.floor(Number(settings.questionCount) || 15)),
     timePerRound: isInfiniteTimer ? -1 : Math.floor(Number(settings.timePerRound)),
   };
-  socket.emit(ClientEvents.GAME_CREATE, { partyId, mode, settings: cleanSettings });
+  socket.emit(ClientEvents.GAME_CREATE, { mode, settings: cleanSettings });
 }
 
-export function startGame(gameId: string) {
-  socket.emit(ClientEvents.GAME_START, { gameId });
+export function startGame() {
+  socket.emit(ClientEvents.GAME_START);
 }
 
 export function leaveGame() {
@@ -94,33 +91,15 @@ export function consumeNo() {
   socket.emit(ClientEvents.CONSUME_NO);
 }
 
-export function askQuestion(gameId: string, questionId: string) {
-  socket.emit(ClientEvents.QUESTION_ASK, { gameId, questionId });
+export function askQuestion(questionId: string) {
+  socket.emit(ClientEvents.QUESTION_ASK, { questionId });
 }
 
-export function answerQuestion(gameId: string, answer: "YES" | "NO" | "yes" | "no") {
+export function answerQuestion(answer: "YES" | "NO" | "yes" | "no") {
   const normalizedAnswer = answer.toUpperCase() as "YES" | "NO";
-  socket.emit(ClientEvents.QUESTION_ANSWER, { gameId, answer: normalizedAnswer });
+  socket.emit(ClientEvents.QUESTION_ANSWER, { answer: normalizedAnswer });
 }
 
-export function submitGuess(gameId: string, guess: string) {
-  socket.emit(ClientEvents.GUESS_SUBMIT, { gameId, guess });
+export function submitGuess(guess: string) {
+  socket.emit(ClientEvents.GUESS_SUBMIT, { guess });
 }
-
-// Backwards-compatibility aliases
-export const createRoom = createParty;
-export const leaveRoom = leaveParty;
-export const kickPlayer = (partyOrRoomId: string, kickedPlayerId: string) =>
-  kickPlayerFromParty(partyOrRoomId, kickedPlayerId);
-export const sendInvite = (
-  invitedPlayer: { id: string },
-  partyId?: string,
-) => {
-  if (partyId) {
-    sendInviteToParty(partyId, invitedPlayer.id);
-  }
-};
-export const acceptInvite = (partyId: string) => acceptInviteToParty(partyId);
-export const rejectInvite = (partyId: string, inviterId: string) =>
-  declineInviteToParty(partyId, inviterId);
-export const sendHeartbeat = () => sendPlayerHeartbeat();
