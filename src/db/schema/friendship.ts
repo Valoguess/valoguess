@@ -46,10 +46,10 @@ export const friendship = pgTable("friendship", {
   
 }, (table) => [
   uniqueIndex("friendship_requester_receiver_uidx")
-    .on(table.receiverId, table.receiverId),
+    .on(table.requesterId, table.receiverId),
 
   index("friendship_requester_idx")
-    .on(table.receiverId, table.status),
+    .on(table.requesterId, table.status),
 
   index("friendship_receiver_idx")
     .on(table.receiverId, table.status),
