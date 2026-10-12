@@ -37,6 +37,6 @@ export const config = {
      * - all static media, fonts, and assets (.png, .jpg, .svg, .ttf, etc.)
      * - metadata files (favicon, sitemap, robots, webmanifest)
      */
-    "/((?!api|_next/static|_next/image|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|ttf|woff|woff2|mp3|wav|webmanifest)$|favicon\\.ico|sitemap\\.xml|robots\\.txt).*)",
+    "/((?!api|_next/static|_next/image|.*\\.(?:png|avif|jpg|jpeg|gif|webp|svg|ico|ttf|woff|woff2|mp3|wav|webmanifest)$|favicon\\.ico|sitemap\\.xml|robots\\.txt).*)",
   ],
 };
