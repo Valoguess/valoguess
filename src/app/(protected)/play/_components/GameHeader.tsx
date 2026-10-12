@@ -50,7 +50,7 @@ export function GameHeader({
             name={userName}
             rank="You"
             rankColor="#3CF2C4"
-            avatar="/agents/icon/iso.png"
+            avatar="/agents/icon/iso.avif"
             nosUsed={userNosUsed}
             nosMax={nosMax}
             turn={turnOwner === "you"}
@@ -68,7 +68,7 @@ export function GameHeader({
           name={opponentName}
           rank="Enemy"
           rankColor="#8C7BFF"
-          avatar="/agents/icon/yoru.png"
+          avatar="/agents/icon/yoru.avif"
           nosUsed={opponentNosUsed}
           nosMax={nosMax}
           turn={turnOwner === "opponent" || turnOwner === "opponent-thinking"}

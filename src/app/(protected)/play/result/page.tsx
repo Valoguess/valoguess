@@ -197,7 +197,7 @@ function ResultContent() {
               <div className="absolute inset-0 rounded-full blur-md opacity-30 bg-[#3CF2C4]" />
               <div className="relative flex h-20 w-20 items-center justify-center rounded-full p-[2.5px] bg-gradient-to-br from-[#3CF2C4] via-[#3CF2C4]/40 to-transparent">
                 <div className="h-full w-full overflow-hidden rounded-full bg-base-950 relative">
-                  <Image src={`/agents/icon/${myAgentObj.id}.png`} alt={userName} fill className="object-cover" />
+                  <Image src={`/agents/icon/${myAgentObj.id}.avif`} alt={userName} fill className="object-cover" />
                 </div>
               </div>
               <div className="absolute -bottom-1 -right-1 bg-base-950 p-1 rounded-full border border-white/10">
@@ -307,7 +307,7 @@ function ResultContent() {
               </span>
               
               <div className="relative aspect-[4/5] w-full max-w-[210px] mx-auto overflow-hidden border border-white/10 rounded-sm">
-                <Image src={`/agents/banner/${myAgentObj.id}.png`} alt={myAgentObj.name} fill className="object-cover object-top" />
+                <Image src={`/agents/banner/${myAgentObj.id}.avif`} alt={myAgentObj.name} fill className="object-cover object-top" />
               </div>
               
               <div className="text-center mt-2.5">
@@ -344,7 +344,7 @@ function ResultContent() {
               </span>
               
               <div className="relative aspect-[4/5] w-full max-w-[210px] mx-auto overflow-hidden border border-white/10 rounded-sm">
-                <Image src={`/agents/banner/${oppAgentObj.id}.png`} alt={oppAgentObj.name} fill className="object-cover object-top" />
+                <Image src={`/agents/banner/${oppAgentObj.id}.avif`} alt={oppAgentObj.name} fill className="object-cover object-top" />
               </div>
 
               <div className="text-center mt-2.5">

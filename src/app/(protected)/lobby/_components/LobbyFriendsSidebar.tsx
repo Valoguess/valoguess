@@ -112,7 +112,7 @@ export function LobbyFriendsSidebar({
       id: inv.sender.id,
       name: inv.sender.name || "Player",
       username: inv.sender.username,
-      avatar: inv.sender.avatar || "/agents/icon/omen.png",
+      avatar: inv.sender.avatar || "/agents/icon/omen.avif",
       status: "online",
       activity: "In Lobby",
     }));
@@ -211,7 +211,7 @@ export function LobbyFriendsSidebar({
           <div className="flex items-center gap-2 min-w-0">
             <div className="relative h-8 w-8 overflow-hidden shrink-0">
               <Image
-                src={user.image || "/agents/icon/omen.png"}
+                src={user.image || "/agents/icon/omen.avif"}
                 alt={user.name || "Me"}
                 fill
                 className="object-cover object-top rounded-full"

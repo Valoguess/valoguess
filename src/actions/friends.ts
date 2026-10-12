@@ -73,7 +73,7 @@ export async function sendFriendRequest(targetUsername: string) {
       id: targetUser.id,
       name: targetUser.name || targetUser.username || "Player",
       username: targetUser.username ? `@${targetUser.username}` : undefined,
-      avatar: targetUser.image || "/agents/icon/phoenix.png",
+      avatar: targetUser.image || "/agents/icon/phoenix.avif",
     };
 
     // Check existing friendship

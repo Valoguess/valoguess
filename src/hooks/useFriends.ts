@@ -70,7 +70,7 @@ export function useFriends(user: StoreUser | null) {
               username: friendUser.username
                 ? `@${friendUser.username}`
                 : undefined,
-              avatar: friendUser.image || "/agents/icon/omen.png",
+              avatar: friendUser.image || "/agents/icon/omen.avif",
               status: "online",
               activity: "In Lobby",
             });
@@ -89,7 +89,7 @@ export function useFriends(user: StoreUser | null) {
               username: friendship.requester.username
                 ? `@${friendship.requester.username}`
                 : undefined,
-              avatar: friendship.requester.image || "/agents/icon/reyna.png",
+              avatar: friendship.requester.image || "/agents/icon/reyna.avif",
               type: "incoming",
               createdAt: friendship.createdAt
                 ? new Date(friendship.createdAt).toISOString()
@@ -110,7 +110,7 @@ export function useFriends(user: StoreUser | null) {
               username: friendship.receiver.username
                 ? `@${friendship.receiver.username}`
                 : undefined,
-              avatar: friendship.receiver.image || "/agents/icon/phoenix.png",
+              avatar: friendship.receiver.image || "/agents/icon/phoenix.avif",
               type: "outgoing",
               createdAt: friendship.createdAt
                 ? new Date(friendship.createdAt).toISOString()
@@ -141,7 +141,7 @@ export function useFriends(user: StoreUser | null) {
             id: req.id,
             name: req.name || "Player",
             username: req.username ? `@${req.username.replace(/^@/, "")}` : undefined,
-            avatar: req.avatar || "/agents/icon/reyna.png",
+            avatar: req.avatar || "/agents/icon/reyna.avif",
             type: "incoming",
             createdAt: new Date().toISOString(),
           },

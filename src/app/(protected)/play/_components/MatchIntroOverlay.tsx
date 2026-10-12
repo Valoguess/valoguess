@@ -53,7 +53,7 @@ export function MatchIntroOverlay({
     if (typeof window !== "undefined") {
       AGENTS.forEach((agent) => {
         const img = new window.Image();
-        img.src = `/agents/banner/${agent.id}.png`;
+        img.src = `/agents/banner/${agent.id}.avif`;
       });
     }
   }, []);
@@ -198,7 +198,7 @@ export function MatchIntroOverlay({
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img
                 key={isLocked ? "locked" : undefined}
-                src={`/agents/banner/${currentAgent.id}.png`}
+                src={`/agents/banner/${currentAgent.id}.avif`}
                 alt={currentAgent.name}
                 decoding="async"
                 className={cn(

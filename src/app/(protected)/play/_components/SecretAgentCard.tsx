@@ -36,7 +36,7 @@ export function SecretAgentCard({
         <div>
 
           <Image
-            src={`/agents/banner/${agent.id}.png`}
+            src={`/agents/banner/${agent.id}.avif`}
             alt={agent.name}
             fill
             priority

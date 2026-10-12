@@ -240,7 +240,7 @@ export function MatchEndingOverlay({
             {/* Agent Banner Image */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img
-                src={`/agents/banner/${myAgentObj.id}.png`}
+                src={`/agents/banner/${myAgentObj.id}.avif`}
                 alt={myAgentObj.name}
                 decoding="async"
                 className="w-full h-full object-cover object-top"
@@ -365,7 +365,7 @@ export function MatchEndingOverlay({
                     className="w-full h-full"
                   >
                     <img
-                      src={`/agents/banner/${oppAgentObj.id}.png`}
+                      src={`/agents/banner/${oppAgentObj.id}.avif`}
                       alt={oppAgentObj.name}
                       decoding="async"
                       className="w-full h-full object-cover object-top"

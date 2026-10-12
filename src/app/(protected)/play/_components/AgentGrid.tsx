@@ -107,7 +107,7 @@ export function AgentGrid({
                 >
                   {/* Image */}
                   <Image
-                    src={`/agents/icon/${a.id}.png`}
+                    src={`/agents/icon/${a.id}.avif`}
                     alt={a.name}
                     fill
                     draggable={false}

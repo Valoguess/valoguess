@@ -64,7 +64,7 @@ export function LobbyCenterSlots({
 
           <div className="relative w-full flex-1 my-2 overflow-hidden rounded-sm border border-white/10 bg-base-950">
             <Image
-              src="/agents/banner/chamber.png"
+              src="/agents/banner/chamber.avif"
               alt="Agent Banner"
               fill
               className="object-cover object-top scale-105 transition-transform duration-500 group-hover:scale-110"
@@ -152,7 +152,7 @@ export function LobbyCenterSlots({
 
             <div className="relative w-full flex-1 my-2 overflow-hidden rounded-sm border border-white/10 bg-base-950">
               <Image
-                src="/agents/banner/jett.png"
+                src="/agents/banner/jett.avif"
                 alt="Opponent Banner"
                 fill
                 className="object-cover object-top scale-105 transition-transform duration-500 group-hover:scale-110"

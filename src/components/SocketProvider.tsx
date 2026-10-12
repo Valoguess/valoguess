@@ -46,7 +46,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       }),
       text: data.message,
       colorClass: isMe ? "text-[#3CF2C4]" : "text-[#8C7BFF]",
-      avatar: isMe ? "/agents/icon/chamber.png" : "/agents/icon/omen.png",
+      avatar: isMe ? "/agents/icon/chamber.avif" : "/agents/icon/omen.avif",
     });
   };
 
@@ -81,7 +81,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
         sender: {
           id: inviterId,
           name: "Player",
-          avatar: "/agents/icon/omen.png",
+          avatar: "/agents/icon/omen.avif",
         },
         sentAt: Date.now(),
       });
@@ -166,7 +166,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
           ? f.username
           : `@${f.username}`
         : undefined,
-      avatar: f.image || "/agents/icon/omen.png",
+      avatar: f.image || "/agents/icon/omen.avif",
       status: f.online ? ("online" as const) : ("offline" as const),
       activity: f.online ? "In Lobby" : "Offline",
     }));
@@ -179,7 +179,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
           ? r.username
           : `@${r.username}`
         : undefined,
-      avatar: r.image || "/agents/icon/reyna.png",
+      avatar: r.image || "/agents/icon/reyna.avif",
       type: "incoming" as const,
     }));
 
@@ -191,7 +191,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
           ? r.username
           : `@${r.username}`
         : undefined,
-      avatar: r.image || "/agents/icon/phoenix.png",
+      avatar: r.image || "/agents/icon/phoenix.avif",
       type: "outgoing" as const,
     }));
 
