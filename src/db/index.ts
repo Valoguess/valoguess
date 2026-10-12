@@ -11,9 +11,9 @@ import { gamePlayer, gameResultEnum } from "./schema/gamePlayer";
 import { friendship, friendshipStatusEnum } from "./schema/friendship";
 
 import { relations } from "./relations";
+import ENV from '@/env';
 
-
-export const db = drizzle(process.env.DATABASE_URL!, { relations });
+export const db = drizzle(ENV.DATABASE_URL!, { relations });
 
 export const schema = {
   user,

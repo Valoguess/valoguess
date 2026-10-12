@@ -1,11 +1,13 @@
 "use client";
 
 import { io } from "socket.io-client";
+
+import ENV from "@/env";
 import { token } from "@/lib/auth-client"
 
 const getSocketServerURL = () => {
-  if (process.env.NEXT_PUBLIC_SOCKET_SERVER_URL) {
-    return process.env.NEXT_PUBLIC_SOCKET_SERVER_URL;
+  if (ENV.NEXT_PUBLIC_SOCKET_SERVER_URL) {
+    return ENV.NEXT_PUBLIC_SOCKET_SERVER_URL;
   }
   if (typeof window !== "undefined") {
     const isLocalhost =

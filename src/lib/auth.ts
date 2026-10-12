@@ -4,12 +4,13 @@ import { redisStorage } from "@better-auth/redis-storage";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { anonymous, username, jwt, magicLink } from "better-auth/plugins"
 
+import ENV from "@/env";
 import { redis } from "./redis";
 import { db, schema } from "@/db";
 import { sendMagicLinkEmail } from "./resend";
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: ENV.BETTER_AUTH_URL,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema
@@ -34,8 +35,8 @@ export const auth = betterAuth({
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: ENV.GOOGLE_CLIENT_ID as string,
+      clientSecret: ENV.GOOGLE_CLIENT_SECRET as string,
       mapProfileToUser: (profile) => {
         const cleanPrefix = profile.email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase();
         const username = `${cleanPrefix}_${Math.floor(1000 + Math.random() * 9000)}`; 
