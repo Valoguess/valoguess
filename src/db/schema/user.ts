@@ -11,18 +11,23 @@ export const user = pgTable("user", {
   
   username: varchar("username", { length: 255 })
     .notNull()
-    .unique(),
-  
+    .unique(),  
+    
   name: text("name")
     .notNull(),
-
+    
+  usernameUpdatedAt: timestamp("username_updated_at", { precision: 6, withTimezone: true }),
+  nameUpdatedAt: timestamp("name_updated_at", { precision: 6, withTimezone: true }),
+  
   email: varchar("email", { length: 255 }).notNull().unique(),
 
   emailVerified: boolean("email_verified")
     .default(false)
     .notNull(),
 
+  tagline: text("tagline").default("New Player"),
   image: text("image"),
+  banner: text("banner"),
 
   isAnonymous: boolean("is_anonymous").default(false),
 
