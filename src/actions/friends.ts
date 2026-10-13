@@ -2,6 +2,7 @@
 
 import { db, friendship } from "@/db";
 import { auth } from "@/lib/auth";
+import { attempt } from "@/lib/rateLimit";
 import { getUserByUsername } from "@/services/auth";
 import {
   getFriendships as getFriendshipsService,
@@ -34,6 +35,15 @@ export async function getFriendships(userId?: string) {
 
 export async function sendFriendRequest(targetUsername: string) {
   try {
+    const result = await attempt(
+      `ratelimit:nextjs:sendFriendRequest:${targetUsername}`,
+      {maxRequests: 5, windowSeconds: 60},
+    );
+
+    if (!result.allowed) {
+      return { success: false, error: "Too many requests" };
+    }
+
     const session = await auth.api.getSession({
       headers: await headers(),
     });
