@@ -6,17 +6,55 @@ import { eq } from "drizzle-orm";
 import { UploadApiResponse } from "cloudinary";
 import { v2 as cloudinary } from "cloudinary";
 import { headers } from "next/headers";
+import { attempt } from "@/lib/rateLimit";
 
 const MAX_SIZE = 5 * 1024 * 1024;
 
+const getPublicIdFromUrl = (url: string) => {
+  const parts = url.split('/upload/');
+  if (parts.length < 2) return null;
+
+  const publicIdWithExtension = parts[1].replace(/^v\d+\//, '');
+
+  const publicId = publicIdWithExtension.substring(0, publicIdWithExtension.lastIndexOf('.'));
+  
+  return publicId;
+};
+
+async function deleteImageByUrl(url: string) {
+  try {
+    const publicId = getPublicIdFromUrl(url);
+
+    if (!publicId) {
+      return;
+    }
+    
+    // Delete the asset from Cloudinary
+    const result = await cloudinary.uploader.destroy(publicId, { invalidate: true });
+    console.log("Deletion Result:", result); // Returns { result: 'ok' } if successful
+  } catch (error) {
+    console.error("Deletion Failed:", error);
+  }
+}
+
+
 export async function uploadUserAvatar(formData: FormData) {
+  
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   const currUser = session?.user;
-
+  
   if (!currUser) {
     throw new Error("User not authenticated");
+  }
+  const result = await attempt(
+    `ratelimit:nextjs:uploadUserAvatar:${currUser.id}`,
+    {maxRequests: 5, windowSeconds: 60},
+  );
+
+  if (!result.allowed) {
+    return { success: false, error: "Too many requests" };
   }
 
   const userId = currUser.id;
@@ -116,6 +154,14 @@ export async function removeUserAvatar() {
     throw new Error("User not authenticated");
   }
 
+  if (!currUser.image) { 
+    return {
+      success: true
+    }
+  }
+
+  await deleteImageByUrl(currUser.image);
+
   await db
     .update(user)
     .set({ image: null })
@@ -123,5 +169,5 @@ export async function removeUserAvatar() {
 
   return {
     success: true,
-  };
+  };  
 }
