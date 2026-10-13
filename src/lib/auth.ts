@@ -19,6 +19,12 @@ export const auth = betterAuth({
 		client: redis,
 		keyPrefix: "better-auth:",
   }),
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
+  },
   rateLimit: {
     enabled: true,
     storage: "secondary-storage",
