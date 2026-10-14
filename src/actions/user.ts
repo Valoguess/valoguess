@@ -2,7 +2,7 @@
 
 import z from "zod";
 import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
+import { headers as getHeaders } from "next/headers";
 
 import { db, user } from "@/db";
 import { auth } from "@/lib/auth";
@@ -14,62 +14,77 @@ import {
 } from "@/schemas/updateProfile";
 
 export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const headers = await getHeaders();
+  const session = await auth.api.getSession({ headers });
   const currUser = session?.user;
 
   if (!currUser) {
-    throw new Error("User not authenticated");
+    return { success: false, error: "User not authenticated" };
   }
 
-  if (currUser)
-
   try {
-    const { username, name } = welcomeSchema.parse(formData);
+    const { username: nextUsername, name: nextName } =
+      welcomeSchema.parse(formData);
 
-    const updatedUser = await db
-      .update(user)
-      .set({ name, username })
-      .where(eq(user.id, currUser.id))
-      .returning();
-  
-    return updatedUser;
-  } catch (error) {
-    if (error instanceof z.ZodError) { 
-      throw new Error("Invalid input data");
-    } else {
-      throw new Error("Failed to update user");
+    const existing = await getUserById(currUser.id);
+
+    const updates: {
+      name: string;
+      username: string;
+      nameUpdatedAt?: Date;
+      usernameUpdatedAt?: Date;
+    } = {
+      name: nextName,
+      username: nextUsername,
+    };
+
+    if (!existing?.nameUpdatedAt || existing.name !== nextName) {
+      updates.nameUpdatedAt = new Date();
     }
+    if (!existing?.usernameUpdatedAt || existing.username !== nextUsername) {
+      updates.usernameUpdatedAt = new Date();
+    }
+
+    await auth.api.updateUser({
+      body: updates,
+      headers,
+    });
+    
+    return { success: true };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: "Invalid input data" };
+    }
+    return { success: false, error: "Failed to update user" };
   }
 }
 
 export async function updateUserProfile(formData: UpdateProfileSchema) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const headers = await getHeaders();
+  const session = await auth.api.getSession({ headers });
   const currUser = session?.user;
 
   if (!currUser) {
-    throw new Error("User not authenticated");
+    return { success: false, error: "User not authenticated" };
   }
 
   try {
     const { banner, tagline } = updateProfileSchema.parse(formData);
 
-    const updatedUser = await db
-      .update(user)
-      .set({ banner, tagline })
-      .where(eq(user.id, currUser.id))
-      .returning();
-
-    return updatedUser;
+    await auth.api.updateUser({
+      body: {
+        ...(banner !== undefined ? { banner } : {}),
+        ...(tagline !== undefined ? { tagline } : {}),
+      },
+      headers,
+    });
+    return { success: true };
   } catch (error) {
+    console.log("error", error);
     if (error instanceof z.ZodError) {
-      throw new Error("Invalid input data");
-    } else {
-      throw new Error("Failed to update user profile");
+      return { success: false, error: "Invalid input data" };
     }
+    return { success: false, error: "Failed to update user profile" };
   }
 }
 
