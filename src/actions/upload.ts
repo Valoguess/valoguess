@@ -30,10 +30,9 @@ async function deleteImageByUrl(url: string) {
     }
     
     // Delete the asset from Cloudinary
-    const result = await cloudinary.uploader.destroy(publicId, { invalidate: true });
-    console.log("Deletion Result:", result); // Returns { result: 'ok' } if successful
-  } catch (error) {
-    console.error("Deletion Failed:", error);
+    await cloudinary.uploader.destroy(publicId, { invalidate: true });
+  } catch {
+    // Fail silently
   }
 }
 
@@ -135,8 +134,7 @@ export async function uploadUserAvatar(formData: FormData) {
       success: true,
       url: secureUrl,
     };
-  } catch (error) {
-    console.error("User avatar upload failed:", error);
+  } catch {
     return {
       success: false,
       error: "Failed to upload avatar",

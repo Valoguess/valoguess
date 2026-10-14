@@ -8,11 +8,8 @@ export function asyncHandler<T extends any[]>(
       await handler(...args);
     } catch (err) {
       if (err instanceof AppError) {
-
         return null;
       }
-
-      console.error(err);
     }
   };
 }

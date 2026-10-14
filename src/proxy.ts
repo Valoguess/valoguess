@@ -11,8 +11,8 @@ export async function proxy(request: NextRequest) {
     session = await auth.api.getSession({
       headers: request.headers,
     });
-  } catch (e) {
-    console.error("Session verification in proxy middleware failed:", e);
+  } catch {
+    // Session retrieval error in proxy
   }
 
   const isAuthRoute = authRoutes.some((route) => path.startsWith(route));

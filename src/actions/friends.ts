@@ -27,8 +27,7 @@ export async function getFriendships(userId?: string) {
     }
 
     return await getFriendshipsService(targetId);
-  } catch (err: any) {
-    console.error("Error fetching friendships:", err);
+  } catch {
     return [];
   }
 }
@@ -148,7 +147,6 @@ export async function sendFriendRequest(targetUsername: string) {
       targetUser: targetUserData,
     };
   } catch (err: any) {
-    console.error("Error sending friend request:", err);
     return { success: false, error: err?.message || "Failed to send friend request" };
   }
 }
@@ -204,7 +202,6 @@ export async function acceptFriendRequest(targetIdOrFriendshipId: string) {
       requesterId: updated[0].requesterId,
     };
   } catch (err: any) {
-    console.error("Error accepting friend request:", err);
     return { success: false, error: err?.message || "Failed to accept friend request" };
   }
 }
@@ -257,7 +254,6 @@ export async function declineFriendRequest(targetIdOrFriendshipId: string) {
       requesterId: updated[0].requesterId,
     };
   } catch (err: any) {
-    console.error("Error declining friend request:", err);
     return { success: false, error: err?.message || "Failed to decline friend request" };
   }
 }
@@ -305,7 +301,6 @@ export async function cancelFriendRequest(targetIdOrFriendshipId: string) {
 
     return { success: true, message: "Friend request cancelled" };
   } catch (err: any) {
-    console.error("Error cancelling friend request:", err);
     return { success: false, error: err?.message || "Failed to cancel friend request" };
   }
 }
@@ -351,7 +346,6 @@ export async function removeFriend(targetId: string) {
 
     return { success: true, message: "Friend removed" };
   } catch (err: any) {
-    console.error("Error removing friend:", err);
     return { success: false, error: err?.message || "Failed to remove friend" };
   }
 }
