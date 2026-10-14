@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { redisStorage } from "@better-auth/redis-storage";
@@ -15,6 +16,14 @@ export const auth = betterAuth({
     provider: "pg",
     schema
   }),
+  user: {
+    additionalFields: {
+      usernameUpdatedAt: { type: "date"},
+      nameUpdatedAt: { type: "date"},
+      tagline: { type: "string", defaultValue: "New Player" },
+      banner: { type: "string" },
+    }
+  },
   secondaryStorage: redisStorage({
 		client: redis,
 		keyPrefix: "better-auth:",
@@ -45,7 +54,7 @@ export const auth = betterAuth({
       clientSecret: ENV.GOOGLE_CLIENT_SECRET as string,
       mapProfileToUser: (profile) => {
         const cleanPrefix = profile.email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase();
-        const username = `${cleanPrefix}_${Math.floor(1000 + Math.random() * 9000)}`; 
+        const username = `${cleanPrefix}_${crypto.randomInt(1000, 9999)}`; 
         return {
           username
         }
@@ -66,6 +75,7 @@ export const auth = betterAuth({
     }),
     jwt({
       jwt: {
+        expirationTime: "1h",
         definePayload: ({user}) => {
           return {
             id: user.id,
@@ -81,16 +91,17 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user, ctx) => {
+          const randomValue = crypto.randomBytes(3).toString("hex");
+          
           if (ctx?.path == "/sign-in/anonymous") {
-            const randomValue = Math.random().toString(36).substring(2, 8);
             user.username = `guest-${randomValue}`;
             user.name = `Guest.${randomValue}`;
             user.email = `guest.${randomValue}@valoguess.fun`;
           }
           else if (ctx?.path == "/magic-link/verify") { 
-            const randomValue = Math.random().toString(36).substring(2, 8);
-            user.username = user.email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase() + `_${randomValue}`;
-            user.name = user.email.split("@")[0];
+            const emailPrefix = user.email.split("@")[0]
+            user.username = emailPrefix.replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase() + `_${randomValue}`;
+            user.name = emailPrefix;
           }
         }
       }
