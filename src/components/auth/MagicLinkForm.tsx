@@ -68,7 +68,6 @@ export function MagicLinkForm({
       setIsSent(true);
       setCooldown(60);
     } catch (err: any) {
-      console.error("Magic link error:", err);
       setErrorMessage(err?.message || "An unexpected error occurred while sending magic link.");
     } finally {
       setIsLoading(false);

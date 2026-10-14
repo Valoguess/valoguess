@@ -17,27 +17,32 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   const partyHydrated = usePartyStore((s) => s.hydrated);
   const gameHydrated = useGameStore((s) => s.hydrated);
 
+  const { user } = useAuthStore();
+  const { setGame, clearGame } = useGameStore();
+  const { setFriendsPresence, setSinglePresence } = usePresenceStore();
+  const { addIncomingInvite, setLastDeclinedInvite } = useInviteStore();
+  const { setInitialFriendsData, triggerFriendSync } = useFriendStore();
+  const { party, setParty, clearParty, addPartyMessage } = usePartyStore();
+
   const handlePartySync = (syncedParty: Party | null) => {
-    console.log("Party synced:", syncedParty);
     if (!syncedParty) {
-      usePartyStore.getState().clearParty();
+      clearParty();
       return;
     }
-    usePartyStore.getState().setParty(syncedParty);
+    setParty(syncedParty);
   };
 
   const handlePartyChatSync = (data: { userId: string; message: string }) => {
     if (!data || !data.message) return;
-    const currentUserId = useAuthStore.getState().user?.id;
+    const currentUserId = user?.id;
     const isMe = data.userId === currentUserId;
-    const party = usePartyStore.getState().party;
     const member = party?.members.find((m) => m.id === data.userId);
 
     const senderName = isMe
-      ? useAuthStore.getState().user?.name || "YOU"
+      ? user?.name || "YOU"
       : member?.name || "Player";
 
-    usePartyStore.getState().addPartyMessage({
+    addPartyMessage({
       id: crypto.randomUUID(),
       sender: senderName,
       time: new Date().toLocaleTimeString([], {
@@ -56,13 +61,12 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     otherPlayerId?: string;
     status: "PENDING" | "DECLINED";
   }) => {
-    console.log("Party invite sync received:", data);
     if (!data || !data.partyId) return;
 
     const { partyId, inviterId, otherPlayerId, status } = data;
 
     if (status === "DECLINED") {
-      useInviteStore.getState().setLastDeclinedInvite({
+      setLastDeclinedInvite({
         otherPlayerId: otherPlayerId || inviterId || "",
         partyId,
         roomId: partyId,
@@ -73,7 +77,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
 
     if (status === "PENDING" && inviterId) {
       const id = `inv-${inviterId}-${partyId}`;
-      useInviteStore.getState().addIncomingInvite({
+      addIncomingInvite({
         id,
         inviteId: id,
         partyId,
@@ -89,13 +93,12 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleGameSync = (syncedGame: GuessAgentGameDTO | null) => {
-    console.log("Game synced:", syncedGame);
     if (!syncedGame) {
-      useGameStore.getState().clearGame();
+      clearGame();
       return;
     }
 
-    const currentUserId = useAuthStore.getState().user?.id;
+    const currentUserId = user?.id;
     if (currentUserId && typeof window !== "undefined") {
       const me = syncedGame.players.find((p) => p.id === currentUserId);
       if (me?.state?.secretAgent) {
@@ -106,20 +109,19 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    useGameStore.getState().setGame(syncedGame);
+    setGame(syncedGame);
   };
 
   const handleError = (err: any) => {
-    console.error("Socket error received:", err);
     if (err?.message === "Player not found") {
       socket.disconnect();
       socket.connect();
     }
     if (err?.message === "Party not found" || err?.message === "User not in party") {
-      usePartyStore.getState().clearParty();
+      clearParty();
     }
     if (err?.message === "Game not found") {
-      useGameStore.getState().clearGame();
+      clearGame();
     }
     setError(err);
   };
@@ -153,7 +155,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     if (!syncData) return;
 
     if (syncData.friends) {
-      usePresenceStore.getState().setFriendsPresence(
+      setFriendsPresence(
         syncData.friends.map((f) => ({ userId: f.id, online: Boolean(f.online) })),
       );
     }
@@ -195,7 +197,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       type: "outgoing" as const,
     }));
 
-    useFriendStore.getState().setInitialFriendsData({
+    setInitialFriendsData({
       friends,
       requests: [...incoming, ...outgoing],
     });
@@ -203,7 +205,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
 
   const handleFriendPresence = (data: { userId: string; online: boolean }) => {
     if (data?.userId) {
-      usePresenceStore.getState().setSinglePresence(data.userId, data.online);
+      setSinglePresence(data.userId, data.online);
     }
   };
 
@@ -221,7 +223,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
             }
           : undefined);
 
-      useFriendStore.getState().triggerFriendSync({
+      triggerFriendSync({
         type: "request_received",
         userId,
         requester,
@@ -235,11 +237,11 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   }) => {
     const targetUserId = data?.userId || data?.accepterId;
     if (targetUserId) {
-      useFriendStore.getState().triggerFriendSync({
+      triggerFriendSync({
         type: "request_accepted",
         userId: targetUserId,
       });
-      usePresenceStore.getState().setSinglePresence(targetUserId, true);
+      setSinglePresence(targetUserId, true);
     }
   };
 
@@ -249,7 +251,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   }) => {
     const targetUserId = data?.userId || data?.declinerId;
     if (targetUserId) {
-      useFriendStore.getState().triggerFriendSync({
+      triggerFriendSync({
         type: "request_declined",
         userId: targetUserId,
       });

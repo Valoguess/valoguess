@@ -87,7 +87,6 @@ export function ProfileAvatarUploadCard({
       setSuccessMessage("Avatar cropped, deployed and synced successfully!");
       setTimeout(() => setSuccessMessage(""), 4000);
     } catch (err: any) {
-      console.error("Avatar upload failed:", err);
       setErrorMessage(err?.message || "Failed to upload avatar. Please try again.");
       setPreviewUrl(null);
     } finally {
@@ -117,7 +116,6 @@ export function ProfileAvatarUploadCard({
       setSuccessMessage("Custom avatar removed. Using default agent icon.");
       setTimeout(() => setSuccessMessage(""), 4000);
     } catch (err: any) {
-      console.error("Avatar removal failed:", err);
       setErrorMessage(err?.message || "Failed to reset avatar.");
     } finally {
       setIsRemoving(false);
@@ -192,7 +190,7 @@ export function ProfileAvatarUploadCard({
               src={currentAvatar}
               alt="Avatar Preview"
               fill
-              className="object-cover object-top rounded-full"
+              className="object-cover object-center rounded-full"
               unoptimized={currentAvatar.startsWith("blob:")}
             />
 

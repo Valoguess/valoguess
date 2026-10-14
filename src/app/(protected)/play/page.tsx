@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Flag, Check, X, Loader2, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { GameHeader } from "./_components/GameHeader";
 import { SecretAgentCard } from "./_components/SecretAgentCard";
 import { QuestionPanel } from "./_components/QuestionPanel";
@@ -10,56 +10,74 @@ import { FreeformTurnPanel } from "./_components/FreeformTurnPanel";
 import { AgentGrid } from "./_components/AgentGrid";
 import { AgentGuessModal } from "./_components/AgentGuessModal";
 import { ActivityFeed } from "./_components/ActivityFeed";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import {
-  AGENTS,
-  getQuestionById,
-  getQuestionLabel,
-  getRandomQuestions,
-  ActivityEntry,
-  QuestionItem,
-} from "@/lib/data";
-import { useGameStore } from "@/store/gameStore";
-import { useAuthStore } from "@/store/authStore";
-import {
-  askQuestion as sendAskQuestion,
-  answerQuestion as sendAnswerQuestion,
-  consumeNo,
-  submitGuess,
-  leaveGame,
-} from "@/socket/emitter";
-import { socket } from "@/socket";
-import { ServerEvents } from "@/socket/events";
-import { cn } from "@/lib/utils";
 import { MatchIntroOverlay } from "./_components/MatchIntroOverlay";
 import { MatchEndingOverlay } from "./_components/MatchEndingOverlay";
+import { LeaveGameDialog } from "./_components/LeaveGameDialog";
+import { PlayLoadingScreen } from "./_components/PlayLoadingScreen";
+import { OpponentQuestionPrompt } from "./_components/OpponentQuestionPrompt";
 import { PartyChatOverlay } from "@/components/chat/PartyChatOverlay";
 import { useRoomTimer } from "@/hooks/useRoomTimer";
+import { useGameStore } from "@/store/gameStore";
+import { useAuthStore } from "@/store/authStore";
+import { usePlayState } from "./_hooks/usePlayState";
+import { usePlaySocket } from "./_hooks/usePlaySocket";
 
 function PlayContent() {
   const router = useRouter();
-  const { game, clearGame, hydrated: gameHydrated } = useGameStore();
+  const { game, hydrated: gameHydrated } = useGameStore();
   const { user } = useAuthStore();
 
   const [hasCompletedIntro, setHasCompletedIntro] = useState<boolean>(false);
-  const [isAsking, setIsAsking] = useState(false);
-  const [isAnswering, setIsAnswering] = useState(false);
-  const [isConsumingNo, setIsConsumingNo] = useState(false);
   const [showGuessModal, setShowGuessModal] = useState(false);
-  const [eliminatedIds, setEliminatedIds] = useState<Set<string>>(new Set());
   const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [eliminatedIds, setEliminatedIds] = useState<Set<string>>(new Set());
 
-  // Hook must be called unconditionally at top level
+  // Room timer hook
   const { timeLeft, formattedTime, isInfinite } = useRoomTimer({ game });
 
-  const myPlayer =
-    game?.players.find(
-      (p) => p.id === user?.id || (p.state && p.state.secretAgent !== null)
-    ) || game?.players[0];
-  const opponentPlayer = game?.players.find((p) => p.id !== myPlayer?.id);
+  // Game state derivation hook
+  const {
+    myPlayer,
+    opponentPlayer,
+    isMyTurn,
+    pendingQuestion,
+    isOpponentAskingMe,
+    isIWaitingForAnswer,
+    isFreeform,
+    turnOwner,
+    secretAgentId,
+    activeSecretAgent,
+    gameQuestions,
+    opponentQuestionObj,
+    askedQuestionsMap,
+    activity,
+    currentRound,
+    nosMax,
+    userNosUsed,
+    opponentNosUsed,
+  } = usePlayState({ game, user });
 
-  // Check if intro was already seen during this match session
+  // Socket actions & listeners hook
+  const {
+    isAsking,
+    isAnswering,
+    isConsumingNo,
+    errorMsg,
+    handleAskQuestion,
+    handleAnswerQuestion,
+    handleConsumeNo,
+    handleGuessConfirm,
+    handleLeaveGame,
+  } = usePlaySocket({
+    game,
+    myPlayer,
+    isMyTurn,
+    pendingQuestion,
+    isOpponentAskingMe,
+    isFreeform,
+  });
+
+  // Restore intro state from session if already seen
   useEffect(() => {
     if (typeof window !== "undefined" && game?.id) {
       const seen = sessionStorage.getItem(`intro_seen_${game.id}`) === "true";
@@ -69,83 +87,30 @@ function PlayContent() {
     }
   }, [game?.id, game?.status]);
 
+  // Navigate to lobby if no active match
   useEffect(() => {
     if (!gameHydrated) return;
     if (!game) {
       router.replace("/lobby");
-    } else if (game.status !== "FINISHED") {
-      setIsAsking(false);
-      setIsAnswering(false);
     }
   }, [game, gameHydrated, router]);
 
-  useEffect(() => {
-    const handleGameEnd = (endedGame: any) => {
-      if (endedGame) {
-        useGameStore.getState().setGame(endedGame);
-      }
-    };
-    socket.on(ServerEvents.GAME_END, handleGameEnd);
-    return () => {
-      socket.off(ServerEvents.GAME_END, handleGameEnd);
-    };
-  }, []);
+  // Handle elimination card toggling
+  const handleToggleEliminated = (id: string) => {
+    setEliminatedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
-  useEffect(() => {
-    const onError = (err: any) => {
-      setIsAsking(false);
-      setIsAnswering(false);
-      setErrorMsg(err?.message || "An error occurred");
-      const timer = setTimeout(() => setErrorMsg(null), 4000);
-      return () => clearTimeout(timer);
-    };
-    socket.on(ServerEvents.ERROR, onError);
-    return () => {
-      socket.off(ServerEvents.ERROR, onError);
-    };
-  }, []);
-
+  // 1. Loading screen
   if (!gameHydrated || !game || !myPlayer) {
-    return (
-      <main className="min-h-screen bg-base-950 flex flex-col items-center justify-center text-white select-none">
-        <div className="flex flex-col items-center gap-3">
-          <svg viewBox="0 0 100 100" className="w-12 h-12 animate-pulse">
-            <path d="M15 15 L45 15 L25 85 Z" fill="#FFFFFF" />
-            <path d="M32 15 L52 15 L37 75 Z" fill="#FF4655" />
-            <path d="M58 15 L88 15 L78 85 Z" fill="#FF4655" />
-          </svg>
-          <span className="font-valorant text-xs text-white/50 tracking-widest mt-2">
-            {!gameHydrated ? "Loading Game..." : "Returning to Lobby..."}
-          </span>
-        </div>
-      </main>
-    );
+    return <PlayLoadingScreen label={!gameHydrated ? "Loading Game..." : "Returning to Lobby..."} />;
   }
 
-  const gameState = game.state;
-  const isMyTurn = Boolean(myPlayer.state?.isMyTurn);
-  const pendingQuestion = gameState?.pendingQuestion ?? game.pendingQuestion;
-  const isOpponentAskingMe = pendingQuestion?.targetPlayer === myPlayer.id;
-  const isIWaitingForAnswer = pendingQuestion?.askedBy === myPlayer.id;
-  const isFreeform = game.settings?.questionMode === "FREEFORM";
-
-  const turnOwner: "you" | "opponent" | "opponent-thinking" | "freeform" = isFreeform
-    ? "freeform"
-    : isOpponentAskingMe
-      ? "opponent"
-      : isMyTurn
-        ? "you"
-        : "opponent-thinking";
-
-  const cachedSecretAgent =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem(`secret_agent_${game.id}`)
-      : null;
-  const secretAgentId = myPlayer.state?.secretAgent || cachedSecretAgent;
-  const activeSecretAgent =
-    AGENTS.find((a) => a.id === secretAgentId) || AGENTS[0];
-
-  // Render Match Intro (Card Roulette & VS screen) before gameplay begins
+  // 2. Match Intro Overlay
   if (!hasCompletedIntro || game.status === "STARTING") {
     return (
       <MatchIntroOverlay
@@ -165,11 +130,10 @@ function PlayContent() {
     );
   }
 
-  // Render Match Ending Sequence (Victory/Defeat/Draw cinematic face-off)
+  // 3. Match Ending Sequence Overlay
   if (game.status === "FINISHED") {
     const result = game.state?.result ?? game.result;
-    const isVictory =
-      result?.result === "WIN" && result.winnerId === myPlayer.id;
+    const isVictory = result?.result === "WIN" && result.winnerId === myPlayer.id;
     const isTie = result?.result === "TIE";
 
     return (
@@ -191,132 +155,10 @@ function PlayContent() {
     );
   }
 
-  const questionPoolIds = game.settings?.questionPool || [];
-  const gameQuestions: QuestionItem[] =
-    questionPoolIds.length > 0
-      ? questionPoolIds.map(
-          (id) =>
-            getQuestionById(id) || {
-              id,
-              label: id,
-              category: "utility" as const,
-              difficulty: "low" as const,
-            }
-        )
-      : getRandomQuestions(
-          game.settings?.questionCount || 15,
-          game.id || gameState?.startedAt || game.startedAt
-        );
-
-  const opponentQuestionObj = pendingQuestion
-    ? getQuestionById(pendingQuestion.questionId) || {
-        id: pendingQuestion.questionId,
-        label: pendingQuestion.questionId,
-        category: "utility" as const,
-        difficulty: "low" as const,
-        description: `Characteristic: "${pendingQuestion.questionId}"`,
-      }
-    : null;
-
-  const gameHistory = gameState?.history ?? game.history ?? [];
-  const askedQuestionsMap: Record<string, "yes" | "no"> = {};
-  gameHistory.forEach((h) => {
-    if (h.askedBy === myPlayer.id) {
-      askedQuestionsMap[h.questionId] = h.answer.toLowerCase() as "yes" | "no";
-    }
-  });
-
-  const activity: ActivityEntry[] = gameHistory.flatMap((h, i) => {
-    const isMyQuestion = h.askedBy === myPlayer.id;
-    const qLabel = getQuestionLabel(h.questionId);
-    const timeStr = new Date(h.timestamp).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    return [
-      {
-        id: `${i}-ask`,
-        kind: "asked",
-        actor: isMyQuestion ? "you" : "opponent",
-        text: `${qLabel}?`,
-        time: timeStr,
-      },
-      {
-        id: `${i}-ans`,
-        kind: h.answer === "YES" ? "answered-yes" : "answered-no",
-        actor: isMyQuestion ? "opponent" : "you",
-        text: h.answer === "YES" ? "Yes" : "No",
-        time: timeStr,
-      },
-    ];
-  });
-
-  const handleAskQuestion = (q: QuestionItem) => {
-    if (game && isMyTurn && !pendingQuestion && !isAsking) {
-      setIsAsking(true);
-      setErrorMsg(null);
-      sendAskQuestion(q.id);
-    }
-  };
-
-  const handleAnswerQuestion = (answer: "yes" | "no") => {
-    if (game && isOpponentAskingMe && !isAnswering) {
-      setIsAnswering(true);
-      setErrorMsg(null);
-      sendAnswerQuestion(answer.toUpperCase() as "YES" | "NO");
-    }
-  };
-
-  const handleConsumeNo = () => {
-    if (!isConsumingNo && (myPlayer.state?.nosRemaining ?? 0) > 0) {
-      setIsConsumingNo(true);
-      consumeNo();
-      setTimeout(() => setIsConsumingNo(false), 600);
-    }
-  };
-
-  const handleToggleEliminated = (id: string) => {
-    setEliminatedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const handleGuessConfirm = (agentId: string) => {
-    if (!game) return;
-    if (isFreeform) {
-      if ((myPlayer.state?.guessesRemaining ?? 0) <= 0) return;
-    } else {
-      if (!isMyTurn) return;
-    }
-    submitGuess(agentId);
-    setShowGuessModal(false);
-  };
-
-  const handleLeaveGame = () => {
-    leaveGame();
-    clearGame();
-    router.replace("/lobby");
-  };
-
-  const turnNumber = gameState?.turnNumber ?? game.turnNumber ?? 1;
-  const currentRound = Math.max(1, Math.ceil(turnNumber / 2));
-
-  const nosMax = game.settings?.maxNos ?? 5;
-  const userNosUsed = Math.max(
-    0,
-    nosMax - (myPlayer?.state?.nosRemaining ?? nosMax)
-  );
-  const opponentNosUsed = Math.max(
-    0,
-    nosMax - (opponentPlayer?.state?.nosRemaining ?? nosMax)
-  );
-
+  // 4. Main Tactical Match Screen
   return (
     <main className="min-h-screen bg-base-950">
+      {/* Top Match Header */}
       <GameHeader
         turnOwner={turnOwner}
         userNosUsed={userNosUsed}
@@ -329,6 +171,7 @@ function PlayContent() {
         onLeave={() => setShowLeaveModal(true)}
       />
 
+      {/* Error Message Toast */}
       {errorMsg && (
         <div className="w-full max-w-xl mx-auto mt-4 px-4">
           <div className="bg-[#FF4655]/15 border border-[#FF4655]/40 text-[#FF4655] text-xs font-display font-bold uppercase tracking-wider p-3 rounded text-center shadow-lg animate-pulse">
@@ -337,8 +180,9 @@ function PlayContent() {
         </div>
       )}
 
+      {/* Three-Column Tactical Layout */}
       <div className="grid grid-cols-[300px_1fr_320px] gap-5 p-6 font-body">
-        {/* Left Side: secret agent details */}
+        {/* Left Column: Your Secret Agent & Leave Game Action */}
         <div className="flex flex-col gap-4">
           <SecretAgentCard
             agent={activeSecretAgent}
@@ -357,7 +201,7 @@ function PlayContent() {
           </button>
         </div>
 
-        {/* Center Panel: Question Panel / Opponent Asked Card / Freeform Panel */}
+        {/* Center Column: Questions Panel or Opponent Prompt + Agent Elimination Grid */}
         <div className="flex flex-col">
           {isFreeform ? (
             <FreeformTurnPanel
@@ -391,79 +235,11 @@ function PlayContent() {
               )}
 
               {isOpponentAskingMe && opponentQuestionObj && (
-                <div className="clip-notch-both flex flex-col border border-accent/20 bg-base-850 p-6 shadow-[0_0_24px_rgba(255,70,85,0.1)] relative min-h-[300px] justify-between mb-5">
-                  {/* Corner accent decorations */}
-                  <div className="absolute left-0 top-0 h-4 w-4">
-                    <div className="absolute left-0 top-0 h-px w-4 bg-accent/60" />
-                    <div className="absolute left-0 top-0 h-4 w-px bg-accent/60" />
-                  </div>
-                  <div className="absolute right-0 top-0 h-4 w-4">
-                    <div className="absolute right-0 top-0 h-px w-4 bg-accent/60" />
-                    <div className="absolute right-0 top-0 h-4 w-px bg-accent/60" />
-                  </div>
-
-                  {/* Tag / Header */}
-                  <div className="flex justify-center items-center gap-2 mb-6">
-                    <span className="text-accent font-display text-xs tracking-[0.25em] font-semibold">{`{`}</span>
-                    <span className="text-accent font-display text-sm tracking-[0.25em] font-bold uppercase">
-                      OPPONENT ASKED
-                    </span>
-                    <span className="text-accent font-display text-xs tracking-[0.25em] font-semibold">{`}`}</span>
-                  </div>
-
-                  {/* Question text */}
-                  <div className="text-center my-auto flex flex-col gap-2">
-                    <h2 className="text-white font-display text-4xl md:text-5xl font-black uppercase tracking-[0.05em]">
-                      {opponentQuestionObj.label.toUpperCase()}?
-                    </h2>
-                    <p className="text-ink-400 text-sm max-w-md mx-auto leading-relaxed">
-                      {opponentQuestionObj.description ||
-                        `Does your secret agent match the characteristic: "${opponentQuestionObj.label}"?`}
-                    </p>
-                  </div>
-
-                  {/* Options */}
-                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 mt-8">
-                    {/* YES Button */}
-                    <button
-                      onClick={() => handleAnswerQuestion("yes")}
-                      disabled={isAnswering}
-                      className={cn(
-                        "flex items-center justify-center gap-3 rounded-sm border-2 border-mint bg-mint/5 py-4 px-6 text-mint transition-all duration-200 hover:bg-mint/15 font-display text-xl font-bold uppercase tracking-widest cursor-pointer",
-                        isAnswering && "opacity-50 cursor-not-allowed"
-                      )}
-                    >
-                      {isAnswering ? (
-                        <Loader2 className="h-5 w-5 animate-spin text-mint" />
-                      ) : (
-                        <Check className="h-5 w-5 stroke-[3.5]" />
-                      )}
-                      YES
-                    </button>
-
-                    {/* OR divider */}
-                    <span className="text-ink-600 font-display text-xs tracking-widest uppercase select-none px-2">
-                      — OR —
-                    </span>
-
-                    {/* NO Button */}
-                    <button
-                      onClick={() => handleAnswerQuestion("no")}
-                      disabled={isAnswering}
-                      className={cn(
-                        "flex items-center justify-center gap-3 rounded-sm border-2 border-accent bg-accent/5 py-4 px-6 text-accent transition-all duration-200 hover:bg-accent/15 font-display text-xl font-bold uppercase tracking-widest cursor-pointer",
-                        isAnswering && "opacity-50 cursor-not-allowed"
-                      )}
-                    >
-                      {isAnswering ? (
-                        <Loader2 className="h-5 w-5 animate-spin text-accent" />
-                      ) : (
-                        <X className="h-5 w-5 stroke-[3.5]" />
-                      )}
-                      NO
-                    </button>
-                  </div>
-                </div>
+                <OpponentQuestionPrompt
+                  question={opponentQuestionObj}
+                  isAnswering={isAnswering}
+                  onAnswer={handleAnswerQuestion}
+                />
               )}
             </>
           )}
@@ -475,7 +251,7 @@ function PlayContent() {
           />
         </div>
 
-        {/* Right Side: activity feed */}
+        {/* Right Column: Live Match Activity Feed */}
         <div className="h-[calc(100vh-220px)]">
           <ActivityFeed
             entries={activity}
@@ -486,70 +262,34 @@ function PlayContent() {
         </div>
       </div>
 
-      {/* TACTICAL FINAL GUESS MODAL */}
+      {/* Agent Final Guess Modal */}
       <AgentGuessModal
         isOpen={showGuessModal}
         onClose={() => setShowGuessModal(false)}
-        onConfirmGuess={handleGuessConfirm}
+        onConfirmGuess={(agentId) => {
+          handleGuessConfirm(agentId);
+          setShowGuessModal(false);
+        }}
         eliminatedIds={eliminatedIds}
         guessesRemaining={myPlayer?.state?.guessesRemaining ?? 0}
       />
 
-      {/* LEAVE MATCH CONFIRMATION MODAL */}
-      <Dialog open={showLeaveModal} onOpenChange={setShowLeaveModal}>
-        <DialogContent className="bg-[#090d14]/95 border border-[#FF4655]/40 max-w-sm p-6 text-center text-white backdrop-blur-xl shadow-[0_0_35px_rgba(255,70,85,0.25)] rounded-sm">
-          <div className="flex flex-col items-center">
-            <div className="h-12 w-12 rounded-full border border-[#FF4655]/60 bg-[#FF4655]/15 flex items-center justify-center mb-4 text-[#FF4655] shadow-[0_0_15px_rgba(255,70,85,0.3)]">
-              <LogOut className="h-6 w-6" />
-            </div>
-            <h3 className="font-valorant text-xl tracking-wider text-white mb-2">
-              LEAVE MATCH?
-            </h3>
-            <p className="text-xs text-white/60 mb-6 font-medium">
-              Are you sure you want to exit the match? Leaving will forfeit your current duel and return you to the lobby.
-            </p>
-            <div className="flex items-center justify-center gap-3 w-full">
-              <button
-                onClick={() => setShowLeaveModal(false)}
-                className="flex-1 py-2.5 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white font-display text-xs font-bold uppercase tracking-wider transition cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleLeaveGame}
-                className="flex-1 py-2.5 rounded-sm border border-[#FF4655] bg-[#FF4655] hover:bg-[#e03847] text-white font-display text-xs font-bold uppercase tracking-wider transition cursor-pointer shadow-[0_0_12px_rgba(255,70,85,0.4)]"
-              >
-                Leave Match
-              </button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Leave Game Confirmation Modal */}
+      <LeaveGameDialog
+        isOpen={showLeaveModal}
+        onOpenChange={setShowLeaveModal}
+        onConfirmLeave={handleLeaveGame}
+      />
 
-      {/* IN-GAME FLOATING PARTY CHAT */}
+      {/* Floating Party Chat Overlay */}
       <PartyChatOverlay className="bottom-6 left-6" />
     </main>
   );
 }
 
-export default function Page() {
+export default function PlayPage() {
   return (
-    <Suspense
-      fallback={
-        <main className="min-h-screen bg-base-950 flex flex-col items-center justify-center text-white select-none">
-          <div className="flex flex-col items-center gap-3">
-            <svg viewBox="0 0 100 100" className="w-12 h-12 animate-pulse">
-              <path d="M15 15 L45 15 L25 85 Z" fill="#FFFFFF" />
-              <path d="M32 15 L52 15 L37 75 Z" fill="#FF4655" />
-              <path d="M58 15 L88 15 L78 85 Z" fill="#FF4655" />
-            </svg>
-            <span className="font-valorant text-xs text-white/50 tracking-widest mt-2">
-              Loading Game...
-            </span>
-          </div>
-        </main>
-      }
-    >
+    <Suspense fallback={<PlayLoadingScreen />}>
       <PlayContent />
     </Suspense>
   );

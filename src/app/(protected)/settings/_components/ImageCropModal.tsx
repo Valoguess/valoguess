@@ -78,7 +78,7 @@ export function ImageCropModal({
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoom((prev) => Math.min(3, Math.max(1, +(prev + delta).toFixed(2))));
+    setZoom((prev) => Math.min(4, Math.max(0.5, +(prev + delta).toFixed(2))));
   };
 
   // Rotate 90 degrees
@@ -99,7 +99,8 @@ export function ImageCropModal({
 
     const img = imageRef.current;
     const container = containerRef.current;
-    const containerSize = container.clientWidth; // typically 320px
+    const containerRect = container.getBoundingClientRect();
+    const containerSize = containerRect.width;
 
     const canvas = document.createElement("canvas");
     canvas.width = 500;
@@ -107,44 +108,65 @@ export function ImageCropModal({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Scale factor from preview container to 500px output
-    const scaleFactor = 500 / containerSize;
+    // The circular guide mask is drawn in viewBox="0 0 100 100" with r="46" (radius = 46% of containerSize)
+    // The diameter of the circle is 92% of containerSize
+    const cropCircleDiameter = containerSize * 0.92;
 
+    // Scale factor from the on-screen crop bounding box to the 500x500 canvas
+    const outputScale = 500 / cropCircleDiameter;
+
+    // Unrotated base dimensions rendered by CSS object-contain inside containerSize x containerSize
+    const naturalWidth = img.naturalWidth;
+    const naturalHeight = img.naturalHeight;
+    const containRatio = Math.min(containerSize / naturalWidth, containerSize / naturalHeight);
+    const baseWidth = naturalWidth * containRatio;
+    const baseHeight = naturalHeight * containRatio;
+
+    // Fill background with black to match the modal and Valo theme
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, 500, 500);
 
-    // Save context and apply center-based transforms
     ctx.save();
-    ctx.translate(250, 250);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    // 1. Move to the center of the image on the output canvas:
+    // On screen, the crop circle center is (containerSize / 2, containerSize / 2), which maps to (250, 250).
+    // The image was offset from that center by (pan.x, pan.y).
+    const canvasCenterX = 250 + pan.x * outputScale;
+    const canvasCenterY = 250 + pan.y * outputScale;
+    ctx.translate(canvasCenterX, canvasCenterY);
+
+    // 2. Rotate around the image center
     ctx.rotate((rotation * Math.PI) / 180);
+
+    // 3. Scale by zoom around the image center
     ctx.scale(zoom, zoom);
-    ctx.translate(pan.x * scaleFactor, pan.y * scaleFactor);
 
-    // Calculate dimensions maintaining aspect ratio to fit the container
-    const isSideways = rotation === 90 || rotation === 270;
-    const naturalWidth = isSideways ? img.naturalHeight : img.naturalWidth;
-    const naturalHeight = isSideways ? img.naturalWidth : img.naturalHeight;
-
-    const ratio = Math.max(containerSize / naturalWidth, containerSize / naturalHeight);
-    const drawWidth = img.naturalWidth * ratio * scaleFactor;
-    const drawHeight = img.naturalHeight * ratio * scaleFactor;
-
+    // 4. Draw image centered at (0, 0)
+    const drawWidth = baseWidth * outputScale;
+    const drawHeight = baseHeight * outputScale;
     ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+
     ctx.restore();
 
-    // Export to File
+    // Export high-quality image File
+    const isPng = imageFile?.type === "image/png";
+    const exportType = isPng ? "image/png" : "image/jpeg";
+    const exportQuality = isPng ? undefined : 0.95;
+
     canvas.toBlob(
       (blob) => {
         if (!blob) return;
         const croppedFile = new File([blob], imageFile?.name || "avatar.jpg", {
-          type: "image/jpeg",
+          type: exportType,
           lastModified: Date.now(),
         });
         onApplyCrop(croppedFile);
         onClose();
       },
-      "image/jpeg",
-      0.92
+      exportType,
+      exportQuality
     );
   }, [imageFile, onApplyCrop, onClose, pan, rotation, zoom]);
 
@@ -202,7 +224,10 @@ export function ImageCropModal({
                   transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom}) rotate(${rotation}deg)`,
                   transformOrigin: "center center",
                 }}
-                className="absolute inset-0 m-auto max-w-none max-h-none object-contain w-full h-full pointer-events-none transition-transform duration-75"
+                className={cn(
+                  "absolute inset-0 m-auto max-w-none max-h-none object-contain w-full h-full pointer-events-none",
+                  isDragging ? "transition-none" : "transition-transform duration-100"
+                )}
               />
             )}
 
@@ -253,7 +278,7 @@ export function ImageCropModal({
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => setZoom((z) => Math.max(1, +(z - 0.2).toFixed(2)))}
+                onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.2).toFixed(2)))}
                 className="p-1 hover:bg-white/10 text-white/60 hover:text-white rounded transition cursor-pointer"
                 title="Zoom Out"
               >
@@ -262,8 +287,8 @@ export function ImageCropModal({
 
               <input
                 type="range"
-                min="1"
-                max="3"
+                min="0.5"
+                max="4"
                 step="0.05"
                 value={zoom}
                 onChange={(e) => setZoom(parseFloat(e.target.value))}
@@ -272,7 +297,7 @@ export function ImageCropModal({
 
               <button
                 type="button"
-                onClick={() => setZoom((z) => Math.min(3, +(z + 0.2).toFixed(2)))}
+                onClick={() => setZoom((z) => Math.min(4, +(z + 0.2).toFixed(2)))}
                 className="p-1 hover:bg-white/10 text-white/60 hover:text-white rounded transition cursor-pointer"
                 title="Zoom In"
               >

@@ -192,8 +192,8 @@ export default function WelcomePage() {
       if (session?.user?.id) {
         await updateUser({ name: finalDisplayName, username: finalUsername });
       }
-    } catch (err) {
-      console.error("Failed to update user profile in DB:", err);
+    } catch {
+      // Graceful fallback if database update fails
     }
 
     setUser({

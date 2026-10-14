@@ -36,7 +36,6 @@ function SignupContent() {
     try {
       await googleSignIn("/welcome");
     } catch (err: any) {
-      console.error("Google sign-up error:", err);
       setErrorMessage(err?.message || "Failed to initialize Google authentication.");
       setIsLoadingGoogle(false);
     }
@@ -51,7 +50,6 @@ function SignupContent() {
       await signIn.anonymous();
       router.replace("/welcome");
     } catch (err: any) {
-      console.error("Anonymous registration error:", err);
       setErrorMessage(err?.message || "Failed to initialize guest session.");
     } finally {
       setIsLoadingGuest(false);

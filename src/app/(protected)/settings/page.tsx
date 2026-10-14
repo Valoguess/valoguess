@@ -2,25 +2,29 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  User,
-  Shield,
-  Image as ImageIcon,
-  ArrowLeft,
-  LogOut,
-} from "lucide-react";
+import { User, Shield, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useAuthStore } from "@/store/authStore";
-import { updateUser } from "@/actions/user";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { updateUser, updateUserProfile } from "@/actions/user";
 import { AGENT_BANNERS } from "./constants";
 import { ProfileCardPreview } from "./_components/ProfileCardPreview";
 import { IdentitySettingsTab } from "./_components/IdentitySettingsTab";
 import { BannerTaglineTab } from "./_components/BannerTaglineTab";
 import { PrivacyAccountTab } from "./_components/PrivacyAccountTab";
+import { SettingsHeader } from "./_components/SettingsHeader";
+import { LogoutConfirmationModal } from "./_components/LogoutConfirmationModal";
+import { socket } from "@/socket";
+
+function getDaysRemaining(updatedAt?: Date | string | null): number {
+  if (!updatedAt) return 0;
+  const lastChange = new Date(updatedAt).getTime();
+  if (Number.isNaN(lastChange)) return 0;
+  const elapsedMs = Date.now() - lastChange;
+  const elapsedDays = Math.floor(elapsedMs / (1000 * 60 * 60 * 24));
+  return Math.max(0, 30 - elapsedDays);
+}
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -35,13 +39,13 @@ export default function SettingsPage() {
     return Boolean(user?.name?.startsWith("Guest") || session?.user?.name?.startsWith("Guest"));
   }, [user, session]);
 
-  // Form states
+  // Form states initialized directly from user schema
   const [name, setName] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [tagline, setTagline] = useState<string>("");
   const [selectedBannerId, setSelectedBannerId] = useState<string>("omen");
 
-  // 30-Day Cooldown states (in days remaining, 0 means eligible)
+  // Cooldown states calculated from database timestamps
   const [nameCooldownDays, setNameCooldownDays] = useState<number>(0);
   const [usernameCooldownDays, setUsernameCooldownDays] = useState<number>(0);
 
@@ -60,7 +64,7 @@ export default function SettingsPage() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Load initial settings from user
+  // Load initial settings from user store and database fields
   useEffect(() => {
     const initialName = user?.name || "AGENT";
     setName(initialName);
@@ -70,41 +74,22 @@ export default function SettingsPage() {
       (initialName.toLowerCase().replace(/[^a-z0-9_]/g, "") || "agent_001");
     setUsername(initialUsername.replace(/^@/, ""));
 
-    const savedTagline = typeof window !== "undefined" ? localStorage.getItem("valoguess_tagline") : null;
-    setTagline(savedTagline || "CLUTCH SPECIALIST");
+    setTagline(user?.tagline || "CLUTCH SPECIALIST");
 
-    const savedBanner = typeof window !== "undefined" ? localStorage.getItem("valoguess_banner") : null;
-    if (savedBanner && AGENT_BANNERS.some((b) => b.id === savedBanner)) {
-      setSelectedBannerId(savedBanner);
+    if (user?.banner && AGENT_BANNERS.some((b) => b.id === user.banner)) {
+      setSelectedBannerId(user.banner);
     }
 
-    if (typeof window !== "undefined") {
-      const lastUsernameChange = localStorage.getItem("valoguess_username_last_changed");
-      if (lastUsernameChange) {
-        const diffMs = Date.now() - parseInt(lastUsernameChange, 10);
-        const daysPassed = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        setUsernameCooldownDays(Math.max(0, 30 - daysPassed));
-      } else {
-        setUsernameCooldownDays(0);
-      }
-
-      const lastNameChange = localStorage.getItem("valoguess_name_last_changed");
-      if (lastNameChange) {
-        const diffMs = Date.now() - parseInt(lastNameChange, 10);
-        const daysPassed = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        setNameCooldownDays(Math.max(0, 30 - daysPassed));
-      } else {
-        setNameCooldownDays(0);
-      }
-    }
+    setNameCooldownDays(getDaysRemaining(user?.nameUpdatedAt));
+    setUsernameCooldownDays(getDaysRemaining(user?.usernameUpdatedAt));
   }, [user]);
 
   // Selected banner object
   const currentBanner = useMemo(() => {
-    return AGENT_BANNERS.find((b) => b.id === selectedBannerId) || AGENT_BANNERS[0];
+    return AGENT_BANNERS.find((b) => b.id === selectedBannerId) || AGENT_BANNERS[0]!;
   }, [selectedBannerId]);
 
-  // Filtered banners
+  // Filtered banners list
   const filteredBanners = useMemo(() => {
     return AGENT_BANNERS.filter((b) => {
       const matchesRole = selectedRole === "ALL" || b.role.toUpperCase() === selectedRole.toUpperCase();
@@ -115,40 +100,56 @@ export default function SettingsPage() {
     });
   }, [selectedRole, bannerSearch]);
 
-  // Save handler
+  // Save handler using database server actions
   const handleSaveSettings = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setIsSaving(true);
 
     try {
+      const nextName = name.trim();
+      const nextUsername = username.trim();
+      const nextTagline = tagline.trim();
+      const nextBanner = selectedBannerId;
+
       if (session?.user?.id) {
-        await updateUser({ name: name.trim(), username: username.trim() });
+        // Save identity changes
+        if (nextName !== user?.name || nextUsername !== user?.username) {
+          const res = await updateUser({ name: nextName, username: nextUsername });
+
+          if (res.success && socket.connected) { 
+            socket.disconnect().connect();
+          }
+        }
+
+        // Save profile customisations (banner, tagline)
+        if (nextBanner !== user?.banner || nextTagline !== user?.tagline) {
+          const res = await updateUserProfile({ banner: nextBanner, tagline: nextTagline });
+          if (res.success && socket.connected) { 
+            socket.disconnect().connect();
+          }
+        }
       }
 
       if (user) {
         setUser({
           ...user,
-          name: name.trim(),
-          username: username.trim(),
+          name: nextName,
+          username: nextUsername,
+          tagline: nextTagline,
+          banner: nextBanner,
+          nameUpdatedAt: nextName !== user.name ? new Date() : user.nameUpdatedAt,
+          usernameUpdatedAt: nextUsername !== user.username ? new Date() : user.usernameUpdatedAt,
         });
       }
 
-      if (typeof window !== "undefined") {
-        localStorage.setItem("valoguess_tagline", tagline.trim());
-        localStorage.setItem("valoguess_banner", selectedBannerId);
-
-        if (usernameCooldownDays === 0 && username.trim()) {
-          localStorage.setItem("valoguess_username_last_changed", Date.now().toString());
-          setUsernameCooldownDays(30);
-        }
-
-        if (nameCooldownDays === 0 && name.trim()) {
-          localStorage.setItem("valoguess_name_last_changed", Date.now().toString());
-          setNameCooldownDays(30);
-        }
+      if (nextUsername !== user?.username && usernameCooldownDays === 0) {
+        setUsernameCooldownDays(30);
+      }
+      if (nextName !== user?.name && nameCooldownDays === 0) {
+        setNameCooldownDays(30);
       }
 
-      setSaveToast("Settings saved successfully!");
+      setSaveToast("Profile settings saved successfully!");
       setTimeout(() => setSaveToast(""), 4000);
     } catch {
       setSaveToast("Failed to save settings. Please try again.");
@@ -165,8 +166,7 @@ export default function SettingsPage() {
       await signOut();
       clearUser();
       router.replace("/login");
-    } catch (err) {
-      console.error("Logout error:", err);
+    } catch {
       clearUser();
       router.replace("/login");
     } finally {
@@ -175,30 +175,9 @@ export default function SettingsPage() {
     }
   };
 
-  // Cooldown debug test toggles
-  const toggleUsernameCooldownDemo = () => {
-    if (usernameCooldownDays > 0) {
-      setUsernameCooldownDays(0);
-      localStorage.removeItem("valoguess_username_last_changed");
-    } else {
-      setUsernameCooldownDays(24);
-      localStorage.setItem("valoguess_username_last_changed", (Date.now() - 6 * 24 * 60 * 60 * 1000).toString());
-    }
-  };
-
-  const toggleNameCooldownDemo = () => {
-    if (nameCooldownDays > 0) {
-      setNameCooldownDays(0);
-      localStorage.removeItem("valoguess_name_last_changed");
-    } else {
-      setNameCooldownDays(19);
-      localStorage.setItem("valoguess_name_last_changed", (Date.now() - 11 * 24 * 60 * 60 * 1000).toString());
-    }
-  };
-
   return (
     <main className="relative min-h-screen w-full bg-[#040609] text-white flex flex-col font-body selection:bg-accent selection:text-white overflow-x-hidden">
-      {/* BACKGROUND GRAPHICS */}
+      {/* Background artwork */}
       <div className="fixed inset-0 z-0 select-none pointer-events-none">
         <Image
           src="/bg/bg2.png"
@@ -212,43 +191,12 @@ export default function SettingsPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,transparent_20%,#040609_90%)]" />
       </div>
 
-      {/* 1. STICKY TOP HEADER NAVIGATION BAR */}
-      <header className="sticky top-0 z-30 w-full h-16 bg-[#080B10]/95 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between shrink-0 shadow-lg">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/lobby"
-            className="flex items-center gap-2 text-xs font-display font-bold uppercase tracking-wider text-white/60 hover:text-white transition py-1.5 px-3 rounded-sm border border-white/10 bg-white/3 hover:bg-white/8 cursor-pointer"
-          >
-            <ArrowLeft className="h-4 w-4 text-accent" />
-            <span>BACK TO LOBBY</span>
-          </Link>
+      {/* Header bar */}
+      <SettingsHeader onOpenLogout={() => setShowLogoutModal(true)} />
 
-          <div className="h-4 w-px bg-white/15 hidden sm:block" />
-
-          <div className="flex items-center gap-2 font-valorant">
-            <span className="text-sm tracking-widest text-white">SETTINGS</span>
-            <span className="text-[10px] tracking-widest text-accent font-mono bg-accent/10 px-2 py-0.5 rounded border border-accent/20">
-              PROFILE & PRIVACY
-            </span>
-          </div>
-        </div>
-
-        {/* Header Actions: Logout Button */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowLogoutModal(true)}
-            className="py-2 px-3.5 rounded-sm border border-white/10 bg-white/3 hover:bg-[#FF4655]/15 hover:border-[#FF4655]/40 text-white/60 hover:text-[#FF4655] font-display text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer"
-            title="Log out of account"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">LOG OUT</span>
-          </button>
-        </div>
-      </header>
-
-      {/* 2. MAIN SETTINGS CONTAINER */}
+      {/* Main Settings Content */}
       <div className="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 py-8 flex flex-col gap-8 pb-16">
-        {/* TOP HERO: LIVE PLAYER CARD PREVIEW */}
+        {/* Live Player Card Preview */}
         <ProfileCardPreview
           currentBanner={currentBanner}
           name={name}
@@ -257,7 +205,7 @@ export default function SettingsPage() {
           avatarUrl={user?.image}
         />
 
-        {/* NAVIGATION TABS */}
+        {/* Tab Selection */}
         <div className="flex items-center border-b border-white/10 gap-2 pb-1">
           <button
             onClick={() => setActiveTab("identity")}
@@ -299,18 +247,18 @@ export default function SettingsPage() {
           </button>
         </div>
 
-        {/* TAB 1: IDENTITY */}
+        {/* Tab Panels */}
         {activeTab === "identity" && (
           <IdentitySettingsTab
             isAnonymous={isAnonymous}
             username={username}
             setUsername={setUsername}
             usernameCooldownDays={usernameCooldownDays}
-            toggleUsernameCooldownDemo={toggleUsernameCooldownDemo}
+            toggleUsernameCooldownDemo={() => setUsernameCooldownDays((prev) => (prev > 0 ? 0 : 24))}
             name={name}
             setName={setName}
             nameCooldownDays={nameCooldownDays}
-            toggleNameCooldownDemo={toggleNameCooldownDemo}
+            toggleNameCooldownDemo={() => setNameCooldownDays((prev) => (prev > 0 ? 0 : 19))}
             defaultIconPath={currentBanner.iconPath}
             onSave={() => handleSaveSettings()}
             isSaving={isSaving}
@@ -318,7 +266,6 @@ export default function SettingsPage() {
           />
         )}
 
-        {/* TAB 2: BANNER & TAGLINE */}
         {activeTab === "banner" && (
           <BannerTaglineTab
             tagline={tagline}
@@ -336,7 +283,6 @@ export default function SettingsPage() {
           />
         )}
 
-        {/* TAB 3: PRIVACY & ACCOUNT */}
         {activeTab === "privacy" && (
           <PrivacyAccountTab
             currentBanner={currentBanner}
@@ -349,64 +295,14 @@ export default function SettingsPage() {
         )}
       </div>
 
-      {/* LOGOUT CONFIRMATION MODAL */}
-      <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
-        <DialogContent
-          showCloseButton={false}
-          className="bg-[#0b0e14]/95 border border-white/10 max-w-sm p-6 shadow-[0_0_50px_rgba(0,0,0,0.9)] backdrop-blur-xl rounded-none relative overflow-hidden"
-        >
-          {/* Top Valorant-style red accent bar */}
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#FF4655]" />
-
-          <div className="flex flex-col items-center text-center space-y-4 pt-1">
-            <div className="h-12 w-12 rounded-full bg-[#FF4655]/10 border border-[#FF4655]/30 flex items-center justify-center text-[#FF4655] shadow-[0_0_20px_rgba(255,70,85,0.2)]">
-              <LogOut className="h-6 w-6" />
-            </div>
-
-            <div className="space-y-1">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-[#FF4655] font-bold">
-                SESSION TERMINATION
-              </div>
-              <h3 className="font-valorant text-lg tracking-wider text-white">
-                LOG OUT OF VALOGUESS?
-              </h3>
-            </div>
-
-            <p className="text-xs text-zinc-400 leading-relaxed max-w-[280px]">
-              {isAnonymous
-                ? "You are using a guest session. Logging out will clear your local guest session and return you to the sign-in screen."
-                : "Are you sure you want to end your session? You will need to sign in again to access party duels and saved stats."}
-            </p>
-
-            <div className="flex items-center gap-2.5 w-full pt-2">
-              <button
-                type="button"
-                disabled={isLoggingOut}
-                onClick={() => setShowLogoutModal(false)}
-                className="flex-1 py-2.5 px-4 bg-white/5 hover:bg-white/10 border border-white/15 text-white/80 hover:text-white font-display text-xs font-bold uppercase tracking-wider rounded-xs transition cursor-pointer disabled:opacity-50"
-              >
-                CANCEL
-              </button>
-
-              <button
-                type="button"
-                disabled={isLoggingOut}
-                onClick={handleLogout}
-                className="flex-1 py-2.5 px-4 bg-[#FF4655] hover:bg-[#FF4655]/90 text-white font-display text-xs font-bold uppercase tracking-wider rounded-xs shadow-[0_0_15px_rgba(255,70,85,0.4)] transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
-              >
-                {isLoggingOut ? (
-                  <span className="animate-pulse">LOGGING OUT...</span>
-                ) : (
-                  <>
-                    <LogOut className="h-3.5 w-3.5" />
-                    <span>LOG OUT</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Logout confirmation dialog */}
+      <LogoutConfirmationModal
+        isOpen={showLogoutModal}
+        onOpenChange={setShowLogoutModal}
+        isAnonymous={isAnonymous}
+        isLoggingOut={isLoggingOut}
+        onConfirmLogout={handleLogout}
+      />
     </main>
   );
 }

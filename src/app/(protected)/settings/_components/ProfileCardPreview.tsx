@@ -68,7 +68,7 @@ export function ProfileCardPreview({
                 src={displayAvatar}
                 alt={name || "Agent"}
                 fill
-                className="object-cover object-top"
+                className="object-cover object-center"
               />
               <div className="absolute bottom-0 right-0 h-3 w-3 bg-mint rounded-tl-sm border-t border-l border-black shadow-[0_0_8px_#3cf2c4]" />
             </div>

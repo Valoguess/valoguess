@@ -122,8 +122,8 @@ export function useFriends(user: StoreUser | null) {
 
       setRawFriends(friends);
       setFriendRequests([...receivedRequests, ...sentRequests]);
-    } catch (err) {
-      console.error("Failed to load friends:", err);
+    } catch {
+      // Graceful fallback on network/session error
     }
   }, [user]);
 

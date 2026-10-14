@@ -1,29 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
-import { socket } from "@/socket";
 import { usePartyStore } from "@/store/partyStore";
-import { useGameStore } from "@/store/gameStore";
-import {
-  createParty,
-  leaveParty,
-  kickPlayerFromParty,
-  sendInviteToParty,
-  acceptInviteToParty,
-  declineInviteToParty,
-  createGame,
-  startGame,
-} from "@/socket/emitter";
-import { cn } from "@/lib/utils";
-import { ServerEvents } from "@/socket/events";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useAuthStore } from "@/store/authStore";
-import { useInviteStore } from "@/store/inviteStore";
-import { Message, Friend } from "./_components/types";
 import { useFriends } from "@/hooks/useFriends";
+import { useGameSettingsStore } from "@/store/gameSettingsStore";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { LobbyHeader } from "./_components/LobbyHeader";
 import { LobbySubheader } from "./_components/LobbySubheader";
 import { LobbyLeftPanel } from "./_components/LobbyLeftPanel";
@@ -32,26 +16,15 @@ import { LobbyFriendsSidebar } from "./_components/LobbyFriendsSidebar";
 import { PartyChatOverlay } from "@/components/chat/PartyChatOverlay";
 import { LobbySettings } from "./_components/LobbySettings";
 import { HowToPlayModal } from "./_components/HowToPlayModal";
-import { useGameSettingsStore } from "@/store/gameSettingsStore";
-
-
+import { useLobbyParty } from "./_hooks/useLobbyParty";
+import { useLobbyGameLifecycle } from "./_hooks/useLobbyGameLifecycle";
 
 export default function LobbyPage() {
-  const router = useRouter();
-  const { party, clearParty, partyMessages } = usePartyStore();
-  const { game, clearGame } = useGameStore();
+  const { party } = usePartyStore();
   const { user } = useAuthStore();
-
-  const startedGameRef = useRef<string | null>(null);
 
   const [savedUsername, setSavedUsername] = useState<string>("AGENT");
   const [isClient, setIsClient] = useState(false);
-
-  // Form & Party code state
-  const [partyInput, setPartyInput] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [isCreatingOrJoining, setIsCreatingOrJoining] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
 
   // Friends Menu Collapsible State (closed by default)
   const [isFriendsCollapsed, setIsFriendsCollapsed] = useState(true);
@@ -59,9 +32,8 @@ export default function LobbyPage() {
   // Modals & Drawers state
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [showChatDrawer, setShowChatDrawer] = useState(false);
 
-  // Gamemode & Match Settings State (persisted in localStorage)
+  // Match Settings State (persisted in localStorage via Zustand)
   const {
     questionMode,
     setQuestionMode,
@@ -92,69 +64,45 @@ export default function LobbyPage() {
     handleRemoveFriend,
   } = useFriends(user);
 
-  const [inviteToast, setInviteToast] = useState("");
+  // Party state & invitation actions
+  const {
+    partyInput,
+    setPartyInput,
+    copied,
+    isCreatingOrJoining,
+    errorMsg,
+    setErrorMsg,
+    inviteToast,
+    enrichedIncomingInvites,
+    handleCreateParty,
+    handleJoinParty,
+    handleJoinPartyWithCode,
+    handleKickGuest,
+    handleLeaveParty,
+    handleCopyCode,
+    onInviteFriendToParty,
+    handleAcceptPartyInvite,
+    handleDeclinePartyInvite,
+  } = useLobbyParty({ party, friendsList });
 
-  // Incoming party invites state from global inviteStore
-  const { incomingInvites, lastDeclinedInvite, removeIncomingInvite } =
-    useInviteStore();
+  const myId = user?.id;
+  const isHost = party ? party.leaderId === myId : true;
+  const me = party?.members.find((m) => m.id === myId) || (user ? { id: user.id, name: user.name || "AGENT" } : null);
+  const opponent = party?.members.find((m) => m.id !== myId);
 
-  // Handle inviting a friend to the current party
-  const onInviteFriendToParty = (friend: Friend) => {
-    // if (!party?.id) {
-    //   setInviteToast("Please create a party first to invite friends!");
-    //   setTimeout(() => setInviteToast(""), 3500);
-    //   return;
-    // }
-
-    sendInviteToParty(friend.id);
-    setInviteToast(`Party invite sent to ${friend.name}!`);
-    setTimeout(() => setInviteToast(""), 3000);
-  };
-
-  // Handle declined party invites from friends
-  useEffect(() => {
-    if (!lastDeclinedInvite) return;
-    const { otherPlayerId } = lastDeclinedInvite;
-    const friend = friendsList.find((f) => f.id === otherPlayerId);
-    const friendName = friend?.name || "Friend";
-    setInviteToast(`${friendName} declined the party invite.`);
-    setTimeout(() => setInviteToast(""), 4000);
-  }, [lastDeclinedInvite, friendsList]);
-
-  // Enrich incoming invites with known friend info
-  const enrichedIncomingInvites = incomingInvites.map((inv) => {
-    const matched = friendsList.find((f) => f.id === inv.sender.id);
-    if (matched) {
-      return {
-        ...inv,
-        sender: {
-          ...inv.sender,
-          name: matched.name,
-          username: matched.username,
-          avatar: matched.avatar,
-        },
-      };
-    }
-    return inv;
+  // Game lifecycle & match creation hook
+  const { handleStartGame } = useLobbyGameLifecycle({
+    party,
+    isHost,
+    opponentId: opponent?.id,
+    questionMode,
+    timer,
+    maxNos,
+    maxGuesses,
+    questionCount,
+    onSetErrorMsg: setErrorMsg,
+    onSetIsCreatingOrJoining: () => {},
   });
-
-  // Handle accepting an incoming party invite
-  const handleAcceptPartyInvite = (inviteId: string, incomingPartyId: string) => {
-    setErrorMsg("");
-    setIsCreatingOrJoining(true);
-    acceptInviteToParty(incomingPartyId);
-    removeIncomingInvite(inviteId, incomingPartyId);
-  };
-
-  // Handle declining an incoming party invite
-  const handleDeclinePartyInvite = (inviteId: string) => {
-    const invite = incomingInvites.find((i) => i.id === inviteId);
-    const targetPartyId = invite?.partyId || invite?.roomId;
-    if (targetPartyId && invite?.sender?.id) {
-      declineInviteToParty(targetPartyId, invite.sender.id);
-    }
-    removeIncomingInvite(inviteId);
-  };
 
   useEffect(() => {
     setIsClient(true);
@@ -163,140 +111,11 @@ export default function LobbyPage() {
     }
   }, [user]);
 
-  // When party syncs, clear joining loader
-  useEffect(() => {
-    if (party) {
-      setIsCreatingOrJoining(false);
-    }
-  }, [party]);
-
-  const myId = user?.id;
-  const isHost = party ? party.leaderId === myId : true;
-  const me = party?.members.find((m) => m.id === myId) || (user ? { id: user.id, name: user.name || "AGENT" } : null);
-  const opponent = party?.members.find((m) => m.id !== myId);
-
-  // Clear any finished or waiting stale game state on lobby entry
-  useEffect(() => {
-    if (game && (game.status === "FINISHED" || game.status === "WAITING")) {
-      clearGame();
-    }
-  }, []);
-
-
-
-  // Game lifecycle handling:
-  // 1. If leader created game (game.status === "WAITING"), leader triggers startGame(game.id)
-  // 2. When game.status === "STARTING" || game.status === "PLAYING", navigate to /play?code=${game.id}
-  useEffect(() => {
-    if (!game) return;
-
-    if (isHost && game.status === "WAITING") {
-      if (startedGameRef.current !== game.id) {
-        startedGameRef.current = game.id;
-        startGame();
-      }
-      return;
-    }
-
-    if (game.status === "STARTING" || game.status === "PLAYING") {
-      router.push("/play");
-    }
-  }, [game, isHost, router]);
-
-  // Socket error handler
-  useEffect(() => {
-    const onError = (err: any) => {
-      setIsCreatingOrJoining(false);
-      startedGameRef.current = null;
-      if (err?.code === "GAME_ALREADY_STARTED" && game?.id) {
-        router.push("/play");
-        return;
-      }
-      setErrorMsg(err?.message || "An error occurred");
-      setTimeout(() => setErrorMsg(""), 4000);
-    };
-    socket.on(ServerEvents.ERROR, onError);
-    return () => {
-      socket.off(ServerEvents.ERROR, onError);
-    };
-  }, [game?.id, router]);
-
-
-
-  // Execute Create Party
-  const handleCreateParty = () => {
-    setErrorMsg("");
-    setIsCreatingOrJoining(true);
-    createParty();
-  };
-
-  // Execute Join Party / Accept Invite
-  const handleJoinParty = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!partyInput.trim()) return;
-    setErrorMsg("");
-    setIsCreatingOrJoining(true);
-    acceptInviteToParty(partyInput.trim());
-  };
-
-  const handleJoinPartyWithCode = (code: string) => {
-    if (!code.trim()) return;
-    setErrorMsg("");
-    setIsCreatingOrJoining(true);
-    acceptInviteToParty(code.trim());
-  };
-
-  // Execute Start Game (Party Leader only, 2 players required)
-  const handleStartGame = () => {
-    if (!party?.id || !isHost || !opponent) return;
-
-    // If game already exists in WAITING state, call startGame
-    if (game?.id && game.status === "WAITING") {
-      if (startedGameRef.current !== game.id) {
-        startedGameRef.current = game.id;
-        startGame();
-      }
-      return;
-    }
-
-    startedGameRef.current = null;
-    createGame({
-      questionMode: questionMode ?? "PRESET",
-      timePerRound: timer,
-      maxNos,
-      maxGuesses,
-      questionCount,
-    });
-  };
-
-  const handleKickGuest = () => {
-    if (party?.id && opponent?.id && isHost) {
-      kickPlayerFromParty(opponent.id);
-    }
-  };
-
-  const handleLeaveParty = () => {
-    leaveParty();
-    clearParty();
-    clearGame();
-    startedGameRef.current = null;
-    setIsCreatingOrJoining(false);
-  };
-
-  const handleCopyCode = () => {
-    if (!party?.id) return;
-    navigator.clipboard.writeText(party.id);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-
-
   if (!isClient) return null;
 
   return (
     <main className="relative h-screen max-h-screen w-screen flex flex-col justify-between bg-[#040609] text-white select-none overflow-hidden font-body">
-      {/* BACKGROUND ARTWORK */}
+      {/* Background Graphics */}
       <div className="absolute inset-0 z-0 select-none pointer-events-none">
         <Image
           src="/bg/bg2.png"
@@ -310,7 +129,7 @@ export default function LobbyPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,#040609_90%)]" />
       </div>
 
-      {/* 1. TOP HEADER NAVIGATION BAR */}
+      {/* 1. Top Header Navigation Bar */}
       <LobbyHeader
         savedUsername={user?.name || "AGENT"}
         onOpenHowToPlay={() => setShowHowToPlay(true)}
@@ -319,9 +138,7 @@ export default function LobbyPage() {
 
       <div className="relative w-full flex-1 min-h-0 flex justify-between">
         <div className="relative flex-1 min-w-0 flex flex-col min-h-0">
-
-
-          {/* 2. SUB-HEADER BAR (Party Status & Controls) */}
+          {/* 2. Sub-Header Bar */}
           <LobbySubheader
             party={party}
             copied={copied}
@@ -333,6 +150,7 @@ export default function LobbyPage() {
             isCreatingOrJoining={isCreatingOrJoining}
           />
 
+          {/* Feedback alerts */}
           {errorMsg && (
             <div className="relative z-10 w-full max-w-md mx-auto mt-2 px-4">
               <div className="bg-accent/15 border border-accent/40 text-accent text-xs font-display font-bold uppercase tracking-wider p-2.5 rounded text-center">
@@ -350,9 +168,9 @@ export default function LobbyPage() {
             </div>
           )}
 
-          {/* 3. MAIN WORKSPACE: LEFT CONTROL PANEL & CHAT, CENTER SLOTS*/}
+          {/* 3. Main Workspace: Left Control Panel & Center Player Slots */}
           <div className="relative z-10 flex-1 flex items-stretch justify-between gap-5 pl-6 lg:pl-8 py-2 overflow-hidden">
-            {/* Left Column: Valorant Game Mode & Permanent Room Chat */}
+            {/* Left Column: Gamemode Selector & Party Controls */}
             <aside className="w-70 flex flex-col justify-center shrink-0 select-none z-20 h-full min-h-0 gap-2.5 pb-1">
               <LobbyLeftPanel
                 questionMode={questionMode}
@@ -376,13 +194,12 @@ export default function LobbyPage() {
                 isCreatingOrJoining={isCreatingOrJoining}
                 handleCreateParty={handleCreateParty}
                 handleJoinPartyWithCode={handleJoinPartyWithCode}
-                handleKickGuest={handleKickGuest}
+                handleKickGuest={() => handleKickGuest(opponent?.id)}
                 myId={myId}
               />
-
             </aside>
 
-            {/* Center: Player Slots */}
+            {/* Center Column: Player Podium Slots */}
             <div className="flex-1 flex items-center justify-center min-w-0 h-full">
               <LobbyCenterSlots
                 party={party}
@@ -392,17 +209,21 @@ export default function LobbyPage() {
                 savedUsername={savedUsername}
                 isCreatingOrJoining={isCreatingOrJoining}
                 handleCreateParty={handleCreateParty}
-                handleKickGuest={handleKickGuest}
+                handleKickGuest={() => handleKickGuest(opponent?.id)}
                 handleCopyCode={handleCopyCode}
               />
             </div>
           </div>
         </div>
 
-        {/* Right Column: Friends Sidebar (w-16 when closed, w-80 on expand) */}
+        {/* Right Column: Friends Drawer */}
         <div className="relative h-full w-16">
-          {/* <div className={cn( isFriendsCollapsed ? "w-0": "w-16")}></div> */}
-          <div className={cn("transition-all duration-300 h-full shrink-0 z-30 absolute right-0", isFriendsCollapsed ? "w-16" : "w-80 lg:w-84")}>
+          <div
+            className={cn(
+              "transition-all duration-300 h-full shrink-0 z-30 absolute right-0",
+              isFriendsCollapsed ? "w-16" : "w-80 lg:w-84"
+            )}
+          >
             <LobbyFriendsSidebar
               isFriendsCollapsed={isFriendsCollapsed}
               setIsFriendsCollapsed={setIsFriendsCollapsed}
@@ -427,11 +248,10 @@ export default function LobbyPage() {
         </div>
       </div>
 
-      {/* 4. IN-GAME / LOBBY FLOATING PARTY CHAT (matches exact Valorant design from screenshot) */}
+      {/* Floating Party Chat */}
       <PartyChatOverlay className="bottom-6 left-6" />
-        
 
-      {/* CUSTOM GAME SETTINGS MODAL */}
+      {/* Custom Game Settings Modal */}
       <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
         <DialogContent className="bg-transparent border-none max-w-xl p-0 shadow-none outline-none">
           <div className="relative w-full h-135">
@@ -454,7 +274,7 @@ export default function LobbyPage() {
         </DialogContent>
       </Dialog>
 
-      {/* HOW TO PLAY MODAL */}
+      {/* How To Play Modal */}
       <HowToPlayModal
         isOpen={showHowToPlay}
         onClose={() => setShowHowToPlay(false)}
