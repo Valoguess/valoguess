@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Sparkles } from "lucide-react";
-import { AgentBanner } from "../constants";
+import { AgentBanner } from "@/consts";
 
 interface ProfileCardPreviewProps {
   currentBanner: AgentBanner;
@@ -37,7 +37,8 @@ export function ProfileCardPreview({
             TACTICAL IDENTITY
           </h2>
           <p className="text-xs text-zinc-400 leading-relaxed">
-            This is how other players see your identity in lobby slots, friends hub, and party match screens.
+            This is how other players see your identity in lobby slots, friends
+            hub, and party match screens.
           </p>
         </div>
 

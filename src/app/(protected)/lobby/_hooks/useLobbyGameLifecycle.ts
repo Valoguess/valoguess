@@ -6,6 +6,7 @@ import { useGameStore } from "@/store/gameStore";
 import { createGame, startGame } from "@/socket/emitter";
 import { Party } from "@/types/party";
 import { GuessAgentQuestionMode } from "@/types/game";
+import { toast } from "sonner";
 
 interface UseLobbyGameLifecycleProps {
   party: Party | null;
@@ -16,7 +17,7 @@ interface UseLobbyGameLifecycleProps {
   maxNos: number;
   maxGuesses: number;
   questionCount: number;
-  onSetErrorMsg: (msg: string) => void;
+  onSetErrorMsg?: (msg: string) => void;
   onSetIsCreatingOrJoining: (val: boolean) => void;
 }
 
@@ -69,8 +70,10 @@ export function useLobbyGameLifecycle({
         router.push("/play");
         return;
       }
-      onSetErrorMsg(err?.message || "An error occurred");
-      setTimeout(() => onSetErrorMsg(""), 4000);
+      const msg = err?.message || "An error occurred";
+      toast.error(msg);
+      onSetErrorMsg?.(msg);
+      setTimeout(() => onSetErrorMsg?.(""), 4000);
     };
 
     socket.on(ServerEvents.ERROR, onError);

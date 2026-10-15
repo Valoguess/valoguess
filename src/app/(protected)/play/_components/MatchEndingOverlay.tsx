@@ -16,7 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AGENTS, Agent } from "@/lib/data";
+import { AGENTS, Agent, getAgentById } from "@/lib/data";
 import { useGameStore } from "@/store/gameStore";
 
 interface MatchEndingOverlayProps {
@@ -50,13 +50,8 @@ export function MatchEndingOverlay({
   );
 
   // Resolve agent entities
-  const myAgentObj: Agent =
-    AGENTS.find((a) => a.id?.toLowerCase() === myAgentId?.toLowerCase()) ||
-    AGENTS[0]!;
-
-  const oppAgentObj: Agent =
-    AGENTS.find((a) => a.id?.toLowerCase() === oppAgentId?.toLowerCase()) ||
-    AGENTS[1]!;
+  const myAgentObj: Agent = getAgentById(myAgentId);
+  const oppAgentObj: Agent = getAgentById(oppAgentId);
 
   // Trigger unmasking animation after 700ms for dramatic reveal
   useEffect(() => {
@@ -270,7 +265,7 @@ export function MatchEndingOverlay({
             {/* Agent Banner Image */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img
-                src={`/agents/banner/${myAgentObj.id}.webp`}
+                src={myAgentObj.bannerPath || `/agents/banner/${myAgentObj.id}.webp`}
                 alt={myAgentObj.name}
                 decoding="async"
                 className="w-full h-full object-cover object-top"
@@ -397,7 +392,7 @@ export function MatchEndingOverlay({
                     className="w-full h-full"
                   >
                     <img
-                      src={`/agents/banner/${oppAgentObj.id}.webp`}
+                      src={oppAgentObj.bannerPath || `/agents/banner/${oppAgentObj.id}.webp`}
                       alt={oppAgentObj.name}
                       decoding="async"
                       className="w-full h-full object-cover object-top"

@@ -1,7 +1,7 @@
 import { useSearchParams } from "next/navigation";
 import { useGameStore } from "@/store/gameStore";
 import { useAuthStore } from "@/store/authStore";
-import { AGENTS, Agent, getQuestionLabel } from "@/lib/data";
+import { AGENTS, Agent, getAgentById, getQuestionLabel } from "@/lib/data";
 
 export interface TimelineEvent {
   id: string;
@@ -16,41 +16,58 @@ export function useResultData() {
   const { game, clearGame } = useGameStore();
   const { user } = useAuthStore();
 
-  const myPlayer =
-    game?.players.find((p) => p.id === user?.id) || game?.players[0];
-  const oppPlayer = game?.players.find((p) => p.id !== myPlayer?.id);
-
-  const gameState = game?.state;
-  const gameResult = gameState?.result ?? game?.result;
-
-  const isVictory = gameResult
-    ? gameResult.result === "WIN" && gameResult.winnerId === myPlayer?.id
-    : searchParams.get("status") === "victory";
-
-  const isTie = gameResult?.result === "TIE";
-  const isDefeat = !isVictory && !isTie;
-
   const cachedSecretAgent =
-    typeof window !== "undefined" && game
+    typeof window !== "undefined" && game?.id
       ? sessionStorage.getItem(`secret_agent_${game.id}`)
       : null;
 
+  const myPlayer =
+    (user?.id ? game?.players.find((p) => p.id === user.id) : undefined) ||
+    (cachedSecretAgent
+      ? game?.players.find((p) => p.state?.secretAgent === cachedSecretAgent)
+      : undefined) ||
+    game?.players[0];
+
+  const oppPlayer =
+    game?.players.find((p) => p.id !== myPlayer?.id) ||
+    (game?.players && game.players.length > 1 ? game.players[1] : undefined);
+
+  const gameState = game?.state;
+  const rawResult = (gameState?.result ?? game?.result) as any;
+  const resolvedWinnerId =
+    rawResult?.winnerId ??
+    rawResult?.winner ??
+    (gameState as any)?.winnerId ??
+    (game as any)?.winnerId ??
+    null;
+
+  const resultType = (
+    typeof rawResult === "string"
+      ? rawResult
+      : rawResult?.result ?? (resolvedWinnerId ? "WIN" : "TIE")
+  ).toUpperCase();
+
+  const isTie = resultType === "TIE" || resultType === "DRAW";
+  const myId = user?.id || myPlayer?.id;
+  const isVictory = isTie
+    ? false
+    : resolvedWinnerId
+      ? Boolean(resolvedWinnerId === myId || (myPlayer?.id && resolvedWinnerId === myPlayer.id))
+      : searchParams.get("status") === "victory";
+
+  const isDefeat = !isVictory && !isTie;
+
   const myAgentId =
     myPlayer?.state?.secretAgent || cachedSecretAgent || "cypher";
-  const myAgentObj: Agent =
-    AGENTS.find((a) => a.id === myAgentId) || {
-      id: myAgentId,
-      name: myAgentId,
-      role: "Sentinel",
-    };
+  const myAgentObj: Agent = getAgentById(myAgentId);
 
-  const oppAgentId = oppPlayer?.state?.secretAgent || "raze";
-  const oppAgentObj: Agent =
-    AGENTS.find((a) => a.id === oppAgentId) || {
-      id: oppAgentId,
-      name: oppAgentId,
-      role: "Duelist",
-    };
+  const oppAgentId =
+    oppPlayer?.state?.secretAgent ||
+    (myAgentId && game?.players && game.players.length > 1
+      ? game.players.find((p) => p.state?.secretAgent && p.state.secretAgent !== myAgentId)?.state?.secretAgent
+      : null) ||
+    "raze";
+  const oppAgentObj: Agent = getAgentById(oppAgentId);
 
   const userName = myPlayer?.name || user?.name || "You";
   const oppName = oppPlayer?.name || "Opponent";
@@ -117,7 +134,7 @@ export function useResultData() {
     ];
   });
 
-  if (gameResult?.result === "TIE") {
+  if (isTie) {
     timeline.push({
       id: "match-end-tie",
       kind: "system-win",
@@ -125,7 +142,7 @@ export function useResultData() {
       text: "Match ended in a DRAW — all guesses exhausted",
       time: timeTaken,
     });
-  } else if (gameResult?.result === "WIN") {
+  } else if (resultType === "WIN" || isVictory || isDefeat) {
     timeline.push({
       id: "match-end-win",
       kind: isVictory ? "system-win" : "system-lose",

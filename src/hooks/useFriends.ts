@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { StoreUser } from "@/store/authStore";
 import { Friend, FriendRequest } from "@/types/friends";
+import { DEFAULT_AVATARS } from "@/consts";
 import { usePresenceStore } from "@/store/presenceStore";
 import { useFriendStore } from "@/store/friendStore";
 import {
@@ -18,12 +19,12 @@ import {
   cancelFriendRequest,
   removeFriend,
 } from "@/actions/friends";
+import { toast } from "sonner";
 
 export function useFriends(user: StoreUser | null) {
   const [friendInput, setFriendInput] = useState("");
   const [rawFriends, setRawFriends] = useState<Friend[]>([]);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
-  const [friendAddedToast, setFriendAddedToast] = useState("");
   const [isAddingFriend, setIsAddingFriend] = useState(false);
 
   const presence = usePresenceStore((state) => state.presence);
@@ -72,7 +73,7 @@ export function useFriends(user: StoreUser | null) {
               username: friendUser.username
                 ? `@${friendUser.username}`
                 : undefined,
-              avatar: friendUser.image || "/agents/icon/omen.webp",
+              avatar: friendUser.image || DEFAULT_AVATARS.USER,
               status: "online",
               activity: "In Lobby",
             });
@@ -91,7 +92,7 @@ export function useFriends(user: StoreUser | null) {
               username: friendship.requester.username
                 ? `@${friendship.requester.username}`
                 : undefined,
-              avatar: friendship.requester.image || "/agents/icon/reyna.webp",
+              avatar: friendship.requester.image || DEFAULT_AVATARS.OPPONENT,
               type: "incoming",
               createdAt: friendship.createdAt
                 ? new Date(friendship.createdAt).toISOString()
@@ -112,7 +113,7 @@ export function useFriends(user: StoreUser | null) {
               username: friendship.receiver.username
                 ? `@${friendship.receiver.username}`
                 : undefined,
-              avatar: friendship.receiver.image || "/agents/icon/phoenix.webp",
+              avatar: friendship.receiver.image || DEFAULT_AVATARS.GUEST,
               type: "outgoing",
               createdAt: friendship.createdAt
                 ? new Date(friendship.createdAt).toISOString()
@@ -134,7 +135,7 @@ export function useFriends(user: StoreUser | null) {
     if (!lastFriendEvent) return;
 
     if (lastFriendEvent.type === "request_received") {
-      setFriendAddedToast("New friend request received!");
+      toast.info("New friend request received!");
       if (lastFriendEvent.requester) {
         const req = lastFriendEvent.requester;
         setFriendRequests((prev) => [
@@ -145,7 +146,7 @@ export function useFriends(user: StoreUser | null) {
             username: req.username
               ? `@${req.username.replace(/^@/, "")}`
               : undefined,
-            avatar: req.avatar || "/agents/icon/reyna.webp",
+            avatar: req.avatar || DEFAULT_AVATARS.OPPONENT,
             type: "incoming",
             createdAt: new Date().toISOString(),
           },
@@ -154,19 +155,16 @@ export function useFriends(user: StoreUser | null) {
         // Fallback to fetch if socket server didn't include requester details
         fetchFriends();
       }
-      setTimeout(() => setFriendAddedToast(""), 4000);
     } else if (lastFriendEvent.type === "request_accepted") {
-      setFriendAddedToast("Your friend request was accepted!");
+      toast.success("Your friend request was accepted!");
       const targetUserId = lastFriendEvent.userId;
 
       setFriendRequests((prev) => prev.filter((r) => r.id !== targetUserId));
       fetchFriends();
-      setTimeout(() => setFriendAddedToast(""), 4000);
     } else if (lastFriendEvent.type === "request_declined") {
-      setFriendAddedToast("Friend request was declined.");
+      toast.warning("Friend request was declined.");
       const targetUserId = lastFriendEvent.userId;
       setFriendRequests((prev) => prev.filter((r) => r.id !== targetUserId));
-      setTimeout(() => setFriendAddedToast(""), 4000);
     }
   }, [lastFriendEvent, fetchFriends]);
 
@@ -210,7 +208,8 @@ export function useFriends(user: StoreUser | null) {
       const res = await sendFriendRequest(target);
       if (res.success) {
         setFriendInput("");
-        setFriendAddedToast(res.message || "Friend request sent!");
+        const msg = res.message || "Friend request sent!";
+        toast.success(msg);
 
         if (res.targetUser) {
           if (res.autoAccepted) {
@@ -251,13 +250,14 @@ export function useFriends(user: StoreUser | null) {
           await fetchFriends();
         }
       } else {
-        setFriendAddedToast(res.error || "Failed to send friend request");
+        const err = res.error || "Failed to send friend request";
+        toast.error(err);
       }
     } catch (err: any) {
-      setFriendAddedToast(err?.message || "Failed to send friend request");
+      const msg = err?.message || "Failed to send friend request";
+      toast.error(msg);
     } finally {
       setIsAddingFriend(false);
-      setTimeout(() => setFriendAddedToast(""), 4000);
     }
   };
 
@@ -282,19 +282,21 @@ export function useFriends(user: StoreUser | null) {
     try {
       const res = await acceptFriendRequest(requestId);
       if (res.success) {
-        setFriendAddedToast(res.message || "Friend request accepted!");
+        const msg = res.message || "Friend request accepted!";
+        toast.success(msg);
         if (res.requesterId) {
           acceptFriendRequestSocket(res.requesterId);
         }
       } else {
-        setFriendAddedToast(res.error || "Failed to accept request");
+        const err = res.error || "Failed to accept request";
+        toast.error(err);
         fetchFriends();
       }
     } catch (err: any) {
-      setFriendAddedToast(err?.message || "Failed to accept request");
+      const msg = err?.message || "Failed to accept request";
+      toast.error(msg);
       fetchFriends();
     }
-    setTimeout(() => setFriendAddedToast(""), 4000);
   };
 
   // Decline incoming request
@@ -304,19 +306,21 @@ export function useFriends(user: StoreUser | null) {
     try {
       const res = await declineFriendRequest(requestId);
       if (res.success) {
-        setFriendAddedToast(res.message || "Friend request declined");
+        const msg = res.message || "Friend request declined";
+        toast.info(msg);
         if (res.requesterId) {
           declineFriendRequestSocket(res.requesterId);
         }
       } else {
-        setFriendAddedToast(res.error || "Failed to decline request");
+        const err = res.error || "Failed to decline request";
+        toast.error(err);
         fetchFriends();
       }
     } catch (err: any) {
-      setFriendAddedToast(err?.message || "Failed to decline request");
+      const msg = err?.message || "Failed to decline request";
+      toast.error(msg);
       fetchFriends();
     }
-    setTimeout(() => setFriendAddedToast(""), 4000);
   };
 
   // Cancel outgoing request
@@ -326,16 +330,18 @@ export function useFriends(user: StoreUser | null) {
     try {
       const res = await cancelFriendRequest(requestId);
       if (res.success) {
-        setFriendAddedToast(res.message || "Friend request cancelled");
+        const msg = res.message || "Friend request cancelled";
+        toast.info(msg);
       } else {
-        setFriendAddedToast(res.error || "Failed to cancel request");
+        const err = res.error || "Failed to cancel request";
+        toast.error(err);
         fetchFriends();
       }
     } catch (err: any) {
-      setFriendAddedToast(err?.message || "Failed to cancel request");
+      const msg = err?.message || "Failed to cancel request";
+      toast.error(msg);
       fetchFriends();
     }
-    setTimeout(() => setFriendAddedToast(""), 4000);
   };
 
   // Remove friend
@@ -345,22 +351,24 @@ export function useFriends(user: StoreUser | null) {
     try {
       const res = await removeFriend(friendId);
       if (res.success) {
-        setFriendAddedToast(res.message || "Friend removed");
+        const msg = res.message || "Friend removed";
+        toast.success(msg);
       } else {
-        setFriendAddedToast(res.error || "Failed to remove friend");
+        const err = res.error || "Failed to remove friend";
+        toast.error(err);
         fetchFriends();
       }
     } catch (err: any) {
-      setFriendAddedToast(err?.message || "Failed to remove friend");
+      const msg = err?.message || "Failed to remove friend";
+      toast.error(msg);
       fetchFriends();
     }
-    setTimeout(() => setFriendAddedToast(""), 4000);
   };
 
   // Invite friend
   const handleInviteFriend = (friend: Friend) => {
-    setFriendAddedToast(`Invited ${friend.name} to party!`);
-    setTimeout(() => setFriendAddedToast(""), 3000);
+    const msg = `Invited ${friend.name} to party!`;
+    toast.success(msg);
   };
 
   return {
@@ -368,7 +376,6 @@ export function useFriends(user: StoreUser | null) {
     setFriendInput,
     friendsList,
     friendRequests,
-    friendAddedToast,
     isAddingFriend,
     handleAddFriend,
     handleAcceptRequest,

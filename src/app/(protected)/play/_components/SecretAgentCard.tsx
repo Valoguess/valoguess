@@ -35,7 +35,7 @@ export function SecretAgentCard({
       <div className="relative h-[400px] overflow-hidden">
         <div>
           <Image
-            src={`/agents/banner/${agent.id}.webp`}
+            src={agent.bannerPath || `/agents/banner/${agent.id}.webp`}
             alt={agent.name}
             fill
             priority

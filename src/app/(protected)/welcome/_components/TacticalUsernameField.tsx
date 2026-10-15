@@ -1,7 +1,7 @@
 "use client";
 
 import { AtSign, Lock, Loader2, Check, X, RefreshCw } from "lucide-react";
-import { UsernameStatus } from "../constants";
+import { UsernameStatus } from "@/consts";
 
 interface TacticalUsernameFieldProps {
   isAnonymous: boolean;
@@ -62,10 +62,10 @@ export function TacticalUsernameField({
             isAnonymous
               ? "bg-white/[0.03] border-white/10 text-zinc-400 cursor-not-allowed select-none opacity-80"
               : usernameStatus === "available"
-              ? "bg-black/50 border-[#3CF2C4]/70 focus:border-[#3CF2C4] text-white"
-              : usernameStatus === "taken" || usernameStatus === "invalid"
-              ? "bg-black/50 border-[#FF4655]/70 focus:border-[#FF4655] text-white"
-              : "bg-black/50 border-white/15 focus:border-[#FF4655] text-white"
+                ? "bg-black/50 border-[#3CF2C4]/70 focus:border-[#3CF2C4] text-white"
+                : usernameStatus === "taken" || usernameStatus === "invalid"
+                  ? "bg-black/50 border-[#FF4655]/70 focus:border-[#FF4655] text-white"
+                  : "bg-black/50 border-white/15 focus:border-[#FF4655] text-white"
           }`}
           required
         />
@@ -97,7 +97,8 @@ export function TacticalUsernameField({
       {/* Status or Helper Message */}
       {isAnonymous ? (
         <p className="text-[11px] text-zinc-500 mt-1.5 leading-relaxed">
-          Guest accounts cannot change their tactical username. Sign in with Google to choose a custom handle.
+          Guest accounts cannot change their tactical username. Sign in with
+          Google to choose a custom handle.
         </p>
       ) : (
         <>
@@ -108,8 +109,8 @@ export function TacticalUsernameField({
                   usernameStatus === "available"
                     ? "text-[#3CF2C4]"
                     : usernameStatus === "taken" || usernameStatus === "invalid"
-                    ? "text-[#FF4655]"
-                    : "text-zinc-400"
+                      ? "text-[#FF4655]"
+                      : "text-zinc-400"
                 }`}
               >
                 {statusMessage}

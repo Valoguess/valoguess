@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useAuthStore } from "@/store/authStore";
 import { updateUser, updateUserProfile } from "@/actions/user";
-import { AGENT_BANNERS } from "./constants";
+import { AGENT_BANNERS } from "@/consts";
 import { ProfileCardPreview } from "./_components/ProfileCardPreview";
 import { IdentitySettingsTab } from "./_components/IdentitySettingsTab";
 import { BannerTaglineTab } from "./_components/BannerTaglineTab";
@@ -16,6 +16,7 @@ import { PrivacyAccountTab } from "./_components/PrivacyAccountTab";
 import { SettingsHeader } from "./_components/SettingsHeader";
 import { LogoutConfirmationModal } from "./_components/LogoutConfirmationModal";
 import { socket } from "@/socket";
+import { toast } from "sonner";
 
 function getDaysRemaining(updatedAt?: Date | string | null): number {
   if (!updatedAt) return 0;
@@ -61,9 +62,8 @@ export default function SettingsPage() {
     "identity",
   );
 
-  // Save state & feedback toast
+  // Save state
   const [isSaving, setIsSaving] = useState(false);
-  const [saveToast, setSaveToast] = useState<string>("");
 
   // Logout modal state
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -169,11 +169,9 @@ export default function SettingsPage() {
         setNameCooldownDays(30);
       }
 
-      setSaveToast("Profile settings saved successfully!");
-      setTimeout(() => setSaveToast(""), 4000);
+      toast.success("Profile settings saved successfully!");
     } catch {
-      setSaveToast("Failed to save settings. Please try again.");
-      setTimeout(() => setSaveToast(""), 4000);
+      toast.error("Failed to save settings. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -286,7 +284,6 @@ export default function SettingsPage() {
             defaultIconPath={currentBanner.iconPath}
             onSave={() => handleSaveSettings()}
             isSaving={isSaving}
-            saveToast={saveToast}
           />
         )}
 
@@ -303,7 +300,6 @@ export default function SettingsPage() {
             setSelectedBannerId={setSelectedBannerId}
             onSave={() => handleSaveSettings()}
             isSaving={isSaving}
-            saveToast={saveToast}
           />
         )}
 

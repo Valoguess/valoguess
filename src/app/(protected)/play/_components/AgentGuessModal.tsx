@@ -139,7 +139,7 @@ export function AgentGuessModal({
                 {/* Agent Icon */}
                 <div className="relative h-14 w-14 rounded-xs overflow-hidden bg-black/60 border border-white/10 mb-1.5 shrink">
                   <Image
-                    src={`/agents/icon/${agent.id}.webp`}
+                    src={agent.iconPath}
                     alt={agent.name}
                     fill
                     className={cn(
@@ -178,7 +178,7 @@ export function AgentGuessModal({
             <div className="flex items-center gap-3">
               <div className="relative h-11 w-11 rounded-xs overflow-hidden border border-[#FF4655] shrink-0">
                 <Image
-                  src={`/agents/icon/${selectedAgent.id}.webp`}
+                  src={selectedAgent.iconPath}
                   alt={selectedAgent.name}
                   fill
                   className="object-cover object-top"

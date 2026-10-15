@@ -5,7 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, HelpCircle, Lock, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AGENTS, Agent } from "@/lib/data";
+import { AGENTS, Agent, getAgentById } from "@/lib/data";
 
 interface MatchIntroOverlayProps {
   secretAgentId?: string | null;
@@ -29,8 +29,7 @@ export function MatchIntroOverlay({
   minDurationMs = 4500,
 }: MatchIntroOverlayProps) {
   // Find target agent or fallback to first
-  const targetAgent: Agent =
-    AGENTS.find((a) => a.id === secretAgentId) || AGENTS[0]!;
+  const targetAgent: Agent = getAgentById(secretAgentId);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
@@ -54,7 +53,7 @@ export function MatchIntroOverlay({
     if (typeof window !== "undefined") {
       AGENTS.forEach((agent) => {
         const img = new window.Image();
-        img.src = `/agents/banner/${agent.id}.webp`;
+        img.src = agent.bannerPath;
       });
     }
   }, []);
@@ -201,7 +200,7 @@ export function MatchIntroOverlay({
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img
                 key={isLocked ? "locked" : undefined}
-                src={`/agents/banner/${currentAgent.id}.webp`}
+                src={currentAgent.bannerPath}
                 alt={currentAgent.name}
                 decoding="async"
                 className={cn(

@@ -12,6 +12,7 @@ import {
   acceptInviteToParty,
   declineInviteToParty,
 } from "@/socket/emitter";
+import { toast } from "sonner";
 
 interface UseLobbyPartyProps {
   party: Party | null;
@@ -26,8 +27,6 @@ export function useLobbyParty({ party, friendsList }: UseLobbyPartyProps) {
   const [partyInput, setPartyInput] = useState("");
   const [copied, setCopied] = useState(false);
   const [isCreatingOrJoining, setIsCreatingOrJoining] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [inviteToast, setInviteToast] = useState("");
 
   // When party syncs, clear joining loader
   useEffect(() => {
@@ -42,9 +41,7 @@ export function useLobbyParty({ party, friendsList }: UseLobbyPartyProps) {
     const { otherPlayerId } = lastDeclinedInvite;
     const friend = friendsList.find((f) => f.id === otherPlayerId);
     const friendName = friend?.name || "Friend";
-    setInviteToast(`${friendName} declined the party invite.`);
-    const timer = setTimeout(() => setInviteToast(""), 4000);
-    return () => clearTimeout(timer);
+    toast.warning(`${friendName} declined the party invite.`);
   }, [lastDeclinedInvite, friendsList]);
 
   // Enrich incoming invites with known friend info
@@ -68,7 +65,6 @@ export function useLobbyParty({ party, friendsList }: UseLobbyPartyProps) {
 
   // Actions
   const handleCreateParty = useCallback(() => {
-    setErrorMsg("");
     setIsCreatingOrJoining(true);
     createParty();
   }, []);
@@ -76,14 +72,12 @@ export function useLobbyParty({ party, friendsList }: UseLobbyPartyProps) {
   const handleJoinParty = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!partyInput.trim()) return;
-    setErrorMsg("");
     setIsCreatingOrJoining(true);
     acceptInviteToParty(partyInput.trim());
   }, [partyInput]);
 
   const handleJoinPartyWithCode = useCallback((code: string) => {
     if (!code.trim()) return;
-    setErrorMsg("");
     setIsCreatingOrJoining(true);
     acceptInviteToParty(code.trim());
   }, []);
@@ -105,17 +99,16 @@ export function useLobbyParty({ party, friendsList }: UseLobbyPartyProps) {
     if (!party?.id) return;
     navigator.clipboard.writeText(party.id);
     setCopied(true);
+    toast.success("Party code copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
   }, [party?.id]);
 
   const onInviteFriendToParty = useCallback((friend: Friend) => {
     sendInviteToParty(friend.id);
-    setInviteToast(`Party invite sent to ${friend.name}!`);
-    setTimeout(() => setInviteToast(""), 3000);
+    toast.success(`Party invite sent to ${friend.name}!`);
   }, []);
 
   const handleAcceptPartyInvite = useCallback((inviteId: string, incomingPartyId: string) => {
-    setErrorMsg("");
     setIsCreatingOrJoining(true);
     acceptInviteToParty(incomingPartyId);
     removeIncomingInvite(inviteId, incomingPartyId);
@@ -135,9 +128,6 @@ export function useLobbyParty({ party, friendsList }: UseLobbyPartyProps) {
     setPartyInput,
     copied,
     isCreatingOrJoining,
-    errorMsg,
-    setErrorMsg,
-    inviteToast,
     enrichedIncomingInvites,
     handleCreateParty,
     handleJoinParty,

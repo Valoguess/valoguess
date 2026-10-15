@@ -12,6 +12,7 @@ import {
 } from "@/socket/emitter";
 import { GuessAgentGameDTO, GuessAgentPlayerDTO, PendingQuestion } from "@/types/game";
 import { QuestionItem } from "@/lib/data";
+import { toast } from "sonner";
 
 interface UsePlaySocketProps {
   game: GuessAgentGameDTO | null;
@@ -36,7 +37,6 @@ export function usePlaySocket({
   const [isAsking, setIsAsking] = useState(false);
   const [isAnswering, setIsAnswering] = useState(false);
   const [isConsumingNo, setIsConsumingNo] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Reset asking/answering flags when game turns progress
   useEffect(() => {
@@ -57,14 +57,26 @@ export function usePlaySocket({
     };
   }, []);
 
+  // Listen to ServerEvents.GAME_SYNC for server cleanup to lobby
+  useEffect(() => {
+    const handleGameSync = (syncedGame: GuessAgentGameDTO | null) => {
+      if (!syncedGame || (typeof syncedGame === "object" && !syncedGame.id)) {
+        router.push("/lobby");
+      }
+    };
+    socket.on(ServerEvents.GAME_SYNC, handleGameSync);
+    return () => {
+      socket.off(ServerEvents.GAME_SYNC, handleGameSync);
+    };
+  }, [router]);
+
   // Listen to ServerEvents.ERROR
   useEffect(() => {
     const onError = (err: any) => {
       setIsAsking(false);
       setIsAnswering(false);
-      setErrorMsg(err?.message || "An error occurred");
-      const timer = setTimeout(() => setErrorMsg(null), 4000);
-      return () => clearTimeout(timer);
+      const msg = err?.message || "An error occurred";
+      toast.error(msg);
     };
     socket.on(ServerEvents.ERROR, onError);
     return () => {
@@ -76,7 +88,6 @@ export function usePlaySocket({
     (q: QuestionItem) => {
       if (game && isMyTurn && !pendingQuestion && !isAsking) {
         setIsAsking(true);
-        setErrorMsg(null);
         sendAskQuestion(q.id);
       }
     },
@@ -87,7 +98,6 @@ export function usePlaySocket({
     (answer: "yes" | "no") => {
       if (game && isOpponentAskingMe && !isAnswering) {
         setIsAnswering(true);
-        setErrorMsg(null);
         sendAnswerQuestion(answer.toUpperCase() as "YES" | "NO");
       }
     },
@@ -125,7 +135,6 @@ export function usePlaySocket({
     isAsking,
     isAnswering,
     isConsumingNo,
-    errorMsg,
     handleAskQuestion,
     handleAnswerQuestion,
     handleConsumeNo,

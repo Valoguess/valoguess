@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
 interface AddFriendFormProps {
@@ -8,7 +7,6 @@ interface AddFriendFormProps {
   setFriendInput: (val: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   isAddingFriend?: boolean;
-  friendAddedToast?: string;
   currentUsername?: string;
 }
 
@@ -17,16 +15,8 @@ export function AddFriendForm({
   setFriendInput,
   onSubmit,
   isAddingFriend = false,
-  friendAddedToast = "",
   currentUsername,
 }: AddFriendFormProps) {
-  const isErrorToast =
-    friendAddedToast.toLowerCase().includes("not found") ||
-    friendAddedToast.toLowerCase().includes("already") ||
-    friendAddedToast.toLowerCase().includes("cannot") ||
-    friendAddedToast.toLowerCase().includes("failed") ||
-    friendAddedToast.toLowerCase().includes("error");
-
   return (
     <div className="p-3 border-t border-white/10 bg-black/40 shrink-0">
       <div className="flex items-center justify-between mb-1.5">
@@ -56,17 +46,6 @@ export function AddFriendForm({
           )}
         </button>
       </form>
-
-      {friendAddedToast && (
-        <span
-          className={cn(
-            "text-[9px] font-display font-bold mt-1.5 block text-left animate-fade-in truncate",
-            isErrorToast ? "text-[#FF4655]" : "text-mint"
-          )}
-        >
-          {friendAddedToast}
-        </span>
-      )}
     </div>
   );
 }

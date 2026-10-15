@@ -109,7 +109,7 @@ export function AgentGrid({
                 >
                   {/* Image */}
                   <Image
-                    src={`/agents/icon/${a.id}.webp`}
+                    src={a.iconPath}
                     alt={a.name}
                     fill
                     draggable={false}

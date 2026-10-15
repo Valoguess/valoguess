@@ -62,7 +62,6 @@ function PlayContent() {
     isAsking,
     isAnswering,
     isConsumingNo,
-    errorMsg,
     handleAskQuestion,
     handleAnswerQuestion,
     handleConsumeNo,
@@ -132,18 +131,54 @@ function PlayContent() {
 
   // 3. Match Ending Sequence Overlay
   if (game.status === "FINISHED") {
-    const result = game.state?.result ?? game.result;
-    const isVictory = result?.result === "WIN" && result.winnerId === myPlayer.id;
-    const isTie = result?.result === "TIE";
+    const rawResult = (game.state?.result ?? game.result) as any;
+    const resolvedWinnerId =
+      rawResult?.winnerId ??
+      rawResult?.winner ??
+      (game.state as any)?.winnerId ??
+      (game as any)?.winnerId ??
+      null;
+
+    const resultType = (
+      typeof rawResult === "string"
+        ? rawResult
+        : rawResult?.result ?? (resolvedWinnerId ? "WIN" : "TIE")
+    ).toUpperCase();
+
+    const isTie = resultType === "TIE" || resultType === "DRAW";
+    const myId = user?.id || myPlayer?.id;
+    const isVictory = Boolean(
+      !isTie &&
+        resolvedWinnerId &&
+        (resolvedWinnerId === myId || (myPlayer?.id && resolvedWinnerId === myPlayer.id))
+    );
+
+    const opponentMember =
+      opponentPlayer ||
+      (myPlayer?.id ? game.players.find((p) => p.id !== myPlayer.id) : undefined) ||
+      game.players[1];
+
+    const myAgentKey =
+      secretAgentId ||
+      myPlayer?.state?.secretAgent ||
+      (typeof window !== "undefined" && game.id
+        ? sessionStorage.getItem(`secret_agent_${game.id}`)
+        : null);
+
+    const oppAgentKey =
+      opponentMember?.state?.secretAgent ||
+      (myAgentKey && game.players.length > 1
+        ? game.players.find((p) => p.state?.secretAgent && p.state.secretAgent !== myAgentKey)?.state?.secretAgent
+        : null);
 
     return (
       <MatchEndingOverlay
         isVictory={isVictory}
         isTie={isTie}
-        userName={myPlayer.name || user?.name || "You"}
-        opponentName={opponentPlayer?.name || "Opponent"}
-        myAgentId={secretAgentId}
-        oppAgentId={opponentPlayer?.state?.secretAgent}
+        userName={myPlayer?.name || user?.name || "You"}
+        opponentName={opponentMember?.name || "Opponent"}
+        myAgentId={myAgentKey}
+        oppAgentId={oppAgentKey}
         roundsPlayed={Math.max(
           1,
           Math.ceil((game.state?.turnNumber ?? game.turnNumber ?? 1) / 2)
@@ -170,15 +205,6 @@ function PlayContent() {
         maxRounds={-1}
         onLeave={() => setShowLeaveModal(true)}
       />
-
-      {/* Error Message Toast */}
-      {errorMsg && (
-        <div className="w-full max-w-xl mx-auto mt-4 px-4">
-          <div className="bg-[#FF4655]/15 border border-[#FF4655]/40 text-[#FF4655] text-xs font-display font-bold uppercase tracking-wider p-3 rounded text-center shadow-lg animate-pulse">
-            {errorMsg}
-          </div>
-        </div>
-      )}
 
       {/* Three-Column Tactical Layout */}
       <div className="grid grid-cols-[300px_1fr_320px] gap-5 p-6 font-body">

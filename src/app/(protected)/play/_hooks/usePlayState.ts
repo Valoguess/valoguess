@@ -3,9 +3,10 @@ import { GuessAgentGameDTO } from "@/types/game";
 import { StoreUser } from "@/store/authStore";
 import {
   AGENTS,
+  ALL_QUESTIONS,
+  getAgentById,
   getQuestionById,
   getQuestionLabel,
-  getRandomQuestions,
   ActivityEntry,
   QuestionItem,
   Agent,
@@ -17,16 +18,44 @@ interface UsePlayStateProps {
 }
 
 export function usePlayState({ game, user }: UsePlayStateProps) {
+  const cachedSecretAgent =
+    typeof window !== "undefined" && game?.id
+      ? sessionStorage.getItem(`secret_agent_${game.id}`)
+      : null;
+
   const myPlayer = useMemo(() => {
-    return (
-      game?.players.find(
-        (p) => p.id === user?.id || (p.state && p.state.secretAgent !== null)
-      ) || game?.players[0]
-    );
-  }, [game?.players, user?.id]);
+    if (!game?.players || game.players.length === 0) return undefined;
+
+    // 1. Primary: match strictly by authenticated user ID
+    if (user?.id) {
+      const byUserId = game.players.find((p) => p.id === user.id);
+      if (byUserId) return byUserId;
+    }
+
+    // 2. Secondary: match by cached secret agent assigned to this client at start
+    if (cachedSecretAgent) {
+      const byCachedAgent = game.players.find(
+        (p) => p.state?.secretAgent === cachedSecretAgent
+      );
+      if (byCachedAgent) return byCachedAgent;
+    }
+
+    // 3. Fallback during live match only (before match ends and both secret agents are revealed)
+    if (game.status !== "FINISHED") {
+      const withRevealedAgent = game.players.find(
+        (p) => p.state && p.state.secretAgent !== null
+      );
+      if (withRevealedAgent) return withRevealedAgent;
+    }
+
+    return game.players[0];
+  }, [game?.players, game?.status, user?.id, cachedSecretAgent]);
 
   const opponentPlayer = useMemo(() => {
-    return game?.players.find((p) => p.id !== myPlayer?.id);
+    return (
+      game?.players.find((p) => p.id !== myPlayer?.id) ||
+      (game?.players && game.players.length > 1 ? game.players[1] : undefined)
+    );
   }, [game?.players, myPlayer?.id]);
 
   const gameState = game?.state;
@@ -44,13 +73,8 @@ export function usePlayState({ game, user }: UsePlayStateProps) {
         ? "you"
         : "opponent-thinking";
 
-  const cachedSecretAgent =
-    typeof window !== "undefined" && game
-      ? sessionStorage.getItem(`secret_agent_${game.id}`)
-      : null;
   const secretAgentId = myPlayer?.state?.secretAgent || cachedSecretAgent;
-  const activeSecretAgent: Agent =
-    AGENTS.find((a) => a.id === secretAgentId) || AGENTS[0]!;
+  const activeSecretAgent: Agent = getAgentById(secretAgentId);
 
   const questionPoolIds = game?.settings?.questionPool || [];
   const gameQuestions: QuestionItem[] = useMemo(() => {
@@ -65,11 +89,8 @@ export function usePlayState({ game, user }: UsePlayStateProps) {
           }
       );
     }
-    return getRandomQuestions(
-      game?.settings?.questionCount || 15,
-      game?.id || gameState?.startedAt || game?.startedAt
-    );
-  }, [questionPoolIds, game?.settings?.questionCount, game?.id, gameState?.startedAt, game?.startedAt]);
+    return ALL_QUESTIONS.slice(0, game?.settings?.questionCount || 15);
+  }, [questionPoolIds, game?.settings?.questionCount]);
 
   const opponentQuestionObj = useMemo(() => {
     if (!pendingQuestion) return null;

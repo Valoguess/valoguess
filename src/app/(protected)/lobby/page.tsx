@@ -55,7 +55,6 @@ export default function LobbyPage() {
     setFriendInput,
     friendsList,
     friendRequests,
-    friendAddedToast,
     isAddingFriend,
     handleAddFriend,
     handleAcceptRequest,
@@ -70,9 +69,6 @@ export default function LobbyPage() {
     setPartyInput,
     copied,
     isCreatingOrJoining,
-    errorMsg,
-    setErrorMsg,
-    inviteToast,
     enrichedIncomingInvites,
     handleCreateParty,
     handleJoinParty,
@@ -102,7 +98,6 @@ export default function LobbyPage() {
     maxNos,
     maxGuesses,
     questionCount,
-    onSetErrorMsg: setErrorMsg,
     onSetIsCreatingOrJoining: () => {},
   });
 
@@ -152,23 +147,6 @@ export default function LobbyPage() {
             isCreatingOrJoining={isCreatingOrJoining}
           />
 
-          {/* Feedback alerts */}
-          {errorMsg && (
-            <div className="relative z-10 w-full max-w-md mx-auto mt-2 px-4">
-              <div className="bg-accent/15 border border-accent/40 text-accent text-xs font-display font-bold uppercase tracking-wider p-2.5 rounded text-center">
-                {errorMsg}
-              </div>
-            </div>
-          )}
-
-          {inviteToast && (
-            <div className="relative z-20 w-full max-w-md mx-auto mt-2 px-4 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="bg-[#090d14]/90 border border-mint/40 text-mint text-xs font-display font-bold uppercase tracking-wider p-2 rounded text-center shadow-[0_0_15px_rgba(60,242,196,0.2)] flex items-center justify-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-mint animate-ping" />
-                {inviteToast}
-              </div>
-            </div>
-          )}
 
           {/* 3. Main Workspace: Left Control Panel & Center Player Slots */}
           <div className="relative z-10 flex-1 flex items-stretch justify-between gap-5 pl-6 lg:pl-8 py-2 overflow-hidden">
@@ -245,7 +223,6 @@ export default function LobbyPage() {
               incomingPartyInvites={enrichedIncomingInvites}
               onAcceptPartyInvite={handleAcceptPartyInvite}
               onDeclinePartyInvite={handleDeclinePartyInvite}
-              friendAddedToast={friendAddedToast || inviteToast}
               isAddingFriend={isAddingFriend}
             />
           </div>

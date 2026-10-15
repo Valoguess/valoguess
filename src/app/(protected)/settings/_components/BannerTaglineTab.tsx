@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Tag, Image as ImageIcon, Search, Check, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import { AgentBanner, PRESET_TAGLINES } from "../constants";
+import { AgentBanner, PRESET_TAGLINES } from "@/consts";
 
 interface BannerTaglineTabProps {
   tagline: string;
@@ -18,7 +18,6 @@ interface BannerTaglineTabProps {
   setSelectedBannerId: (val: string) => void;
   onSave?: () => void;
   isSaving?: boolean;
-  saveToast?: string;
 }
 
 export function BannerTaglineTab({
@@ -33,7 +32,6 @@ export function BannerTaglineTab({
   setSelectedBannerId,
   onSave,
   isSaving = false,
-  saveToast,
 }: BannerTaglineTabProps) {
   return (
     <div className="space-y-6 animate-fade-in text-left">
@@ -174,16 +172,9 @@ export function BannerTaglineTab({
       {onSave && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/10 bg-[#080B10]/40 border border-white/5 rounded-sm p-4">
           <div>
-            {saveToast ? (
-              <span className="text-xs font-display font-bold text-mint flex items-center gap-1.5 animate-fade-in">
-                <Check className="h-4 w-4" />
-                {saveToast}
-              </span>
-            ) : (
-              <span className="text-[11px] text-zinc-500">
-                Save chosen banner card and custom tagline to your player card.
-              </span>
-            )}
+            <span className="text-[11px] text-zinc-500">
+              Save chosen banner card and custom tagline to your player card.
+            </span>
           </div>
 
           <button

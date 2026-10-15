@@ -2,9 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Shield, Eye, EyeOff, Link2, AlertTriangle, LogOut } from "lucide-react";
+import {
+  Shield,
+  Eye,
+  EyeOff,
+  Link2,
+  AlertTriangle,
+  LogOut,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AgentBanner } from "../constants";
+import { AgentBanner } from "@/consts";
 
 interface PrivacyAccountTabProps {
   currentBanner: AgentBanner;
@@ -25,7 +32,6 @@ export function PrivacyAccountTab({
 }: PrivacyAccountTabProps) {
   return (
     <div className="space-y-6 animate-fade-in text-left">
-
       {/* 2. ACCOUNT AUTHENTICATION & SESSION MANAGEMENT */}
       <div className="bg-[#080B10]/70 border border-white/10 rounded-sm p-6 space-y-4">
         <span className="font-valorant text-sm tracking-wider text-white flex items-center gap-2">
@@ -39,7 +45,9 @@ export function PrivacyAccountTab({
                 <AlertTriangle className="h-3.5 w-3.5" /> GUEST ACCOUNT ACTIVE
               </div>
               <p className="text-xs text-zinc-300">
-                You are currently using an anonymous session. Link your Google account to secure your stats, unlock friends list, and choose custom handles.
+                You are currently using an anonymous session. Link your Google
+                account to secure your stats, unlock friends list, and choose
+                custom handles.
               </p>
             </div>
 
@@ -70,7 +78,10 @@ export function PrivacyAccountTab({
                 ✓ ACCOUNT VERIFIED
               </span>
               <span className="text-[11px] text-zinc-400">
-                Signed in as <strong className="text-white">{userEmail || "Google User"}</strong>
+                Signed in as{" "}
+                <strong className="text-white">
+                  {userEmail || "Google User"}
+                </strong>
               </span>
             </div>
 
@@ -102,7 +113,8 @@ export function PrivacyAccountTab({
               <LogOut className="h-4 w-4 text-[#FF4655]" /> SESSION TERMINATION
             </span>
             <p className="text-xs text-zinc-400 max-w-xl leading-relaxed">
-              End your active session on this device. You will be redirected to the sign-in screen.
+              End your active session on this device. You will be redirected to
+              the sign-in screen.
             </p>
           </div>
 

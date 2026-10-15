@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { useGameStore } from "@/store/gameStore";
 import { useRoomTimer } from "@/hooks/useRoomTimer";
+import { DEFAULT_AVATARS } from "@/consts";
 
 type GameHeaderProps = {
   turnOwner: "you" | "opponent" | "opponent-thinking" | "freeform";
@@ -49,7 +50,7 @@ export function GameHeader({
             name={userName}
             rank="You"
             rankColor="#3CF2C4"
-            avatar="/agents/icon/iso.webp"
+            avatar={DEFAULT_AVATARS.USER}
             nosUsed={userNosUsed}
             nosMax={nosMax}
             turn={turnOwner === "you"}
@@ -63,7 +64,7 @@ export function GameHeader({
           name={opponentName}
           rank="Enemy"
           rankColor="#8C7BFF"
-          avatar="/agents/icon/yoru.webp"
+          avatar={DEFAULT_AVATARS.OPPONENT}
           nosUsed={opponentNosUsed}
           nosMax={nosMax}
           turn={turnOwner === "opponent" || turnOwner === "opponent-thinking"}

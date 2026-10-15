@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 import { Friend, FriendRequest, IncomingPartyInvite } from "./types";
+import { DEFAULT_AVATARS } from "@/consts";
 import { FriendRow } from "./friends/FriendRow";
 import {
   IncomingRequestRow,
@@ -48,7 +49,6 @@ interface LobbyFriendsSidebarProps {
   incomingPartyInvites?: IncomingPartyInvite[];
   onAcceptPartyInvite?: (inviteId: string, partyId: string) => void;
   onDeclinePartyInvite?: (inviteId: string) => void;
-  friendAddedToast: string;
   isAddingFriend?: boolean;
 }
 
@@ -71,7 +71,6 @@ export function LobbyFriendsSidebar({
   incomingPartyInvites = [],
   onAcceptPartyInvite,
   onDeclinePartyInvite,
-  friendAddedToast,
   isAddingFriend = false,
 }: LobbyFriendsSidebarProps) {
   const { user } = useAuthStore();
@@ -115,7 +114,7 @@ export function LobbyFriendsSidebar({
       id: inv.sender.id,
       name: inv.sender.name || "Player",
       username: inv.sender.username,
-      avatar: inv.sender.avatar || "/agents/icon/omen.webp",
+      avatar: inv.sender.avatar || DEFAULT_AVATARS.USER,
       status: "online",
       activity: "In Lobby",
     }));
@@ -216,7 +215,7 @@ export function LobbyFriendsSidebar({
             <div className="flex items-center gap-2 min-w-0">
               <div className="relative h-8 w-8 overflow-hidden shrink-0">
                 <Image
-                  src={user.image || "/agents/icon/omen.webp"}
+                  src={user.image || DEFAULT_AVATARS.USER}
                   alt={user.name || "Me"}
                   fill
                   className="object-cover object-top rounded-full"
@@ -611,7 +610,6 @@ export function LobbyFriendsSidebar({
             setFriendInput={setFriendInput}
             onSubmit={handleAddFriend}
             isAddingFriend={isAddingFriend}
-            friendAddedToast={friendAddedToast}
             currentUsername={user?.username}
           />
         )}

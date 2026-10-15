@@ -85,7 +85,7 @@ export function ResultFaceOff({
 
           <div className="relative aspect-[4/5] w-full max-w-[210px] mx-auto overflow-hidden border border-white/10 rounded-sm">
             <Image
-              src={`/agents/banner/${myAgentObj.id}.webp`}
+              src={myAgentObj.bannerPath || `/agents/banner/${myAgentObj.id}.webp`}
               alt={myAgentObj.name}
               fill
               className="object-cover object-top"
@@ -127,7 +127,7 @@ export function ResultFaceOff({
 
           <div className="relative aspect-[4/5] w-full max-w-[210px] mx-auto overflow-hidden border border-white/10 rounded-sm">
             <Image
-              src={`/agents/banner/${oppAgentObj.id}.webp`}
+              src={oppAgentObj.bannerPath || `/agents/banner/${oppAgentObj.id}.webp`}
               alt={oppAgentObj.name}
               fill
               className="object-cover object-top"

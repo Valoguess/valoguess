@@ -55,7 +55,7 @@ export function ResultProfileSidebar({
           <div className="relative flex h-20 w-20 items-center justify-center rounded-full p-[2.5px] bg-gradient-to-br from-[#3CF2C4] via-[#3CF2C4]/40 to-transparent">
             <div className="h-full w-full overflow-hidden rounded-full bg-base-950 relative">
               <Image
-                src={`/agents/icon/${myAgentObj.id}.webp`}
+                src={myAgentObj.iconPath || `/agents/icon/${myAgentObj.id}.webp`}
                 alt={userName}
                 fill
                 className="object-cover"

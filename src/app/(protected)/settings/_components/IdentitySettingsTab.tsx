@@ -17,7 +17,6 @@ interface IdentitySettingsTabProps {
   defaultIconPath: string;
   onSave?: () => void;
   isSaving?: boolean;
-  saveToast?: string;
 }
 
 export function IdentitySettingsTab({
@@ -33,7 +32,6 @@ export function IdentitySettingsTab({
   defaultIconPath,
   onSave,
   isSaving = false,
-  saveToast,
 }: IdentitySettingsTabProps) {
   return (
     <div className="space-y-6 animate-fade-in">
@@ -174,16 +172,9 @@ export function IdentitySettingsTab({
     {onSave && (
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 bg-[#080B10]/40 border border-white/5 rounded-sm p-4">
         <div>
-          {saveToast ? (
-            <span className="text-xs font-display font-bold text-mint flex items-center gap-1.5 animate-fade-in">
-              <Check className="h-4 w-4" />
-              {saveToast}
-            </span>
-          ) : (
-            <span className="text-[11px] text-zinc-500">
-              Update username and display name. Profile picture saves automatically.
-            </span>
-          )}
+          <span className="text-[11px] text-zinc-500">
+            Update username and display name. Profile picture saves automatically.
+          </span>
         </div>
 
         <button

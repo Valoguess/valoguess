@@ -4,6 +4,8 @@ import Image from "next/image";
 import { Crown, Plus, Loader2, X, UserPlus, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Party, PartyMember } from "@/types/party";
+import { useAuthStore } from "@/store/authStore";
+import { getAgentBannerPath } from "@/consts";
 
 interface LobbyCenterSlotsProps {
   party: Party | null;
@@ -31,7 +33,10 @@ export function LobbyCenterSlots({
   handleKickGuest,
   handleCopyCode,
 }: LobbyCenterSlotsProps) {
+  const { user } = useAuthStore();
   const hasParty = Boolean(party);
+  const myBanner = getAgentBannerPath(user?.banner || "chamber");
+  const oppBanner = getAgentBannerPath((opponent as any)?.banner || "jett");
 
   return (
     <div className="flex-1 flex items-center justify-center gap-4 h-full max-h-130 max-w-275uto">
@@ -64,7 +69,7 @@ export function LobbyCenterSlots({
 
           <div className="relative w-full flex-1 my-2 overflow-hidden rounded-sm border border-white/10 bg-base-950">
             <Image
-              src="/agents/banner/chamber.webp"
+              src={myBanner}
               alt="Agent Banner"
               fill
               className="object-cover object-top scale-105 transition-transform duration-500 group-hover:scale-110"
@@ -157,7 +162,7 @@ export function LobbyCenterSlots({
 
             <div className="relative w-full flex-1 my-2 overflow-hidden rounded-sm border border-white/10 bg-base-950">
               <Image
-                src="/agents/banner/jett.webp"
+                src={oppBanner}
                 alt="Opponent Banner"
                 fill
                 className="object-cover object-top scale-105 transition-transform duration-500 group-hover:scale-110"

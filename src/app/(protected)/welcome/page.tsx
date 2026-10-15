@@ -14,7 +14,7 @@ import {
   RANDOM_NOUNS,
   UsernameStatus,
   getOrGenerateGuestPrefix,
-} from "./constants";
+} from "@/consts";
 import { WelcomeHeader } from "./_components/WelcomeHeader";
 import { DisplayNameField } from "./_components/DisplayNameField";
 import { TacticalUsernameField } from "./_components/TacticalUsernameField";

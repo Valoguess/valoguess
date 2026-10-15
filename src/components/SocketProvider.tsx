@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { socket } from "@/socket";
 import { ClientEvents, ServerEvents } from "@/socket/events";
 import { usePartyStore } from "@/store/partyStore";
@@ -11,8 +12,11 @@ import { usePresenceStore } from "@/store/presenceStore";
 import { useFriendStore } from "@/store/friendStore";
 import { Party } from "@/types/party";
 import { GuessAgentGameDTO } from "@/types/game";
+import { DEFAULT_AVATARS } from "@/consts";
+import { toast } from "sonner";
 
 function SocketProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [error, setError] = useState<any>(null);
   const partyHydrated = usePartyStore((s) => s.hydrated);
   const gameHydrated = useGameStore((s) => s.hydrated);
@@ -49,7 +53,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       }),
       text: data.message,
       colorClass: isMe ? "text-[#3CF2C4]" : "text-[#8C7BFF]",
-      avatar: isMe ? "/agents/icon/chamber.webp" : "/agents/icon/omen.webp",
+      avatar: isMe ? DEFAULT_AVATARS.GUEST : DEFAULT_AVATARS.USER,
     });
   };
 
@@ -83,7 +87,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
         sender: {
           id: inviterId,
           name: "Player",
-          avatar: "/agents/icon/omen.webp",
+          avatar: DEFAULT_AVATARS.USER,
         },
         sentAt: Date.now(),
       });
@@ -91,8 +95,9 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleGameSync = (syncedGame: GuessAgentGameDTO | null) => {
-    if (!syncedGame) {
+    if (!syncedGame || (typeof syncedGame === "object" && !syncedGame.id)) {
       clearGame();
+      router.push("/lobby");
       return;
     }
 
@@ -120,9 +125,11 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       err?.message === "User not in party"
     ) {
       clearParty();
+      toast.error(err.message);
     }
     if (err?.message === "Game not found") {
       clearGame();
+      toast.error(err.message);
     }
     setError(err);
   };
@@ -172,7 +179,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
           ? f.username
           : `@${f.username}`
         : undefined,
-      avatar: f.image || "/agents/icon/omen.webp",
+      avatar: f.image || DEFAULT_AVATARS.USER,
       status: f.online ? ("online" as const) : ("offline" as const),
       activity: f.online ? "In Lobby" : "Offline",
     }));
@@ -185,7 +192,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
           ? r.username
           : `@${r.username}`
         : undefined,
-      avatar: r.image || "/agents/icon/reyna.webp",
+      avatar: r.image || DEFAULT_AVATARS.OPPONENT,
       type: "incoming" as const,
     }));
 
@@ -197,7 +204,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
           ? r.username
           : `@${r.username}`
         : undefined,
-      avatar: r.image || "/agents/icon/phoenix.webp",
+      avatar: r.image || DEFAULT_AVATARS.GUEST,
       type: "outgoing" as const,
     }));
 

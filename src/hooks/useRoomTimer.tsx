@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { GuessAgentGameDTO, Room } from "@/types/game";
+import { GuessAgentGameDTO } from "@/types/game";
 
 interface UseRoomTimerProps {
-  room?: Room | null;
   game?: GuessAgentGameDTO | null;
 }
 
-export const useRoomTimer = ({ room, game }: UseRoomTimerProps) => {
-  const turnEndTime = game?.state?.turnEndTime
-  const turnNumber = game?.state?.turnNumber;;
+export const useRoomTimer = ({ game }: UseRoomTimerProps) => {
+  const turnEndTime = game?.state?.turnEndTime;
+  const turnNumber = game?.state?.turnNumber;
   const isPlaying = game?.status === "PLAYING"
   const rawTimePerRound = game?.settings?.timePerRound;
 

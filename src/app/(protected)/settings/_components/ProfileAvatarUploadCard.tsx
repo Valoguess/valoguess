@@ -2,10 +2,11 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { Camera, Upload, Trash2, CheckCircle2, AlertCircle, Loader2, Sparkles, Lock } from "lucide-react";
+import { Camera, Upload, Trash2, Loader2, Lock } from "lucide-react";
 import { uploadUserAvatar, removeUserAvatar } from "@/actions/upload";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { ImageCropModal } from "./ImageCropModal";
 
 interface ProfileAvatarUploadCardProps {
@@ -23,8 +24,6 @@ export function ProfileAvatarUploadCard({
   const [isUploading, setIsUploading] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
 
   // Image Cropper Modal State
@@ -36,18 +35,15 @@ export function ProfileAvatarUploadCard({
 
   // Initial file select intercepts to show ImageCropModal
   const handleFileSelect = (file: File) => {
-    setErrorMessage("");
-    setSuccessMessage("");
-
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setErrorMessage("Only image files (JPG, PNG, WEBP, GIF) are allowed.");
+      toast.error("Only image files (JPG, PNG, WEBP, GIF) are allowed.");
       return;
     }
 
     if (file.size > 15 * 1024 * 1024) {
-      setErrorMessage("File exceeds 15 MB limit. Please select a smaller image.");
+      toast.error("File exceeds 15 MB limit. Please select a smaller image.");
       return;
     }
 
@@ -57,9 +53,6 @@ export function ProfileAvatarUploadCard({
 
   // Called after user confirms and crops image in modal
   const uploadCroppedFile = async (croppedFile: File) => {
-    setErrorMessage("");
-    setSuccessMessage("");
-
     // Local instant preview of the cropped result
     const localUrl = URL.createObjectURL(croppedFile);
     setPreviewUrl(localUrl);
@@ -84,10 +77,10 @@ export function ProfileAvatarUploadCard({
       }
 
       setPreviewUrl(res.url);
-      setSuccessMessage("Avatar cropped, deployed and synced successfully!");
-      setTimeout(() => setSuccessMessage(""), 4000);
+      toast.success("Avatar cropped, deployed and synced successfully!");
     } catch (err: any) {
-      setErrorMessage(err?.message || "Failed to upload avatar. Please try again.");
+      const msg = err?.message || "Failed to upload avatar. Please try again.";
+      toast.error(msg);
       setPreviewUrl(null);
     } finally {
       setIsUploading(false);
@@ -100,8 +93,6 @@ export function ProfileAvatarUploadCard({
 
   const handleRemove = async () => {
     if (isRemoving || isUploading) return;
-    setErrorMessage("");
-    setSuccessMessage("");
     setIsRemoving(true);
 
     try {
@@ -113,10 +104,10 @@ export function ProfileAvatarUploadCard({
         });
       }
       setPreviewUrl(null);
-      setSuccessMessage("Custom avatar removed. Using default agent icon.");
-      setTimeout(() => setSuccessMessage(""), 4000);
+      toast.info("Custom avatar removed. Using default agent icon.");
     } catch (err: any) {
-      setErrorMessage(err?.message || "Failed to reset avatar.");
+      const msg = err?.message || "Failed to reset avatar.";
+      toast.error(msg);
     } finally {
       setIsRemoving(false);
     }
@@ -160,21 +151,6 @@ export function ProfileAvatarUploadCard({
           </span>
         )}
       </div>
-
-      {/* Feedback Messages */}
-      {errorMessage && (
-        <div className="p-3 bg-[#FF4655]/10 border border-[#FF4655]/30 rounded text-xs text-[#FF4655] font-medium flex items-center gap-2 animate-in fade-in">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="p-3 bg-mint/10 border border-mint/30 rounded text-xs text-mint font-medium flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <span>{successMessage}</span>
-        </div>
-      )}
 
       {/* Main Avatar Controls Row */}
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pt-1">
