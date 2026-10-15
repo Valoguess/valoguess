@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Rajdhani, Inter } from "next/font/google";
 import "./globals.css";
+
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner"
 import SocketProvider from "@/components/SocketProvider";
 import { AuthInitializer } from "@/components/AuthInitializer";
 
@@ -181,7 +183,10 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-[#050811] text-white">
         <AuthInitializer>
-          <SocketProvider>{children}</SocketProvider>
+          <SocketProvider>
+            {children}
+          </SocketProvider>
+          <Toaster />
         </AuthInitializer>
       </body>
     </html>
