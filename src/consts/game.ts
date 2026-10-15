@@ -1,5 +1,3 @@
-
-
 export const RANKS = {
   IRON: { name: "Iron III", color: "#A8A8A8" },
   BRONZE: { name: "Bronze III", color: "#CD7F32" },
@@ -16,6 +14,16 @@ export const GAME_CONFIG = {
   MAX_NOS: 5,
   MAX_ROUNDS: 10,
   DEFAULT_TIMER: 60, // in seconds
+  MIN_TIMER: 15,
+  MAX_TIMER: 180,
+  DEFAULT_QUESTION_COUNT: 15,
+  DEFAULT_MAX_GUESSES: 3,
 } as const;
 
-
+export interface ActivityEntry {
+  id: string;
+  kind: "asked" | "answered-yes" | "answered-no" | "prompt";
+  actor: "you" | "opponent" | "system";
+  text: string;
+  time: string;
+}

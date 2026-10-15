@@ -1,6 +1,6 @@
 export type AgentRole = "Duelist" | "Initiator" | "Controller" | "Sentinel";
 
-export interface AgentBanner {
+export interface Agent {
   id: string;
   name: string;
   role: AgentRole;
@@ -8,7 +8,10 @@ export interface AgentBanner {
   iconPath: string;
 }
 
-export const AGENT_BANNERS: AgentBanner[] = [
+// Alias for settings and player cards
+export type AgentBanner = Agent;
+
+export const AGENTS: Agent[] = [
   // Duelists
   {
     id: "jett",
@@ -58,6 +61,13 @@ export const AGENT_BANNERS: AgentBanner[] = [
     role: "Duelist",
     bannerPath: "/agents/banner/iso.webp",
     iconPath: "/agents/icon/iso.webp",
+  },
+  {
+    id: "waylay",
+    name: "Waylay",
+    role: "Duelist",
+    bannerPath: "/agents/banner/waylay.webp",
+    iconPath: "/agents/icon/waylay.webp",
   },
 
   // Initiators
@@ -154,6 +164,13 @@ export const AGENT_BANNERS: AgentBanner[] = [
     bannerPath: "/agents/banner/clove.webp",
     iconPath: "/agents/icon/clove.webp",
   },
+  {
+    id: "veto",
+    name: "Veto",
+    role: "Controller",
+    bannerPath: "/agents/banner/veto.webp",
+    iconPath: "/agents/icon/veto.webp",
+  },
 
   // Sentinels
   {
@@ -198,9 +215,19 @@ export const AGENT_BANNERS: AgentBanner[] = [
     bannerPath: "/agents/banner/vyse.webp",
     iconPath: "/agents/icon/vyse.webp",
   },
+  {
+    id: "miks",
+    name: "Miks",
+    role: "Sentinel",
+    bannerPath: "/agents/banner/miks.webp",
+    iconPath: "/agents/icon/miks.webp",
+  },
 ];
 
-export const PRESET_TAGLINES = [
+// Setting banner alias
+export const AGENT_BANNERS: AgentBanner[] = AGENTS;
+
+export const PRESET_TAGLINES: readonly string[] = [
   "ONE TAP DEMON",
   "RADIANT MIND",
   "CLUTCH SPECIALIST",
@@ -210,4 +237,27 @@ export const PRESET_TAGLINES = [
   "SNEAKY DEFUSER",
   "TACTICAL DUELIST",
   "AGENT ON DUTY",
-];
+] as const;
+
+export function getAgentById(id?: string | null): Agent {
+  if (!id) return AGENTS[0]!;
+  const normalized = id.toLowerCase();
+  const found = AGENTS.find((a) => a.id.toLowerCase() === normalized);
+  if (found) return found;
+
+  return {
+    id: normalized,
+    name: normalized.charAt(0).toUpperCase() + normalized.slice(1),
+    role: "Sentinel",
+    bannerPath: `/agents/banner/${normalized}.webp`,
+    iconPath: `/agents/icon/${normalized}.webp`,
+  };
+}
+
+export function getAgentBannerPath(id?: string | null): string {
+  return getAgentById(id).bannerPath;
+}
+
+export function getAgentIconPath(id?: string | null): string {
+  return getAgentById(id).iconPath;
+}

@@ -1,71 +1,20 @@
-export type Role = "Duelist" | "Initiator" | "Controller" | "Sentinel";
+import {
+  AgentRole as Role,
+  Agent,
+  AGENTS,
+  ActivityEntry,
+  getAgentById,
+  getAgentBannerPath,
+  getAgentIconPath,
+} from "@/consts";
 
-export type Agent = {
-  id: string;
-  name: string;
-  role: Role;
-  // colorFrom: string;
-  // colorTo: string;
+export type { Role, Agent, ActivityEntry };
+export {
+  AGENTS,
+  getAgentById,
+  getAgentBannerPath,
+  getAgentIconPath,
 };
-
-// Generic placeholder roster inspired by a 5v5 tactical shooter's role
-// archetypes. Names/art are original, not sourced from any existing game.
-export const AGENTS: Agent[] = [
-  { id: "astra", name: "astra", role: "Controller" },
-  { id: "breach", name: "breach", role: "Initiator" },
-  { id: "brimstone", name: "brimstone", role: "Controller" },
-  { id: "chamber", name: "chamber", role: "Sentinel" },
-  { id: "clove", name: "clove", role: "Controller" },
-  { id: "cypher", name: "cypher", role: "Sentinel" },
-  { id: "deadlock", name: "deadlock", role: "Sentinel" },
-  { id: "fade", name: "fade", role: "Initiator" },
-  { id: "gekko", name: "gekko", role: "Initiator" },
-  { id: "harbor", name: "harbor", role: "Controller" },
-  { id: "iso", name: "iso", role: "Duelist" },
-  { id: "jett", name: "jett", role: "Duelist" },
-  { id: "kayo", name: "kayo", role: "Initiator" },
-  { id: "killjoy", name: "killjoy", role: "Sentinel" },
-  { id: "miks", name: "miks", role: "Sentinel" },
-  { id: "neon", name: "neon", role: "Duelist" },
-  { id: "omen", name: "omen", role: "Controller" },
-  { id: "phoenix", name: "phoenix", role: "Duelist" },
-  { id: "raze", name: "raze", role: "Duelist" },
-  { id: "reyna", name: "reyna", role: "Duelist" },
-  { id: "sage", name: "sage", role: "Sentinel" },
-  { id: "skye", name: "skye", role: "Initiator" },
-  { id: "sova", name: "sova", role: "Initiator" },
-  { id: "tejo", name: "tejo", role: "Initiator" },
-  { id: "veto", name: "veto", role: "Controller" },
-  { id: "viper", name: "viper", role: "Controller" },
-  { id: "vyse", name: "vyse", role: "Sentinel" },
-  { id: "waylay", name: "waylay", role: "Duelist" },
-  { id: "yoru", name: "yoru", role: "Duelist" },
-];
-
-
-export type ActivityEntry = {
-  id: string;
-  kind: "asked" | "answered-yes" | "answered-no" | "prompt";
-  actor: "you" | "opponent" | "system";
-  text: string;
-  time: string;
-};
-
-export const INITIAL_ACTIVITY: ActivityEntry[] = [
-  { id: "a1", kind: "asked", actor: "opponent", text: "Can Heal?", time: "01:12" },
-  { id: "a2", kind: "answered-no", actor: "you", text: "No", time: "01:14" },
-  { id: "a3", kind: "asked", actor: "opponent", text: "Has Smoke?", time: "01:16" },
-  { id: "a4", kind: "answered-yes", actor: "you", text: "Yes", time: "01:18" },
-  { id: "a5", kind: "asked", actor: "opponent", text: "Can Stun?", time: "01:20" },
-  { id: "a6", kind: "answered-no", actor: "you", text: "No", time: "01:22" },
-];
-
-
-export const DIFFICULTY_PERCENTAGES = {
-  low: 0.5,
-  medium: 0.3,
-  high: 0.2,
-} as const;
 
 export type QuestionDifficulty =
   | "low"
@@ -623,85 +572,4 @@ export function getQuestionById(id: string): QuestionItem | undefined {
 
 export function getQuestionLabel(id: string): string {
   return QUESTIONS[id]?.label || id;
-}
-
-// Pseudo-random number generator for deterministic seed
-function createPrng(seed: number) {
-  let s = seed % 2147483647;
-  if (s <= 0) s += 2147483646;
-  return () => {
-    s = (s * 16807) % 2147483647;
-    return (s - 1) / 2147483646;
-  };
-}
-
-function stringToSeed(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return Math.abs(hash) || 1;
-}
-
-/**
- * Returns a randomized set of questions sampled across easy (low), med (medium),
- * and hard (high) difficulty tiers based on DIFFICULTY_PERCENTAGES.
- */
-export function getRandomQuestions(
-  totalCount = 24,
-  seed?: string | number
-): QuestionItem[] {
-  const prng =
-    seed !== undefined
-      ? typeof seed === "number"
-        ? createPrng(seed)
-        : createPrng(stringToSeed(seed))
-      : Math.random;
-
-  const lowPool: QuestionItem[] = [];
-  const mediumPool: QuestionItem[] = [];
-  const highPool: QuestionItem[] = [];
-
-  for (const [id, q] of Object.entries(QUESTIONS)) {
-    const item: QuestionItem = { id, ...q };
-    if (q.difficulty === "low") lowPool.push(item);
-    else if (q.difficulty === "medium") mediumPool.push(item);
-    else if (q.difficulty === "high") highPool.push(item);
-  }
-
-  const shuffle = <T>(arr: T[]): T[] => {
-    const copy = [...arr];
-    for (let i = copy.length - 1; i > 0; i--) {
-      const j = Math.floor(prng() * (i + 1));
-      [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
-  };
-
-  const lowShuffled = shuffle(lowPool);
-  const medShuffled = shuffle(mediumPool);
-  const highShuffled = shuffle(highPool);
-
-  const lowTarget = Math.round(totalCount * DIFFICULTY_PERCENTAGES.low);
-  const medTarget = Math.round(totalCount * DIFFICULTY_PERCENTAGES.medium);
-  const highTarget = Math.max(1, totalCount - lowTarget - medTarget);
-
-  const selected: QuestionItem[] = [
-    ...lowShuffled.slice(0, lowTarget),
-    ...medShuffled.slice(0, medTarget),
-    ...highShuffled.slice(0, highTarget),
-  ];
-
-  // If not enough questions in a specific pool, fill from remaining
-  if (selected.length < totalCount) {
-    const selectedIds = new Set(selected.map((s) => s.id));
-    const remaining = [...lowShuffled, ...medShuffled, ...highShuffled].filter(
-      (q) => !selectedIds.has(q.id)
-    );
-    selected.push(...remaining.slice(0, totalCount - selected.length));
-  }
-
-  return shuffle(selected);
 }

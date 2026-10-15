@@ -51,6 +51,12 @@ export const RANDOM_NOUNS = [
 
 export type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
 
+export const DEFAULT_AVATARS = {
+  USER: "/agents/icon/omen.webp",
+  GUEST: "/agents/icon/chamber.webp",
+  OPPONENT: "/agents/icon/reyna.webp",
+} as const;
+
 export function getOrGenerateGuestPrefix(existingName?: string | null): string {
   const match = existingName?.match(/^Guest\.([a-zA-Z0-9]{5,6})/);
   if (match) {
