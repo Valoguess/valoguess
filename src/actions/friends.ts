@@ -10,6 +10,7 @@ import {
 } from "@/services/friendship";
 import { and, eq, or } from "drizzle-orm";
 import { headers } from "next/headers";
+import { DEFAULT_AVATARS } from "@/consts";
 
 const isUuid = (str: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
@@ -88,7 +89,7 @@ export async function sendFriendRequest(targetUsername: string) {
       id: targetUser.id,
       name: targetUser.name || targetUser.username || "Player",
       username: targetUser.username ? `@${targetUser.username}` : undefined,
-      avatar: targetUser.image || "/agents/icon/phoenix.webp",
+      avatar: targetUser.image || DEFAULT_AVATARS.USER,
     };
 
     // Check existing friendship

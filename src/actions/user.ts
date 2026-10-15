@@ -80,7 +80,6 @@ export async function updateUserProfile(formData: UpdateProfileSchema) {
     });
     return { success: true };
   } catch (error) {
-    console.log("error", error);
     if (error instanceof z.ZodError) {
       return { success: false, error: "Invalid input data" };
     }
