@@ -40,7 +40,8 @@ export function MatchIntroOverlay({
   const [now, setNow] = useState(Date.now());
   const initialEndsAtRef = useRef(Date.now() + 7000);
   const targetEndsAt =
-    startingEndsAt || (startingAt ? startingAt + 7000 : initialEndsAtRef.current);
+    startingEndsAt ||
+    (startingAt ? startingAt + 7000 : initialEndsAtRef.current);
   const secondsRemaining = Math.max(0, Math.ceil((targetEndsAt - now) / 1000));
 
   useEffect(() => {
@@ -53,12 +54,14 @@ export function MatchIntroOverlay({
     if (typeof window !== "undefined") {
       AGENTS.forEach((agent) => {
         const img = new window.Image();
-        img.src = `/agents/banner/${agent.id}.avif`;
+        img.src = `/agents/banner/${agent.id}.webp`;
       });
     }
   }, []);
 
-  const currentAgent = isLocked ? targetAgent : AGENTS[currentIndex] || targetAgent;
+  const currentAgent = isLocked
+    ? targetAgent
+    : AGENTS[currentIndex] || targetAgent;
 
   // Decelerating shuffle loop
   useEffect(() => {
@@ -116,7 +119,7 @@ export function MatchIntroOverlay({
       {/* BACKGROUND ARTWORK */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
-          src="/bg/bg2.png"
+          src="/bg/bg2.webp"
           alt="Valorant Background"
           fill
           priority
@@ -170,7 +173,7 @@ export function MatchIntroOverlay({
               "relative w-64 md:w-76 aspect-[4/6] rounded-sm border-2 overflow-hidden flex flex-col justify-between transition-all duration-300 backdrop-blur-xl bg-[#080c14]",
               isLocked
                 ? "border-[#3CF2C4] shadow-[0_0_35px_rgba(60,242,196,0.4)]"
-                : "border-white/20 shadow-[0_0_20px_rgba(0,0,0,0.8)]"
+                : "border-white/20 shadow-[0_0_20px_rgba(0,0,0,0.8)]",
             )}
           >
             {/* Corner Bracket Accents */}
@@ -198,12 +201,12 @@ export function MatchIntroOverlay({
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img
                 key={isLocked ? "locked" : undefined}
-                src={`/agents/banner/${currentAgent.id}.avif`}
+                src={`/agents/banner/${currentAgent.id}.webp`}
                 alt={currentAgent.name}
                 decoding="async"
                 className={cn(
                   "w-full h-full object-cover object-top transition-transform duration-200",
-                  isLocked ? "scale-100" : "scale-105"
+                  isLocked ? "scale-100" : "scale-105",
                 )}
                 style={{ willChange: "transform" }}
               />
@@ -307,7 +310,11 @@ export function MatchIntroOverlay({
 
               <motion.div
                 animate={{ y: [-130, 130, -130] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
                 className="absolute w-full h-[2px] bg-gradient-to-r from-transparent via-[#FF4655] to-transparent opacity-75 shadow-[0_0_12px_#ff4655]"
               />
 

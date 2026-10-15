@@ -87,7 +87,9 @@ export default function LobbyPage() {
 
   const myId = user?.id;
   const isHost = party ? party.leaderId === myId : true;
-  const me = party?.members.find((m) => m.id === myId) || (user ? { id: user.id, name: user.name || "AGENT" } : null);
+  const me =
+    party?.members.find((m) => m.id === myId) ||
+    (user ? { id: user.id, name: user.name || "AGENT" } : null);
   const opponent = party?.members.find((m) => m.id !== myId);
 
   // Game lifecycle & match creation hook
@@ -118,7 +120,7 @@ export default function LobbyPage() {
       {/* Background Graphics */}
       <div className="absolute inset-0 z-0 select-none pointer-events-none">
         <Image
-          src="/bg/bg2.png"
+          src="/bg/bg2.webp"
           alt="Valorant Background"
           fill
           priority
@@ -221,13 +223,15 @@ export default function LobbyPage() {
           <div
             className={cn(
               "transition-all duration-300 h-full shrink-0 z-30 absolute right-0",
-              isFriendsCollapsed ? "w-16" : "w-80 lg:w-84"
+              isFriendsCollapsed ? "w-16" : "w-80 lg:w-84",
             )}
           >
             <LobbyFriendsSidebar
               isFriendsCollapsed={isFriendsCollapsed}
               setIsFriendsCollapsed={setIsFriendsCollapsed}
-              isAnonymous={Boolean(user?.isAnonymous || user?.name?.startsWith("Guest"))}
+              isAnonymous={Boolean(
+                user?.isAnonymous || user?.name?.startsWith("Guest"),
+              )}
               friendsList={friendsList}
               friendRequests={friendRequests}
               friendInput={friendInput}

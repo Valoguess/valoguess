@@ -21,7 +21,9 @@ export function AgentGrid({
   onToggleEliminated,
   onOpenGuessModal,
 }: AgentGridProps = {}) {
-  const [internalEliminated, setInternalEliminated] = useState<Set<string>>(new Set());
+  const [internalEliminated, setInternalEliminated] = useState<Set<string>>(
+    new Set(),
+  );
   const [showGuessModal, setShowGuessModal] = useState(false);
   const { game } = useGameStore();
   const { user } = useAuthStore();
@@ -50,7 +52,7 @@ export function AgentGrid({
 
   const myPlayer =
     game?.players.find(
-      (p) => p.id === user?.id || (p.state && p.state.secretAgent !== null)
+      (p) => p.id === user?.id || (p.state && p.state.secretAgent !== null),
     ) || game?.players[0];
   const isMyTurn = Boolean(myPlayer?.state?.isMyTurn);
   const guessesRemaining = myPlayer?.state?.guessesRemaining ?? 0;
@@ -102,12 +104,12 @@ export function AgentGrid({
                     "relative aspect-[4/5] overflow-hidden rounded-[4px] border bg-zinc-900 transition-all duration-200",
                     isOut
                       ? "border-white/5"
-                      : "border-white/10 hover:border-accent/70 hover:shadow-[0_0_18px_rgba(255,70,85,0.18)]"
+                      : "border-white/10 hover:border-accent/70 hover:shadow-[0_0_18px_rgba(255,70,85,0.18)]",
                   )}
                 >
                   {/* Image */}
                   <Image
-                    src={`/agents/icon/${a.id}.avif`}
+                    src={`/agents/icon/${a.id}.webp`}
                     alt={a.name}
                     fill
                     draggable={false}
@@ -115,7 +117,7 @@ export function AgentGrid({
                       "select-none object-cover transition-all duration-300",
                       isOut
                         ? "grayscale brightness-[0.25] saturate-0"
-                        : "group-hover:scale-105"
+                        : "group-hover:scale-105",
                     )}
                   />
 
@@ -123,7 +125,9 @@ export function AgentGrid({
                   <div
                     className={cn(
                       "absolute inset-0 transition-colors duration-200",
-                      isOut ? "bg-black/45" : "bg-black/10 group-hover:bg-black/0"
+                      isOut
+                        ? "bg-black/45"
+                        : "bg-black/10 group-hover:bg-black/0",
                     )}
                   />
 
@@ -134,7 +138,7 @@ export function AgentGrid({
                   <p
                     className={cn(
                       "absolute bottom-1 left-0 right-0 z-20 truncate px-1 text-center font-display text-[8px] font-semibold uppercase tracking-[0.14em] text-white transition-opacity",
-                      isOut && "opacity-50"
+                      isOut && "opacity-50",
                     )}
                   >
                     {a.name}
@@ -174,7 +178,8 @@ export function AgentGrid({
           {/* MAKE GUESS TRIGGER BUTTON */}
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-mono text-white/40">
-              Remaining: <span className="font-bold text-accent">{guessesRemaining}</span>
+              Remaining:{" "}
+              <span className="font-bold text-accent">{guessesRemaining}</span>
             </span>
 
             <button
@@ -184,14 +189,14 @@ export function AgentGrid({
                 "clip-tag flex items-center justify-center gap-2.5 px-8 py-3 font-valorant text-xs uppercase tracking-[0.15em] text-white transition-all shadow-md cursor-pointer",
                 yourTurn
                   ? "bg-accent hover:bg-accent-dim shadow-[0_0_20px_rgba(255,70,85,0.4)] active:scale-98"
-                  : "bg-white/5 text-white/30 border border-white/10 cursor-not-allowed opacity-50"
+                  : "bg-white/5 text-white/30 border border-white/10 cursor-not-allowed opacity-50",
               )}
               title={
                 !isMyTurn
                   ? "Wait for your turn to make a guess"
                   : guessesRemaining <= 0
-                  ? "No guesses remaining"
-                  : "Make your final guess"
+                    ? "No guesses remaining"
+                    : "Make your final guess"
               }
             >
               <Crosshair className="h-4 w-4" />

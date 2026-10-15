@@ -6,7 +6,7 @@ export function AuthBackground() {
   return (
     <div className="absolute inset-0 z-0 pointer-events-none select-none">
       <Image
-        src="/bg/bg2.png"
+        src="/bg/bg2.webp"
         alt="ValoGuess Background"
         fill
         priority

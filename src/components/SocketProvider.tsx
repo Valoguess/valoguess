@@ -38,9 +38,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     const isMe = data.userId === currentUserId;
     const member = party?.members.find((m) => m.id === data.userId);
 
-    const senderName = isMe
-      ? user?.name || "YOU"
-      : member?.name || "Player";
+    const senderName = isMe ? user?.name || "YOU" : member?.name || "Player";
 
     addPartyMessage({
       id: crypto.randomUUID(),
@@ -51,7 +49,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       }),
       text: data.message,
       colorClass: isMe ? "text-[#3CF2C4]" : "text-[#8C7BFF]",
-      avatar: isMe ? "/agents/icon/chamber.avif" : "/agents/icon/omen.avif",
+      avatar: isMe ? "/agents/icon/chamber.webp" : "/agents/icon/omen.webp",
     });
   };
 
@@ -85,7 +83,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
         sender: {
           id: inviterId,
           name: "Player",
-          avatar: "/agents/icon/omen.avif",
+          avatar: "/agents/icon/omen.webp",
         },
         sentAt: Date.now(),
       });
@@ -117,7 +115,10 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       socket.disconnect();
       socket.connect();
     }
-    if (err?.message === "Party not found" || err?.message === "User not in party") {
+    if (
+      err?.message === "Party not found" ||
+      err?.message === "User not in party"
+    ) {
       clearParty();
     }
     if (err?.message === "Game not found") {
@@ -156,7 +157,10 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
 
     if (syncData.friends) {
       setFriendsPresence(
-        syncData.friends.map((f) => ({ userId: f.id, online: Boolean(f.online) })),
+        syncData.friends.map((f) => ({
+          userId: f.id,
+          online: Boolean(f.online),
+        })),
       );
     }
 
@@ -168,7 +172,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
           ? f.username
           : `@${f.username}`
         : undefined,
-      avatar: f.image || "/agents/icon/omen.avif",
+      avatar: f.image || "/agents/icon/omen.webp",
       status: f.online ? ("online" as const) : ("offline" as const),
       activity: f.online ? "In Lobby" : "Offline",
     }));
@@ -181,7 +185,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
           ? r.username
           : `@${r.username}`
         : undefined,
-      avatar: r.image || "/agents/icon/reyna.avif",
+      avatar: r.image || "/agents/icon/reyna.webp",
       type: "incoming" as const,
     }));
 
@@ -193,7 +197,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
           ? r.username
           : `@${r.username}`
         : undefined,
-      avatar: r.image || "/agents/icon/phoenix.avif",
+      avatar: r.image || "/agents/icon/phoenix.webp",
       type: "outgoing" as const,
     }));
 
@@ -271,8 +275,14 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     socket.on(ServerEvents.FRIENDS_SYNC, handleFriendsSync);
     socket.on(ServerEvents.FRIEND_PRESENCE, handleFriendPresence);
     socket.on(ServerEvents.FRIEND_REQUEST, handleFriendRequest);
-    socket.on(ServerEvents.FRIEND_REQUEST_ACCEPTED, handleFriendRequestAccepted);
-    socket.on(ServerEvents.FRIEND_REQUEST_DECLINED, handleFriendRequestDeclined);
+    socket.on(
+      ServerEvents.FRIEND_REQUEST_ACCEPTED,
+      handleFriendRequestAccepted,
+    );
+    socket.on(
+      ServerEvents.FRIEND_REQUEST_DECLINED,
+      handleFriendRequestDeclined,
+    );
 
     if (!socket.connected) {
       socket.connect();
@@ -300,8 +310,14 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       socket.off(ServerEvents.FRIENDS_SYNC, handleFriendsSync);
       socket.off(ServerEvents.FRIEND_PRESENCE, handleFriendPresence);
       socket.off(ServerEvents.FRIEND_REQUEST, handleFriendRequest);
-      socket.off(ServerEvents.FRIEND_REQUEST_ACCEPTED, handleFriendRequestAccepted);
-      socket.off(ServerEvents.FRIEND_REQUEST_DECLINED, handleFriendRequestDeclined);
+      socket.off(
+        ServerEvents.FRIEND_REQUEST_ACCEPTED,
+        handleFriendRequestAccepted,
+      );
+      socket.off(
+        ServerEvents.FRIEND_REQUEST_DECLINED,
+        handleFriendRequestDeclined,
+      );
 
       clearInterval(heartbeat);
       window.removeEventListener("beforeunload", handleBeforeUnload);

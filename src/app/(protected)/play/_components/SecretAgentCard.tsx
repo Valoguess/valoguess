@@ -34,9 +34,8 @@ export function SecretAgentCard({
 
       <div className="relative h-[400px] overflow-hidden">
         <div>
-
           <Image
-            src={`/agents/banner/${agent.id}.avif`}
+            src={`/agents/banner/${agent.id}.webp`}
             alt={agent.name}
             fill
             priority
@@ -126,11 +125,9 @@ export function SecretAgentCard({
           </div> */}
         </div>
 
-
         {/* Agent Name */}
 
         <div className="absolute inset-x-0 bottom-5 text-center">
-
           <h3 className="font-display text-3xl font-black uppercase tracking-[0.12em] text-white drop-shadow-lg">
             {agent.name}
           </h3>
@@ -140,17 +137,14 @@ export function SecretAgentCard({
               {agent.role}
             </span>
           </div>
-
         </div>
       </div>
       {/* ================= INFO ================= */}
 
       <div className="border-t border-white/10 bg-base-900">
-
         {/* Match Details */}
 
         <div className="border-b border-white/10 px-5 py-4">
-
           <div className="mb-3 flex items-center justify-between">
             <span className="font-display text-[11px] uppercase tracking-[0.24em] text-accent">
               Match Details
@@ -186,12 +180,8 @@ export function SecretAgentCard({
               value={maxRounds > 0 ? `${maxRounds}` : "Unlimited"}
             />
           </div>
-
         </div>
-
-
       </div>
-
     </section>
   );
 }
@@ -216,9 +206,7 @@ function InfoRow({
 
         {/* Label */}
 
-        <span className="text-sm font-medium text-zinc-400">
-          {label}
-        </span>
+        <span className="text-sm font-medium text-zinc-400">{label}</span>
       </div>
 
       {/* Value */}

@@ -36,7 +36,10 @@ export default function SettingsPage() {
     if (typeof (session?.user as any)?.isAnonymous === "boolean") {
       return Boolean((session?.user as any).isAnonymous);
     }
-    return Boolean(user?.name?.startsWith("Guest") || session?.user?.name?.startsWith("Guest"));
+    return Boolean(
+      user?.name?.startsWith("Guest") ||
+      session?.user?.name?.startsWith("Guest"),
+    );
   }, [user, session]);
 
   // Form states initialized directly from user schema
@@ -54,7 +57,9 @@ export default function SettingsPage() {
   const [bannerSearch, setBannerSearch] = useState<string>("");
 
   // Navigation tab
-  const [activeTab, setActiveTab] = useState<"identity" | "banner" | "privacy">("identity");
+  const [activeTab, setActiveTab] = useState<"identity" | "banner" | "privacy">(
+    "identity",
+  );
 
   // Save state & feedback toast
   const [isSaving, setIsSaving] = useState(false);
@@ -71,7 +76,8 @@ export default function SettingsPage() {
 
     const initialUsername =
       user?.username ||
-      (initialName.toLowerCase().replace(/[^a-z0-9_]/g, "") || "agent_001");
+      initialName.toLowerCase().replace(/[^a-z0-9_]/g, "") ||
+      "agent_001";
     setUsername(initialUsername.replace(/^@/, ""));
 
     setTagline(user?.tagline || "CLUTCH SPECIALIST");
@@ -86,13 +92,17 @@ export default function SettingsPage() {
 
   // Selected banner object
   const currentBanner = useMemo(() => {
-    return AGENT_BANNERS.find((b) => b.id === selectedBannerId) || AGENT_BANNERS[0]!;
+    return (
+      AGENT_BANNERS.find((b) => b.id === selectedBannerId) || AGENT_BANNERS[0]!
+    );
   }, [selectedBannerId]);
 
   // Filtered banners list
   const filteredBanners = useMemo(() => {
     return AGENT_BANNERS.filter((b) => {
-      const matchesRole = selectedRole === "ALL" || b.role.toUpperCase() === selectedRole.toUpperCase();
+      const matchesRole =
+        selectedRole === "ALL" ||
+        b.role.toUpperCase() === selectedRole.toUpperCase();
       const matchesSearch =
         b.name.toLowerCase().includes(bannerSearch.toLowerCase()) ||
         b.role.toLowerCase().includes(bannerSearch.toLowerCase());
@@ -114,17 +124,23 @@ export default function SettingsPage() {
       if (session?.user?.id) {
         // Save identity changes
         if (nextName !== user?.name || nextUsername !== user?.username) {
-          const res = await updateUser({ name: nextName, username: nextUsername });
+          const res = await updateUser({
+            name: nextName,
+            username: nextUsername,
+          });
 
-          if (res.success && socket.connected) { 
+          if (res.success && socket.connected) {
             socket.disconnect().connect();
           }
         }
 
         // Save profile customisations (banner, tagline)
         if (nextBanner !== user?.banner || nextTagline !== user?.tagline) {
-          const res = await updateUserProfile({ banner: nextBanner, tagline: nextTagline });
-          if (res.success && socket.connected) { 
+          const res = await updateUserProfile({
+            banner: nextBanner,
+            tagline: nextTagline,
+          });
+          if (res.success && socket.connected) {
             socket.disconnect().connect();
           }
         }
@@ -137,8 +153,12 @@ export default function SettingsPage() {
           username: nextUsername,
           tagline: nextTagline,
           banner: nextBanner,
-          nameUpdatedAt: nextName !== user.name ? new Date() : user.nameUpdatedAt,
-          usernameUpdatedAt: nextUsername !== user.username ? new Date() : user.usernameUpdatedAt,
+          nameUpdatedAt:
+            nextName !== user.name ? new Date() : user.nameUpdatedAt,
+          usernameUpdatedAt:
+            nextUsername !== user.username
+              ? new Date()
+              : user.usernameUpdatedAt,
         });
       }
 
@@ -180,7 +200,7 @@ export default function SettingsPage() {
       {/* Background artwork */}
       <div className="fixed inset-0 z-0 select-none pointer-events-none">
         <Image
-          src="/bg/bg2.png"
+          src="/bg/bg2.webp"
           alt="Background"
           fill
           priority
@@ -213,7 +233,7 @@ export default function SettingsPage() {
               "py-2.5 px-5 font-display text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2",
               activeTab === "identity"
                 ? "border-accent text-white bg-white/4"
-                : "border-transparent text-white/50 hover:text-white hover:bg-white/2"
+                : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
             <User className="h-4 w-4 text-accent" />
@@ -226,7 +246,7 @@ export default function SettingsPage() {
               "py-2.5 px-5 font-display text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2",
               activeTab === "banner"
                 ? "border-accent text-white bg-white/4"
-                : "border-transparent text-white/50 hover:text-white hover:bg-white/2"
+                : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
             <ImageIcon className="h-4 w-4 text-amber-400" />
@@ -239,7 +259,7 @@ export default function SettingsPage() {
               "py-2.5 px-5 font-display text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2",
               activeTab === "privacy"
                 ? "border-accent text-white bg-white/4"
-                : "border-transparent text-white/50 hover:text-white hover:bg-white/2"
+                : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
             <Shield className="h-4 w-4 text-mint" />
@@ -254,11 +274,15 @@ export default function SettingsPage() {
             username={username}
             setUsername={setUsername}
             usernameCooldownDays={usernameCooldownDays}
-            toggleUsernameCooldownDemo={() => setUsernameCooldownDays((prev) => (prev > 0 ? 0 : 24))}
+            toggleUsernameCooldownDemo={() =>
+              setUsernameCooldownDays((prev) => (prev > 0 ? 0 : 24))
+            }
             name={name}
             setName={setName}
             nameCooldownDays={nameCooldownDays}
-            toggleNameCooldownDemo={() => setNameCooldownDays((prev) => (prev > 0 ? 0 : 19))}
+            toggleNameCooldownDemo={() =>
+              setNameCooldownDays((prev) => (prev > 0 ? 0 : 19))
+            }
             defaultIconPath={currentBanner.iconPath}
             onSave={() => handleSaveSettings()}
             isSaving={isSaving}

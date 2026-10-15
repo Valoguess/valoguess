@@ -43,7 +43,11 @@ export function ResultFaceOff({
         <h1
           className={cn(
             "font-valorant text-6xl font-black uppercase tracking-[0.1em] text-shadow-glow leading-none select-none",
-            isTie ? "text-amber-400" : isVictory ? "text-[#3CF2C4]" : "text-zinc-500"
+            isTie
+              ? "text-amber-400"
+              : isVictory
+                ? "text-[#3CF2C4]"
+                : "text-zinc-500",
           )}
         >
           {isTie ? "DRAW" : isVictory ? "VICTORY" : "DEFEAT"}
@@ -67,7 +71,7 @@ export function ResultFaceOff({
               ? "border-[#3CF2C4]/50 shadow-[0_0_20px_rgba(60,242,196,0.15)]"
               : isTie
                 ? "border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.08)]"
-                : "border-white/5"
+                : "border-white/5",
           )}
         >
           {/* Corner decor */}
@@ -81,7 +85,7 @@ export function ResultFaceOff({
 
           <div className="relative aspect-[4/5] w-full max-w-[210px] mx-auto overflow-hidden border border-white/10 rounded-sm">
             <Image
-              src={`/agents/banner/${myAgentObj.id}.png`}
+              src={`/agents/banner/${myAgentObj.id}.webp`}
               alt={myAgentObj.name}
               fill
               className="object-cover object-top"
@@ -109,7 +113,7 @@ export function ResultFaceOff({
               ? "border-accent/40 shadow-[0_0_20px_rgba(255,70,85,0.08)]"
               : isTie
                 ? "border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.08)]"
-                : "border-white/5"
+                : "border-white/5",
           )}
         >
           {/* Corner decor */}
@@ -123,7 +127,7 @@ export function ResultFaceOff({
 
           <div className="relative aspect-[4/5] w-full max-w-[210px] mx-auto overflow-hidden border border-white/10 rounded-sm">
             <Image
-              src={`/agents/banner/${oppAgentObj.id}.png`}
+              src={`/agents/banner/${oppAgentObj.id}.webp`}
               alt={oppAgentObj.name}
               fill
               className="object-cover object-top"
@@ -149,7 +153,7 @@ export function ResultFaceOff({
             ? "border-amber-500/40 bg-amber-500/10 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.1)]"
             : isVictory
               ? "border-mint bg-mint/5 text-mint shadow-[0_0_15px_rgba(60,242,196,0.05)]"
-              : "border-accent bg-accent/5 text-accent shadow-[0_0_15px_rgba(255,70,85,0.05)]"
+              : "border-accent bg-accent/5 text-accent shadow-[0_0_15px_rgba(255,70,85,0.05)]",
         )}
       >
         <span>{isTie ? "⚖️" : "★"}</span>
@@ -169,15 +173,29 @@ export function ResultFaceOff({
         </h4>
         <div className="grid grid-cols-6 gap-2 text-center">
           <StatCol icon="🎯" label="Rounds Played" val={String(roundsPlayed)} />
-          <StatCol icon="❓" label="Total Questions" val={String(totalQuestions)} />
-          <StatCol icon="❌" label="No Answers (You)" val={String(userNosUsed)} />
-          <StatCol icon="❌" label="No Answers (Opponent)" val={String(opponentNosUsed)} />
+          <StatCol
+            icon="❓"
+            label="Total Questions"
+            val={String(totalQuestions)}
+          />
+          <StatCol
+            icon="❌"
+            label="No Answers (You)"
+            val={String(userNosUsed)}
+          />
+          <StatCol
+            icon="❌"
+            label="No Answers (Opponent)"
+            val={String(opponentNosUsed)}
+          />
           <StatCol icon="🔍" label="Guesses Made" val={String(guessesMade)} />
           <StatCol
             icon="📈"
             label="Accuracy"
             val={isTie ? "0%" : accuracy}
-            valClass={isTie ? "text-amber-400" : isVictory ? "text-mint" : "text-accent"}
+            valClass={
+              isTie ? "text-amber-400" : isVictory ? "text-mint" : "text-accent"
+            }
           />
         </div>
       </div>

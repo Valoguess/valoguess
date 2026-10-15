@@ -36,7 +36,7 @@ export async function sendFriendRequest(targetUsername: string) {
   try {
     const result = await attempt(
       `ratelimit:nextjs:sendFriendRequest:${targetUsername}`,
-      {maxRequests: 5, windowSeconds: 60},
+      { maxRequests: 5, windowSeconds: 60 },
     );
 
     if (!result.allowed) {
@@ -49,7 +49,10 @@ export async function sendFriendRequest(targetUsername: string) {
     const currUser = session?.user;
 
     if (!currUser) {
-      return { success: false, error: "You must be signed in to send friend requests" };
+      return {
+        success: false,
+        error: "You must be signed in to send friend requests",
+      };
     }
 
     if (currUser.isAnonymous) {
@@ -66,7 +69,10 @@ export async function sendFriendRequest(targetUsername: string) {
 
     const targetUser = await getUserByUsername(clean);
     if (!targetUser) {
-      return { success: false, error: `Player with username "${clean}" not found` };
+      return {
+        success: false,
+        error: `Player with username "${clean}" not found`,
+      };
     }
 
     if (targetUser.id === currUser.id) {
@@ -82,7 +88,7 @@ export async function sendFriendRequest(targetUsername: string) {
       id: targetUser.id,
       name: targetUser.name || targetUser.username || "Player",
       username: targetUser.username ? `@${targetUser.username}` : undefined,
-      avatar: targetUser.image || "/agents/icon/phoenix.avif",
+      avatar: targetUser.image || "/agents/icon/phoenix.webp",
     };
 
     // Check existing friendship
@@ -90,7 +96,10 @@ export async function sendFriendRequest(targetUsername: string) {
 
     if (existing) {
       if (existing.status === "ACCEPTED") {
-        return { success: false, error: `${displayName} is already your friend` };
+        return {
+          success: false,
+          error: `${displayName} is already your friend`,
+        };
       }
 
       if (existing.status === "PENDING") {
@@ -147,7 +156,10 @@ export async function sendFriendRequest(targetUsername: string) {
       targetUser: targetUserData,
     };
   } catch (err: any) {
-    return { success: false, error: err?.message || "Failed to send friend request" };
+    return {
+      success: false,
+      error: err?.message || "Failed to send friend request",
+    };
   }
 }
 
@@ -169,18 +181,18 @@ export async function acceptFriendRequest(targetIdOrFriendshipId: string) {
           and(
             eq(friendship.requesterId, targetIdOrFriendshipId),
             eq(friendship.receiverId, currUser.id),
-            eq(friendship.status, "PENDING")
+            eq(friendship.status, "PENDING"),
           ),
           and(
             eq(friendship.id, targetIdOrFriendshipId),
             eq(friendship.receiverId, currUser.id),
-            eq(friendship.status, "PENDING")
-          )
+            eq(friendship.status, "PENDING"),
+          ),
         )
       : and(
           eq(friendship.requesterId, targetIdOrFriendshipId),
           eq(friendship.receiverId, currUser.id),
-          eq(friendship.status, "PENDING")
+          eq(friendship.status, "PENDING"),
         );
 
     const updated = await db
@@ -202,7 +214,10 @@ export async function acceptFriendRequest(targetIdOrFriendshipId: string) {
       requesterId: updated[0].requesterId,
     };
   } catch (err: any) {
-    return { success: false, error: err?.message || "Failed to accept friend request" };
+    return {
+      success: false,
+      error: err?.message || "Failed to accept friend request",
+    };
   }
 }
 
@@ -224,18 +239,18 @@ export async function declineFriendRequest(targetIdOrFriendshipId: string) {
           and(
             eq(friendship.requesterId, targetIdOrFriendshipId),
             eq(friendship.receiverId, currUser.id),
-            eq(friendship.status, "PENDING")
+            eq(friendship.status, "PENDING"),
           ),
           and(
             eq(friendship.id, targetIdOrFriendshipId),
             eq(friendship.receiverId, currUser.id),
-            eq(friendship.status, "PENDING")
-          )
+            eq(friendship.status, "PENDING"),
+          ),
         )
       : and(
           eq(friendship.requesterId, targetIdOrFriendshipId),
           eq(friendship.receiverId, currUser.id),
-          eq(friendship.status, "PENDING")
+          eq(friendship.status, "PENDING"),
         );
 
     const updated = await db
@@ -254,7 +269,10 @@ export async function declineFriendRequest(targetIdOrFriendshipId: string) {
       requesterId: updated[0].requesterId,
     };
   } catch (err: any) {
-    return { success: false, error: err?.message || "Failed to decline friend request" };
+    return {
+      success: false,
+      error: err?.message || "Failed to decline friend request",
+    };
   }
 }
 
@@ -276,18 +294,18 @@ export async function cancelFriendRequest(targetIdOrFriendshipId: string) {
           and(
             eq(friendship.requesterId, currUser.id),
             eq(friendship.receiverId, targetIdOrFriendshipId),
-            eq(friendship.status, "PENDING")
+            eq(friendship.status, "PENDING"),
           ),
           and(
             eq(friendship.id, targetIdOrFriendshipId),
             eq(friendship.requesterId, currUser.id),
-            eq(friendship.status, "PENDING")
-          )
+            eq(friendship.status, "PENDING"),
+          ),
         )
       : and(
           eq(friendship.requesterId, currUser.id),
           eq(friendship.receiverId, targetIdOrFriendshipId),
-          eq(friendship.status, "PENDING")
+          eq(friendship.status, "PENDING"),
         );
 
     const deleted = await db
@@ -301,7 +319,10 @@ export async function cancelFriendRequest(targetIdOrFriendshipId: string) {
 
     return { success: true, message: "Friend request cancelled" };
   } catch (err: any) {
-    return { success: false, error: err?.message || "Failed to cancel friend request" };
+    return {
+      success: false,
+      error: err?.message || "Failed to cancel friend request",
+    };
   }
 }
 
@@ -319,8 +340,14 @@ export async function removeFriend(targetId: string) {
     const validUuid = isUuid(targetId);
 
     const userConditions = [
-      and(eq(friendship.requesterId, targetId), eq(friendship.receiverId, currUser.id)),
-      and(eq(friendship.requesterId, currUser.id), eq(friendship.receiverId, targetId)),
+      and(
+        eq(friendship.requesterId, targetId),
+        eq(friendship.receiverId, currUser.id),
+      ),
+      and(
+        eq(friendship.requesterId, currUser.id),
+        eq(friendship.receiverId, targetId),
+      ),
     ];
 
     if (validUuid) {
@@ -329,9 +356,9 @@ export async function removeFriend(targetId: string) {
           eq(friendship.id, targetId),
           or(
             eq(friendship.requesterId, currUser.id),
-            eq(friendship.receiverId, currUser.id)
-          )
-        )
+            eq(friendship.receiverId, currUser.id),
+          ),
+        ),
       );
     }
 

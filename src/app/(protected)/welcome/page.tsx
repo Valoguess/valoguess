@@ -32,7 +32,10 @@ export default function WelcomePage() {
     if (typeof (session?.user as any)?.isAnonymous === "boolean") {
       return Boolean((session?.user as any).isAnonymous);
     }
-    return Boolean(user?.name?.startsWith("Guest") || session?.user?.name?.startsWith("Guest"));
+    return Boolean(
+      user?.name?.startsWith("Guest") ||
+      session?.user?.name?.startsWith("Guest"),
+    );
   }, [user, session]);
 
   // For anonymous users: fixed prefix Guest.[5-6letters]
@@ -61,15 +64,17 @@ export default function WelcomePage() {
       }
 
       const assignedUsername =
-        user?.username ||
-        prefix.toLowerCase().replace(".", "_");
+        user?.username || prefix.toLowerCase().replace(".", "_");
       setUsername(assignedUsername);
       setUsernameStatus("available");
     } else {
       const initialDisplayName = session?.user?.name || user?.name || "";
       const initialHandle =
         user?.username ||
-        session?.user?.email?.split("@")[0]?.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase() ||
+        session?.user?.email
+          ?.split("@")[0]
+          ?.replace(/[^a-zA-Z0-9_]/g, "")
+          .toLowerCase() ||
         "";
 
       if (initialDisplayName) {
@@ -108,7 +113,9 @@ export default function WelcomePage() {
 
     if (!/^[a-z0-9_.-]+$/.test(cleaned)) {
       setUsernameStatus("invalid");
-      setStatusMessage("Only letters, numbers, underscores, and hyphens allowed");
+      setStatusMessage(
+        "Only letters, numbers, underscores, and hyphens allowed",
+      );
       setSuggestions([]);
       return;
     }
@@ -124,7 +131,10 @@ export default function WelcomePage() {
     setStatusMessage("Checking availability...");
 
     const timeout = setTimeout(() => {
-      const isTaken = TAKEN_USERNAMES.has(cleaned) || cleaned.endsWith("_taken") || cleaned === "guest123";
+      const isTaken =
+        TAKEN_USERNAMES.has(cleaned) ||
+        cleaned.endsWith("_taken") ||
+        cleaned === "guest123";
 
       if (isTaken) {
         setUsernameStatus("taken");
@@ -147,14 +157,22 @@ export default function WelcomePage() {
   // Randomize a unique handle suggestion
   const handleRandomizeUsername = () => {
     if (isAnonymous) return;
-    const adj = RANDOM_ADJECTIVES[Math.floor(Math.random() * RANDOM_ADJECTIVES.length)].toLowerCase();
-    const noun = RANDOM_NOUNS[Math.floor(Math.random() * RANDOM_NOUNS.length)].toLowerCase();
+    const adj =
+      RANDOM_ADJECTIVES[
+        Math.floor(Math.random() * RANDOM_ADJECTIVES.length)
+      ].toLowerCase();
+    const noun =
+      RANDOM_NOUNS[
+        Math.floor(Math.random() * RANDOM_NOUNS.length)
+      ].toLowerCase();
     const num = Math.floor(10 + Math.random() * 90);
     const newHandle = `${adj}_${noun}${num}`;
     setUsername(newHandle);
 
     if (!displayName) {
-      setDisplayName(`${adj.charAt(0).toUpperCase() + adj.slice(1)} ${noun.charAt(0).toUpperCase() + noun.slice(1)}`);
+      setDisplayName(
+        `${adj.charAt(0).toUpperCase() + adj.slice(1)} ${noun.charAt(0).toUpperCase() + noun.slice(1)}`,
+      );
     }
   };
 
@@ -174,12 +192,18 @@ export default function WelcomePage() {
       finalDisplayName = displayNameSuffix.trim()
         ? `${guestPrefix}${displayNameSuffix}`
         : guestPrefix;
-      finalUsername = username.trim().toLowerCase() || guestPrefix.toLowerCase().replace(".", "_");
+      finalUsername =
+        username.trim().toLowerCase() ||
+        guestPrefix.toLowerCase().replace(".", "_");
     } else {
       finalDisplayName = displayName.trim() || username.trim() || "Agent";
       finalUsername = username.trim().toLowerCase();
 
-      if (usernameStatus === "invalid" || usernameStatus === "taken" || usernameStatus === "checking") {
+      if (
+        usernameStatus === "invalid" ||
+        usernameStatus === "taken" ||
+        usernameStatus === "checking"
+      ) {
         return;
       }
     }
@@ -221,7 +245,7 @@ export default function WelcomePage() {
       {/* Background artwork */}
       <div className="absolute inset-0 z-0 pointer-events-none select-none">
         <Image
-          src="/bg/bg2.png"
+          src="/bg/bg2.webp"
           alt="ValoGuess Background"
           fill
           priority
@@ -261,7 +285,10 @@ export default function WelcomePage() {
             </p>
           </div>
 
-          <form onSubmit={handleCompleteOnboarding} className="space-y-5 text-left">
+          <form
+            onSubmit={handleCompleteOnboarding}
+            className="space-y-5 text-left"
+          >
             {/* FIELD 1: DISPLAY NAME */}
             <DisplayNameField
               isAnonymous={isAnonymous}

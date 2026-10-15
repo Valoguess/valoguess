@@ -15,7 +15,7 @@ export function AuthHeader({ mode }: AuthHeaderProps) {
       <Link href="/" className="flex items-center gap-3 group">
         <div className="relative w-9 h-9 flex items-center justify-center">
           <Image
-            src="/logo.png"
+            src="/logo.webp"
             alt="ValoGuess Logo"
             fill
             className="object-contain transition-transform duration-200 group-hover:scale-105"
@@ -23,7 +23,9 @@ export function AuthHeader({ mode }: AuthHeaderProps) {
           />
         </div>
         <div className="flex flex-col text-left leading-tight">
-          <span className="font-bold text-base tracking-wider text-white">VALOGUESS</span>
+          <span className="font-bold text-base tracking-wider text-white">
+            VALOGUESS
+          </span>
           <span className="text-[10px] font-medium uppercase tracking-widest text-[#FF4655]">
             {isLogin ? "TACTICAL AUTHENTICATION" : "AGENT ENROLLMENT"}
           </span>

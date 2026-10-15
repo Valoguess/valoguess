@@ -28,7 +28,6 @@ export function GameHeader({
   maxRounds = 10,
   onLeave,
 }: GameHeaderProps) {
-
   return (
     <header className="border-b border-white/10 bg-[#090B11] relative">
       {/* HUD */}
@@ -50,25 +49,21 @@ export function GameHeader({
             name={userName}
             rank="You"
             rankColor="#3CF2C4"
-            avatar="/agents/icon/iso.avif"
+            avatar="/agents/icon/iso.webp"
             nosUsed={userNosUsed}
             nosMax={nosMax}
             turn={turnOwner === "you"}
           />
         </div>
 
-        <CenterHUD
-          time={60}
-          round={round}
-          maxRounds={maxRounds}
-        />
+        <CenterHUD time={60} round={round} maxRounds={maxRounds} />
 
         <PlayerSide
           align="right"
           name={opponentName}
           rank="Enemy"
           rankColor="#8C7BFF"
-          avatar="/agents/icon/yoru.avif"
+          avatar="/agents/icon/yoru.webp"
           nosUsed={opponentNosUsed}
           nosMax={nosMax}
           turn={turnOwner === "opponent" || turnOwner === "opponent-thinking"}
@@ -94,7 +89,9 @@ function CenterHUD({
   return (
     <div className="flex flex-col items-center">
       <div className="flex items-center gap-2">
-        <span className="font-valorant text-2xl tracking-[0.15em] text-white">GUESS THE AGENT</span>
+        <span className="font-valorant text-2xl tracking-[0.15em] text-white">
+          GUESS THE AGENT
+        </span>
       </div>
       <div className="text-[10px] uppercase tracking-[0.25em] text-zinc-500 mt-0.5">
         1V1 DUEL
@@ -107,7 +104,11 @@ function CenterHUD({
             ROUND {round} / {maxRoundsDisplay}
           </div>
           <div className="font-display text-4xl font-black tabular-nums text-white leading-none mt-1">
-            {isInfinite || timeLeft === -1 ? "∞" : (timeLeft > 0 ? formattedTime : "00:00")}
+            {isInfinite || timeLeft === -1
+              ? "∞"
+              : timeLeft > 0
+                ? formattedTime
+                : "00:00"}
           </div>
           <div className="text-[9px] text-zinc-400 mt-1 uppercase tracking-wider">
             First player to guess the agent wins!
@@ -142,7 +143,7 @@ function PlayerSide({
     <div
       className={cn(
         "flex items-center gap-4",
-        align === "right" && "flex-row-reverse"
+        align === "right" && "flex-row-reverse",
       )}
     >
       {/* Avatar Container */}
@@ -151,27 +152,22 @@ function PlayerSide({
         <div
           className={cn(
             "absolute inset-0 rounded-full blur-md opacity-30 transition-all duration-300",
-            turn ? "bg-accent scale-110 opacity-50" : "bg-zinc-700"
+            turn ? "bg-accent scale-110 opacity-50" : "bg-zinc-700",
           )}
         />
-        
+
         {/* Outer border ring */}
         <div
           className={cn(
             "relative flex h-16 w-16 items-center justify-center rounded-full p-[2px] transition-all duration-300",
             turn
               ? "bg-gradient-to-br from-accent via-accent/50 to-transparent shadow-[0_0_15px_rgba(255,70,85,0.4)]"
-              : "border border-white/10 bg-white/[0.02]"
+              : "border border-white/10 bg-white/[0.02]",
           )}
         >
           {/* Avatar Image Wrapper */}
           <div className="h-full w-full overflow-hidden rounded-full bg-base-950 relative">
-            <Image
-              src={avatar}
-              alt={name}
-              fill
-              className="object-cover"
-            />
+            <Image src={avatar} alt={name} fill className="object-cover" />
           </div>
         </div>
       </div>
@@ -180,10 +176,15 @@ function PlayerSide({
       <div
         className={cn(
           "flex flex-col justify-center",
-          align === "right" ? "items-end" : "items-start"
+          align === "right" ? "items-end" : "items-start",
         )}
       >
-        <div className={cn("flex items-center gap-3", align === "right" && "flex-row-reverse")}>
+        <div
+          className={cn(
+            "flex items-center gap-3",
+            align === "right" && "flex-row-reverse",
+          )}
+        >
           {/* Name */}
           <span className="font-display text-xl font-bold uppercase tracking-wide text-white">
             {name}
@@ -208,7 +209,7 @@ function PlayerSide({
                 "clip-tag border px-2 py-0.5",
                 align === "left"
                   ? "border-accent bg-accent"
-                  : "border-[#8C7BFF]/50 bg-[#8C7BFF]/20"
+                  : "border-[#8C7BFF]/50 bg-[#8C7BFF]/20",
               )}
             >
               <span className="font-display text-[9px] font-black uppercase tracking-[0.18em] text-white">
@@ -222,7 +223,7 @@ function PlayerSide({
         <div
           className={cn(
             "mt-2.5 flex items-center gap-3",
-            align === "right" && "flex-row-reverse"
+            align === "right" && "flex-row-reverse",
           )}
         >
           <span className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 font-medium">
@@ -238,9 +239,19 @@ function PlayerSide({
               ∞
             </span>
           ) : (
-            <div className={cn("flex flex-col gap-1", align === "right" && "items-end")}>
+            <div
+              className={cn(
+                "flex flex-col gap-1",
+                align === "right" && "items-end",
+              )}
+            >
               {/* Row 1: up to 5 dots */}
-              <div className={cn("flex gap-1.5", align === "right" && "flex-row-reverse")}>
+              <div
+                className={cn(
+                  "flex gap-1.5",
+                  align === "right" && "flex-row-reverse",
+                )}
+              >
                 {Array.from({ length: Math.min(5, nosMax) }).map((_, i) => (
                   <div
                     key={i}
@@ -248,7 +259,7 @@ function PlayerSide({
                       "h-2 w-2 rounded-full transition-all duration-300 border",
                       i < nosUsed
                         ? "bg-accent border-accent shadow-[0_0_6px_#ff4655]"
-                        : "bg-white/[0.05] border-white/10"
+                        : "bg-white/[0.05] border-white/10",
                     )}
                   />
                 ))}
@@ -256,7 +267,12 @@ function PlayerSide({
 
               {/* Row 2: dots above 5 */}
               {nosMax > 5 && (
-                <div className={cn("flex gap-1.5", align === "right" && "flex-row-reverse")}>
+                <div
+                  className={cn(
+                    "flex gap-1.5",
+                    align === "right" && "flex-row-reverse",
+                  )}
+                >
                   {Array.from({ length: nosMax - 5 }).map((_, i) => {
                     const actualIdx = 5 + i;
                     return (
@@ -266,7 +282,7 @@ function PlayerSide({
                           "h-2 w-2 rounded-full transition-all duration-300 border",
                           actualIdx < nosUsed
                             ? "bg-accent border-accent shadow-[0_0_6px_#ff4655]"
-                            : "bg-white/[0.05] border-white/10"
+                            : "bg-white/[0.05] border-white/10",
                         )}
                       />
                     );

@@ -43,7 +43,7 @@ export function LobbyCenterSlots({
             "flex flex-col items-center justify-between flex-1 h-full max-h-130 max-w-65 border-2 bg-[#0a0e16]/80 backdrop-blur-md clip-notch-both relative p-4 group transition-all duration-300",
             isHost
               ? "border-accent/60 shadow-[0_0_30px_rgba(255,70,85,0.15)]"
-              : "border-mint/40 shadow-[0_0_20px_rgba(60,242,196,0.1)]"
+              : "border-mint/40 shadow-[0_0_20px_rgba(60,242,196,0.1)]",
           )}
         >
           <div className="w-full flex items-center justify-between z-10">
@@ -64,7 +64,7 @@ export function LobbyCenterSlots({
 
           <div className="relative w-full flex-1 my-2 overflow-hidden rounded-sm border border-white/10 bg-base-950">
             <Image
-              src="/agents/banner/chamber.avif"
+              src="/agents/banner/chamber.webp"
               alt="Agent Banner"
               fill
               className="object-cover object-top scale-105 transition-transform duration-500 group-hover:scale-110"
@@ -79,7 +79,7 @@ export function LobbyCenterSlots({
             <span
               className={cn(
                 "text-[10px] font-display font-bold uppercase tracking-widest block mt-0.5",
-                isHost ? "text-accent" : "text-mint"
+                isHost ? "text-accent" : "text-mint",
               )}
             >
               {isHost ? "HOST • 1V1 DUELIST" : "MEMBER • 1V1 DUELIST"}
@@ -91,7 +91,12 @@ export function LobbyCenterSlots({
         <div className="flex flex-col items-center justify-center flex-1 h-full max-h-130 max-w-65 border border-dashed border-accent/40 bg-black/40 backdrop-blur-md clip-notch-both relative p-6 text-center shadow-[0_0_20px_rgba(255,70,85,0.08)]">
           <div className="relative w-20 h-20 mb-4 flex items-center justify-center">
             <div className="absolute inset-0 bg-accent/20 blur-md rounded-full animate-pulse" />
-            <Image src="/logo.svg" alt="V Emblem" fill className="object-contain" />
+            <Image
+              src="/logo.svg"
+              alt="V Emblem"
+              fill
+              className="object-contain"
+            />
           </div>
 
           <h2 className="font-valorant text-2xl tracking-wider text-white mb-1">
@@ -125,7 +130,7 @@ export function LobbyCenterSlots({
               "flex flex-col items-center justify-between flex-1 h-full max-h-120 max-w-65 border-2 bg-[#0a0e16]/80 backdrop-blur-md clip-notch-both relative p-4 group transition-all duration-300",
               !isHost
                 ? "border-accent/60 shadow-[0_0_30px_rgba(255,70,85,0.15)]"
-                : "border-mint/40 shadow-[0_0_20px_rgba(60,242,196,0.1)]"
+                : "border-mint/40 shadow-[0_0_20px_rgba(60,242,196,0.1)]",
             )}
           >
             <div className="w-full flex items-center justify-between z-10">
@@ -152,7 +157,7 @@ export function LobbyCenterSlots({
 
             <div className="relative w-full flex-1 my-2 overflow-hidden rounded-sm border border-white/10 bg-base-950">
               <Image
-                src="/agents/banner/jett.avif"
+                src="/agents/banner/jett.webp"
                 alt="Opponent Banner"
                 fill
                 className="object-cover object-top scale-105 transition-transform duration-500 group-hover:scale-110"
@@ -167,7 +172,7 @@ export function LobbyCenterSlots({
               <span
                 className={cn(
                   "text-[10px] font-display font-bold uppercase tracking-widest block mt-0.5",
-                  !isHost ? "text-accent" : "text-mint"
+                  !isHost ? "text-accent" : "text-mint",
                 )}
               >
                 {!isHost ? "HOST • 1V1 DUELIST" : "READY FOR MATCH"}

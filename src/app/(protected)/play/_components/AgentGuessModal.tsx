@@ -2,9 +2,21 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Crosshair, Search, Shield, X, AlertTriangle, Check } from "lucide-react";
+import {
+  Crosshair,
+  Search,
+  Shield,
+  X,
+  AlertTriangle,
+  Check,
+} from "lucide-react";
 import { AGENTS, Agent, Role } from "@/lib/data";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -57,7 +69,9 @@ export function AgentGuessModal({
                 </DialogTitle>
                 <p className="text-xs text-white/50 font-sans mt-0.5">
                   Select the opponent&apos;s secret agent. Remaining guesses:{" "}
-                  <span className="font-bold text-accent">{guessesRemaining}</span>
+                  <span className="font-bold text-accent">
+                    {guessesRemaining}
+                  </span>
                 </p>
               </div>
             </div>
@@ -68,7 +82,9 @@ export function AgentGuessModal({
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
           {/* Role Filter Tabs */}
           <div className="flex items-center gap-1 p-1 bg-black/50 border border-white/10 rounded-sm w-full sm:w-auto">
-            {(["ALL", "Duelist", "Initiator", "Controller", "Sentinel"] as const).map((r) => (
+            {(
+              ["ALL", "Duelist", "Initiator", "Controller", "Sentinel"] as const
+            ).map((r) => (
               <button
                 key={r}
                 onClick={() => setRoleFilter(r)}
@@ -76,7 +92,7 @@ export function AgentGuessModal({
                   "px-2 py-1 text-[10px] font-display font-bold uppercase tracking-wider rounded-xs transition-all cursor-pointer",
                   roleFilter === r
                     ? "bg-[#FF4655] text-white shadow-[0_0_10px_rgba(255,70,85,0.3)]"
-                    : "text-white/50 hover:text-white hover:bg-white/5"
+                    : "text-white/50 hover:text-white hover:bg-white/5",
                 )}
               >
                 {r}
@@ -107,26 +123,28 @@ export function AgentGuessModal({
               <button
                 key={agent.id}
                 onClick={() => {
-                  selectedAgentId === agent.id ? setSelectedAgentId(null) : setSelectedAgentId(agent.id);
+                  selectedAgentId === agent.id
+                    ? setSelectedAgentId(null)
+                    : setSelectedAgentId(agent.id);
                 }}
                 className={cn(
                   "flex flex-col items-center p-2 rounded-sm border transition-all text-left relative group cursor-pointer",
                   isSelected
                     ? "border-[#FF4655] bg-[#FF4655]/20 shadow-[0_0_18px_rgba(255,70,85,0.35)] scale-102"
                     : isEliminated
-                    ? "border-white/5 bg-black/40 opacity-40 hover:opacity-75"
-                    : "border-white/10 bg-white/[0.02] hover:bg-white/[0.07] hover:border-white/30"
+                      ? "border-white/5 bg-black/40 opacity-40 hover:opacity-75"
+                      : "border-white/10 bg-white/[0.02] hover:bg-white/[0.07] hover:border-white/30",
                 )}
               >
                 {/* Agent Icon */}
                 <div className="relative h-14 w-14 rounded-xs overflow-hidden bg-black/60 border border-white/10 mb-1.5 shrink">
                   <Image
-                    src={`/agents/icon/${agent.id}.avif`}
+                    src={`/agents/icon/${agent.id}.webp`}
                     alt={agent.name}
                     fill
                     className={cn(
                       "object-cover object-top transition-transform group-hover:scale-105",
-                      isEliminated && !isSelected && "grayscale"
+                      isEliminated && !isSelected && "grayscale",
                     )}
                   />
                   {isSelected && (
@@ -160,19 +178,19 @@ export function AgentGuessModal({
             <div className="flex items-center gap-3">
               <div className="relative h-11 w-11 rounded-xs overflow-hidden border border-[#FF4655] shrink-0">
                 <Image
-                  src={`/agents/icon/${selectedAgent.id}.avif`}
+                  src={`/agents/icon/${selectedAgent.id}.webp`}
                   alt={selectedAgent.name}
                   fill
                   className="object-cover object-top"
                 />
               </div>
               <div className="flex flex-col text-left">
-                  <span className="text-[9px] font-mono text-accent uppercase font-bold tracking-widest">
-                    TARGET LOCKED:
-                  </span>
-                  <span className="font-valorant text-base text-white tracking-wider">
-                    {selectedAgent.name}
-                  </span>
+                <span className="text-[9px] font-mono text-accent uppercase font-bold tracking-widest">
+                  TARGET LOCKED:
+                </span>
+                <span className="font-valorant text-base text-white tracking-wider">
+                  {selectedAgent.name}
+                </span>
               </div>
             </div>
           ) : (
@@ -182,7 +200,6 @@ export function AgentGuessModal({
           )}
 
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
-
             <button
               onClick={handleConfirm}
               disabled={!selectedAgentId}

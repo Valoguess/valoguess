@@ -28,7 +28,9 @@ export function useFriends(user: StoreUser | null) {
 
   const presence = usePresenceStore((state) => state.presence);
   const lastFriendEvent = useFriendStore((state) => state.lastFriendEvent);
-  const initialFriendsData = useFriendStore((state) => state.initialFriendsData);
+  const initialFriendsData = useFriendStore(
+    (state) => state.initialFriendsData,
+  );
 
   const friendsList = useMemo<Friend[]>(() => {
     return rawFriends.map((f) => {
@@ -70,7 +72,7 @@ export function useFriends(user: StoreUser | null) {
               username: friendUser.username
                 ? `@${friendUser.username}`
                 : undefined,
-              avatar: friendUser.image || "/agents/icon/omen.avif",
+              avatar: friendUser.image || "/agents/icon/omen.webp",
               status: "online",
               activity: "In Lobby",
             });
@@ -89,7 +91,7 @@ export function useFriends(user: StoreUser | null) {
               username: friendship.requester.username
                 ? `@${friendship.requester.username}`
                 : undefined,
-              avatar: friendship.requester.image || "/agents/icon/reyna.avif",
+              avatar: friendship.requester.image || "/agents/icon/reyna.webp",
               type: "incoming",
               createdAt: friendship.createdAt
                 ? new Date(friendship.createdAt).toISOString()
@@ -110,7 +112,7 @@ export function useFriends(user: StoreUser | null) {
               username: friendship.receiver.username
                 ? `@${friendship.receiver.username}`
                 : undefined,
-              avatar: friendship.receiver.image || "/agents/icon/phoenix.avif",
+              avatar: friendship.receiver.image || "/agents/icon/phoenix.webp",
               type: "outgoing",
               createdAt: friendship.createdAt
                 ? new Date(friendship.createdAt).toISOString()
@@ -140,8 +142,10 @@ export function useFriends(user: StoreUser | null) {
           {
             id: req.id,
             name: req.name || "Player",
-            username: req.username ? `@${req.username.replace(/^@/, "")}` : undefined,
-            avatar: req.avatar || "/agents/icon/reyna.avif",
+            username: req.username
+              ? `@${req.username.replace(/^@/, "")}`
+              : undefined,
+            avatar: req.avatar || "/agents/icon/reyna.webp",
             type: "incoming",
             createdAt: new Date().toISOString(),
           },
@@ -221,7 +225,9 @@ export function useFriends(user: StoreUser | null) {
                 activity: "In Lobby",
               },
             ]);
-            setFriendRequests((prev) => prev.filter((r) => r.id !== res.targetUser!.id));
+            setFriendRequests((prev) =>
+              prev.filter((r) => r.id !== res.targetUser!.id),
+            );
             if (res.receiverId) {
               acceptFriendRequestSocket(res.receiverId);
             }

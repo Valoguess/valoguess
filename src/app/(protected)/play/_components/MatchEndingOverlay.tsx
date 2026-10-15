@@ -45,7 +45,9 @@ export function MatchEndingOverlay({
   const { clearGame } = useGameStore();
 
   const [hasUnmasked, setHasUnmasked] = useState(false);
-  const [secondsRemaining, setSecondsRemaining] = useState(Math.ceil(durationMs / 1000));
+  const [secondsRemaining, setSecondsRemaining] = useState(
+    Math.ceil(durationMs / 1000),
+  );
 
   // Resolve agent entities
   const myAgentObj: Agent =
@@ -128,7 +130,7 @@ export function MatchEndingOverlay({
       {/* BACKGROUND ARTWORK */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
-          src="/bg/bg2.png"
+          src="/bg/bg2.webp"
           alt="Valorant Background"
           fill
           priority
@@ -144,7 +146,10 @@ export function MatchEndingOverlay({
         initial={{ opacity: 0.9 }}
         animate={{ opacity: 0 }}
         transition={{ duration: 0.65, ease: "easeOut" }}
-        className={cn("absolute inset-0 z-50 pointer-events-none", theme.flashColor)}
+        className={cn(
+          "absolute inset-0 z-50 pointer-events-none",
+          theme.flashColor,
+        )}
       />
 
       {/* TOP HEADER: BIG DRAMATIC TITLE SLAM */}
@@ -156,8 +161,18 @@ export function MatchEndingOverlay({
           transition={{ duration: 0.3 }}
           className="flex items-center gap-2 mb-1"
         >
-          <span className={cn("h-1.5 w-1.5 rounded-full animate-ping", theme.textColor)} />
-          <span className={cn("text-[10px] font-mono font-bold uppercase tracking-[0.3em]", theme.textColor)}>
+          <span
+            className={cn(
+              "h-1.5 w-1.5 rounded-full animate-ping",
+              theme.textColor,
+            )}
+          />
+          <span
+            className={cn(
+              "text-[10px] font-mono font-bold uppercase tracking-[0.3em]",
+              theme.textColor,
+            )}
+          >
             VALORANT PROTOCOL // MATCH COMPLETE
           </span>
         </motion.div>
@@ -166,13 +181,18 @@ export function MatchEndingOverlay({
         <motion.div
           initial={{ scale: 2.2, opacity: 0, y: -20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          transition={{ type: "spring", damping: 14, stiffness: 120, delay: 0.1 }}
+          transition={{
+            type: "spring",
+            damping: 14,
+            stiffness: 120,
+            delay: 0.1,
+          }}
           className="relative"
         >
           <h1
             className={cn(
               "font-valorant text-5xl md:text-7xl tracking-[0.25em] uppercase select-none drop-shadow-2xl",
-              theme.textColor
+              theme.textColor,
             )}
             style={{
               textShadow: `0 0 35px ${theme.glowColor}, 0 0 70px ${theme.glowColor}`,
@@ -189,11 +209,21 @@ export function MatchEndingOverlay({
           transition={{ duration: 0.5, delay: 0.3 }}
           className="flex items-center gap-3 mt-1"
         >
-          <div className={cn("h-px w-16 bg-gradient-to-r from-transparent to-current opacity-60", theme.textColor)} />
+          <div
+            className={cn(
+              "h-px w-16 bg-gradient-to-r from-transparent to-current opacity-60",
+              theme.textColor,
+            )}
+          />
           <p className="text-[11px] md:text-xs font-display font-bold text-white/70 tracking-[0.25em] uppercase">
             {theme.subtitle}
           </p>
-          <div className={cn("h-px w-16 bg-gradient-to-l from-transparent to-current opacity-60", theme.textColor)} />
+          <div
+            className={cn(
+              "h-px w-16 bg-gradient-to-l from-transparent to-current opacity-60",
+              theme.textColor,
+            )}
+          />
         </motion.div>
       </div>
 
@@ -240,7 +270,7 @@ export function MatchEndingOverlay({
             {/* Agent Banner Image */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img
-                src={`/agents/banner/${myAgentObj.id}.avif`}
+                src={`/agents/banner/${myAgentObj.id}.webp`}
                 alt={myAgentObj.name}
                 decoding="async"
                 className="w-full h-full object-cover object-top"
@@ -279,10 +309,12 @@ export function MatchEndingOverlay({
             <div
               className={cn(
                 "relative h-18 w-18 md:h-22 md:w-22 rounded-full border-2 bg-[#080c14] flex flex-col items-center justify-center shadow-2xl transition-all",
-                theme.borderColor
+                theme.borderColor,
               )}
             >
-              <OutcomeIcon className={cn("h-7 w-7 md:h-9 md:w-9", theme.textColor)} />
+              <OutcomeIcon
+                className={cn("h-7 w-7 md:h-9 md:w-9", theme.textColor)}
+              />
             </div>
           </div>
 
@@ -321,7 +353,7 @@ export function MatchEndingOverlay({
               "relative w-56 md:w-68 aspect-[4/6] rounded-sm border-2 overflow-hidden flex flex-col justify-between backdrop-blur-xl bg-[#080c14] transition-all duration-500",
               hasUnmasked
                 ? "border-[#8C7BFF] shadow-[0_0_35px_rgba(140,123,255,0.35)]"
-                : "border-[#8C7BFF]/40 shadow-[0_0_20px_rgba(140,123,255,0.15)]"
+                : "border-[#8C7BFF]/40 shadow-[0_0_20px_rgba(140,123,255,0.15)]",
             )}
           >
             {/* Corner Bracket Accents */}
@@ -347,7 +379,7 @@ export function MatchEndingOverlay({
                   "px-1.5 py-0.5 rounded text-[8px] font-mono font-black uppercase tracking-widest border transition-colors",
                   hasUnmasked
                     ? "bg-[#8C7BFF]/20 text-[#8C7BFF] border-[#8C7BFF]/40"
-                    : "bg-accent/20 text-accent border-accent/40"
+                    : "bg-accent/20 text-accent border-accent/40",
                 )}
               >
                 {hasUnmasked ? "UNMASKED" : "CLASSIFIED"}
@@ -365,7 +397,7 @@ export function MatchEndingOverlay({
                     className="w-full h-full"
                   >
                     <img
-                      src={`/agents/banner/${oppAgentObj.id}.avif`}
+                      src={`/agents/banner/${oppAgentObj.id}.webp`}
                       alt={oppAgentObj.name}
                       decoding="async"
                       className="w-full h-full object-cover object-top"
@@ -415,7 +447,14 @@ export function MatchEndingOverlay({
               initial={{ width: "100%" }}
               animate={{ width: "0%" }}
               transition={{ duration: durationMs / 1000, ease: "linear" }}
-              className={cn("h-full", isVictory ? "bg-[#3CF2C4]" : isTie ? "bg-amber-400" : "bg-accent")}
+              className={cn(
+                "h-full",
+                isVictory
+                  ? "bg-[#3CF2C4]"
+                  : isTie
+                    ? "bg-amber-400"
+                    : "bg-accent",
+              )}
             />
           </div>
           <div className="flex items-center gap-1.5 text-[9px] font-mono tracking-widest text-white/50 uppercase">
