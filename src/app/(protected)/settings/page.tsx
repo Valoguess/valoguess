@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { User, Shield, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSession, signOut } from "@/lib/auth-client";
+import { useSession, signOut, token } from "@/lib/auth-client";
 import { useAuthStore } from "@/store/authStore";
 import { updateUser, updateUserProfile } from "@/actions/user";
 import { AGENT_BANNERS } from "@/consts";
@@ -17,6 +17,7 @@ import { SettingsHeader } from "./_components/SettingsHeader";
 import { LogoutConfirmationModal } from "./_components/LogoutConfirmationModal";
 import { socket } from "@/socket";
 import { toast } from "sonner";
+import { refreshAuth } from "@/socket/emitter";
 
 function getDaysRemaining(updatedAt?: Date | string | null): number {
   if (!updatedAt) return 0;
@@ -123,6 +124,8 @@ export default function SettingsPage() {
 
       if (session?.user?.id) {
         // Save identity changes
+        const { data, error } = await token()
+
         if (nextName !== user?.name || nextUsername !== user?.username) {
           const res = await updateUser({
             name: nextName,
@@ -130,7 +133,7 @@ export default function SettingsPage() {
           });
 
           if (res.success && socket.connected) {
-            socket.disconnect().connect();
+            data?.token && refreshAuth(data.token);
           }
         }
 
@@ -141,7 +144,8 @@ export default function SettingsPage() {
             tagline: nextTagline,
           });
           if (res.success && socket.connected) {
-            socket.disconnect().connect();
+            console.log("token", data?.token)
+            data?.token && refreshAuth(data.token);
           }
         }
       }

@@ -103,3 +103,9 @@ export function answerQuestion(answer: "YES" | "NO" | "yes" | "no") {
 export function submitGuess(guess: string) {
   socket.emit(ClientEvents.GUESS_SUBMIT, { guess });
 }
+
+// ==== AUTH EVENTS ====
+
+export function refreshAuth(token: string) {
+  socket.emit(ClientEvents.AUTH_REFRESH, token);
+}
