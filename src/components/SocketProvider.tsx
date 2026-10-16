@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { socket } from "@/socket";
 import { ClientEvents, ServerEvents } from "@/socket/events";
 import { usePartyStore } from "@/store/partyStore";
@@ -17,6 +17,7 @@ import { toast } from "sonner";
 
 function SocketProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [error, setError] = useState<any>(null);
   const partyHydrated = usePartyStore((s) => s.hydrated);
   const gameHydrated = useGameStore((s) => s.hydrated);
@@ -97,16 +98,19 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   const handleGameSync = (syncedGame: GuessAgentGameDTO | null) => {
     if (!syncedGame || (typeof syncedGame === "object" && !syncedGame.id)) {
       clearGame();
-      router.push("/lobby");
+      if (pathname.startsWith("/play")) {
+        toast.error("Game not found. Redirecting to lobby.");
+        router.push("/lobby");
+      }
       return;
     }
 
     const currentUserId = user?.id;
     if (currentUserId && typeof window !== "undefined") {
-      const me = syncedGame.players.find((p) => p.id === currentUserId);
+      const me = syncedGame?.players.find((p) => p.id === currentUserId);
       if (me?.state?.secretAgent) {
         sessionStorage.setItem(
-          `secret_agent_${syncedGame.id}`,
+          `secret_agent_${syncedGame?.id}`,
           me.state.secretAgent,
         );
       }

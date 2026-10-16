@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { socket } from "@/socket";
 import { ServerEvents } from "@/socket/events";
 import { useGameStore } from "@/store/gameStore";
@@ -38,6 +38,8 @@ export function usePlaySocket({
   const [isAnswering, setIsAnswering] = useState(false);
   const [isConsumingNo, setIsConsumingNo] = useState(false);
 
+  const pathname = usePathname();
+
   // Reset asking/answering flags when game turns progress
   useEffect(() => {
     setIsAsking(false);
@@ -61,7 +63,11 @@ export function usePlaySocket({
   useEffect(() => {
     const handleGameSync = (syncedGame: GuessAgentGameDTO | null) => {
       if (!syncedGame || (typeof syncedGame === "object" && !syncedGame.id)) {
-        router.push("/lobby");
+        if (pathname.startsWith("/play")) {
+          toast.error("Game not found. Redirecting to lobby.");
+          router.push("/lobby");
+        }
+        clearGame();
       }
     };
     socket.on(ServerEvents.GAME_SYNC, handleGameSync);
