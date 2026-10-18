@@ -7,6 +7,8 @@ import {
   userSettings,
   game,
   gamePlayer,
+  gameTeam,
+  gameAward
 } from ".";
 
 
@@ -19,6 +21,8 @@ export const relations = defineRelations(
     userSettings,
     game,
     gamePlayer,
+    gameTeam,
+    gameAward
   },
 
   (r) => ({
@@ -93,10 +97,15 @@ export const relations = defineRelations(
         from: r.game.id,
         to: r.gamePlayer.gameId,
       }),
-
-      winner: r.one.user({
-        from: r.game.winnerId,
-        to: r.user.id,
+ 
+      teams: r.many.gameTeam({
+        from: r.game.id,
+        to: r.gameTeam.gameId,
+      }),
+ 
+      awards: r.many.gameAward({
+        from: r.game.id,
+        to: r.gameAward.gameId,
       }),
     },
 
@@ -110,6 +119,33 @@ export const relations = defineRelations(
         from: r.gamePlayer.userId,
         to: r.user.id,
       }),
+
+      team: r.one.gameTeam({
+        from: r.gamePlayer.teamId,
+        to: r.gameTeam.id,
+      }),
+
+      awards: r.many.gameAward({
+        from: r.gamePlayer.userId,
+        to: r.gameAward.recipientUserId,
+      }),
     },
+
+    gameTeam: {
+      game: r.one.game({
+        from: r.gameTeam.gameId,
+        to: r.game.id,
+      }),
+
+      players: r.many.gamePlayer({
+        from: r.gameTeam.id,
+        to: r.gamePlayer.teamId,
+      }),
+
+      awards: r.many.gameAward({
+        from: r.gameTeam.id,
+        to: r.gameAward.recipientTeamId,
+      }),
+    }
   }),
 );

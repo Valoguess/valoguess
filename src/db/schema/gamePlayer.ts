@@ -1,64 +1,65 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
+  pgEnum,
   text,
-  timestamp,
-  boolean,
   integer,
+  timestamp,
+  uuid,
   index,
   uniqueIndex,
-  pgEnum,
-  uuid,
+  varchar,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { user } from "./user";
 import { game } from "./game";
 
-export const gameResultEnum = pgEnum("game_result", [
+export const gamePlayerOutcomeEnum = pgEnum("game_player_outcome", [
   "WIN",
   "LOSS",
   "DRAW",
 ]);
 
-export const gamePlayer = pgTable("game_player", {
-  id: uuid("id").primaryKey()
-    .defaultRandom(),
+export const gamePlayer = pgTable(
+  "game_player",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`uuidv7()`),
 
-  gameId: uuid("game_id")
-    .notNull()
-    .references(() => game.id, {
-      onDelete: "cascade",
-    }),
+    gameId: uuid("game_id")
+      .notNull()
+      .references(() => game.id, { onDelete: "cascade" }),
 
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, {
-      onDelete: "cascade",
-    }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id),
 
-  result: gameResultEnum("result")
-    .notNull(),
+    name: text("name").notNull(),
 
-  agent: text("agent"),
+    tagline: text("tagline"),
+    image: text("image"),
+    banner: text("banner"),
 
-  questionsAsked: integer("questions_asked")
-    .default(0)
-    .notNull(),
+    // Null for solo/individual matches.
+    teamId: uuid("team_id"),
 
-  nosUsed: integer("nos_used")
-    .default(0)
-    .notNull(),
+    outcome: gamePlayerOutcomeEnum("outcome"),
 
-  guessedCorrect: boolean("guessed_correct")
-    .default(false)
-    .notNull(),
+    // Individual ranking, if applicable.
+    placement: integer("placement"),
 
-  createdAt: timestamp("created_at")
-    .defaultNow()
-    .notNull(),
-  
-}, (table) => [
-  uniqueIndex("game_player_game_user_uidx")
-    .on(table.gameId, table.userId),
+    // Optional score for ranked or score-based modes.
+    score: integer("score"),
 
-  index("game_player_user_created_idx")
-    .on(table.userId, table.createdAt),
-]);
+    // Agent, role, questions asked, Nos used, etc.
+    details: jsonb("details").$type<Record<string, unknown>>().notNull(),
+
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("game_player_game_user_uidx").on(table.gameId, table.userId),
+    index("game_player_user_created_idx").on(table.userId, table.createdAt),
+    index("game_player_team_idx").on(table.teamId),
+  ],
+);
