@@ -3,6 +3,7 @@
 import z from "zod";
 import { eq } from "drizzle-orm";
 import { headers as getHeaders } from "next/headers";
+import { cacheLife, cacheTag, updateTag } from "next/cache";
 
 import { db, user } from "@/db";
 import { auth } from "@/lib/auth";
@@ -50,6 +51,9 @@ export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
       headers,
     });
     
+    updateTag("users");
+    updateTag(`user-${currUser.id}`);
+
     return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -78,6 +82,10 @@ export async function updateUserProfile(formData: UpdateProfileSchema) {
       },
       headers,
     });
+
+    updateTag("users");
+    updateTag(`user-${currUser.id}`);
+
     return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -88,6 +96,10 @@ export async function updateUserProfile(formData: UpdateProfileSchema) {
 }
 
 export async function getUserById(userId: string) {
+  "use cache";
+  cacheTag("users", `user-${userId}`);
+  cacheLife("hours");
+
   const userData = await db.select().from(user).where(eq(user.id, userId));
   return userData[0] || null;
 }
