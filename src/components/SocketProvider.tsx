@@ -40,7 +40,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
 
   const handlePartyChatSync = (data: { userId: string; message: string }) => {
     if (!data || !data.message) return;
-    const currentUserId = user?.id;
+    const currentUserId = user?.id || useAuthStore.getState().user?.id;
     const isMe = data.userId === currentUserId;
     const member = party?.members.find((m) => m.id === data.userId);
 
@@ -110,14 +110,22 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       useTempResultStore.getState().setTempResultGame(syncedGame);
     }
 
-    const currentUserId = user?.id;
-    if (currentUserId && typeof window !== "undefined") {
-      const me = syncedGame?.players.find((p) => p.id === currentUserId);
-      if (me?.state?.secretAgent) {
-        sessionStorage.setItem(
-          `secret_agent_${syncedGame?.id}`,
-          me.state.secretAgent,
-        );
+    const currentUserId = user?.id || useAuthStore.getState().user?.id;
+    if (typeof window !== "undefined" && syncedGame?.id) {
+      const me =
+        (currentUserId ? syncedGame.players?.find((p) => p.id === currentUserId) : undefined) ||
+        (syncedGame.status !== "FINISHED"
+          ? syncedGame.players?.find((p) => p.state && p.state.secretAgent !== null)
+          : undefined);
+
+      if (me) {
+        sessionStorage.setItem(`my_player_id_${syncedGame.id}`, me.id);
+        if (me.state?.secretAgent) {
+          sessionStorage.setItem(
+            `secret_agent_${syncedGame.id}`,
+            me.state.secretAgent,
+          );
+        }
       }
     }
 
@@ -145,44 +153,34 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     setError(err);
   };
 
-  const handleFriendsSync = (data: {
-    friends?: {
-      friends?: Array<{
-        id: string;
-        name: string;
-        username?: string | null;
-        image?: string | null;
-        online?: boolean;
-      }>;
-      requests?: {
-        incoming?: Array<{
-          id: string;
-          name: string;
-          username?: string | null;
-          image?: string | null;
-        }>;
-        outgoing?: Array<{
-          id: string;
-          name: string;
-          username?: string | null;
-          image?: string | null;
-        }>;
-      };
-    };
-  }) => {
-    const syncData = data?.friends;
-    if (!syncData) return;
+  const handleFriendsSync = (data: any) => {
+    if (!data) return;
 
-    if (syncData.friends) {
+    let friendsArr: any[] = [];
+    let requestsObj: any = null;
+
+    if (Array.isArray(data)) {
+      friendsArr = data;
+    } else if (Array.isArray(data.friends)) {
+      friendsArr = data.friends;
+      requestsObj = data.requests;
+    } else if (data.friends && typeof data.friends === "object") {
+      friendsArr = Array.isArray(data.friends.friends)
+        ? data.friends.friends
+        : [];
+      requestsObj = data.friends.requests;
+    }
+
+    if (friendsArr.length > 0) {
       setFriendsPresence(
-        syncData.friends.map((f) => ({
+        friendsArr.map((f: any) => ({
           userId: f.id,
           online: Boolean(f.online),
         })),
       );
     }
 
-    const friends = (syncData.friends || []).map((f) => ({
+    const friends = friendsArr.map((f: any) => ({
       id: f.id,
       name: f.name || "Player",
       username: f.username
@@ -195,7 +193,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       activity: f.online ? "In Lobby" : "Offline",
     }));
 
-    const incoming = (syncData.requests?.incoming || []).map((r) => ({
+    const incoming = (requestsObj?.incoming || []).map((r: any) => ({
       id: r.id,
       name: r.name || "Player",
       username: r.username
@@ -207,7 +205,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       type: "incoming" as const,
     }));
 
-    const outgoing = (syncData.requests?.outgoing || []).map((r) => ({
+    const outgoing = (requestsObj?.outgoing || []).map((r: any) => ({
       id: r.id,
       name: r.name || "Player",
       username: r.username
@@ -338,12 +336,13 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       );
 
       clearInterval(heartbeat);
+      socket.disconnect();
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [partyHydrated, gameHydrated]);
 
   if (!partyHydrated || !gameHydrated) {
-    return <div style={{ display: 'none' }}>{children}</div>;;
+    return <div style={{ display: 'none' }}>{children}</div>;
   }
 
   return (
