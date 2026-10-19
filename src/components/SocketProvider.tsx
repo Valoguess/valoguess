@@ -14,6 +14,7 @@ import { Party } from "@/types/party";
 import { GuessAgentGameDTO } from "@/types/game";
 import { DEFAULT_AVATARS } from "@/consts";
 import { toast } from "sonner";
+import { useTempResultStore } from "@/store/tempResultStore";
 
 function SocketProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -98,11 +99,15 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   const handleGameSync = (syncedGame: GuessAgentGameDTO | null) => {
     if (!syncedGame || (typeof syncedGame === "object" && !syncedGame.id)) {
       clearGame();
-      if (pathname.startsWith("/play")) {
+      if (pathname === "/play") {
         toast.error("Game not found. Redirecting to lobby.");
         router.push("/lobby");
       }
       return;
+    }
+
+    if (syncedGame.status === "FINISHED") {
+      useTempResultStore.getState().setTempResultGame(syncedGame);
     }
 
     const currentUserId = user?.id;
@@ -133,7 +138,9 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     }
     if (err?.message === "Game not found") {
       clearGame();
-      toast.error(err.message);
+      if (pathname === "/play") {
+        toast.error(err.message);
+      }
     }
     setError(err);
   };
@@ -336,10 +343,14 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   }, [partyHydrated, gameHydrated]);
 
   if (!partyHydrated || !gameHydrated) {
-    return null;
+    return <div style={{ display: 'none' }}>{children}</div>;;
   }
 
-  return children;
+  return (
+    <>
+      {children}
+    </>
+  );
 }
 
 export default SocketProvider;
