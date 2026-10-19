@@ -34,6 +34,11 @@ export function useResultData() {
     clearGame();
   };
 
+  const cachedPlayerId =
+    typeof window !== "undefined" && activeGame?.id
+      ? sessionStorage.getItem(`my_player_id_${activeGame.id}`)
+      : null;
+
   const cachedSecretAgent =
     typeof window !== "undefined" && activeGame?.id
       ? sessionStorage.getItem(`secret_agent_${activeGame.id}`)
@@ -41,6 +46,9 @@ export function useResultData() {
 
   const myPlayer =
     (user?.id ? activeGame?.players.find((p) => p.id === user.id) : undefined) ||
+    (cachedPlayerId
+      ? activeGame?.players.find((p) => p.id === cachedPlayerId)
+      : undefined) ||
     (cachedSecretAgent
       ? activeGame?.players.find((p) => p.state?.secretAgent === cachedSecretAgent)
       : undefined) ||

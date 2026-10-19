@@ -18,6 +18,11 @@ interface UsePlayStateProps {
 }
 
 export function usePlayState({ game, user }: UsePlayStateProps) {
+  const cachedPlayerId =
+    typeof window !== "undefined" && game?.id
+      ? sessionStorage.getItem(`my_player_id_${game.id}`)
+      : null;
+
   const cachedSecretAgent =
     typeof window !== "undefined" && game?.id
       ? sessionStorage.getItem(`secret_agent_${game.id}`)
@@ -32,7 +37,13 @@ export function usePlayState({ game, user }: UsePlayStateProps) {
       if (byUserId) return byUserId;
     }
 
-    // 2. Secondary: match by cached secret agent assigned to this client at start
+    // 2. Secondary: match by cached player ID locked in during match session
+    if (cachedPlayerId) {
+      const byCachedPlayerId = game.players.find((p) => p.id === cachedPlayerId);
+      if (byCachedPlayerId) return byCachedPlayerId;
+    }
+
+    // 3. Match by cached secret agent assigned to this client at start
     if (cachedSecretAgent) {
       const byCachedAgent = game.players.find(
         (p) => p.state?.secretAgent === cachedSecretAgent
@@ -40,16 +51,27 @@ export function usePlayState({ game, user }: UsePlayStateProps) {
       if (byCachedAgent) return byCachedAgent;
     }
 
-    // 3. Fallback during live match only (before match ends and both secret agents are revealed)
+    // 4. Live match discovery: before match ends, only local player has revealed secretAgent
     if (game.status !== "FINISHED") {
       const withRevealedAgent = game.players.find(
         (p) => p.state && p.state.secretAgent !== null
       );
-      if (withRevealedAgent) return withRevealedAgent;
+      if (withRevealedAgent) {
+        if (typeof window !== "undefined" && game.id) {
+          sessionStorage.setItem(`my_player_id_${game.id}`, withRevealedAgent.id);
+          if (withRevealedAgent.state?.secretAgent) {
+            sessionStorage.setItem(
+              `secret_agent_${game.id}`,
+              withRevealedAgent.state.secretAgent
+            );
+          }
+        }
+        return withRevealedAgent;
+      }
     }
 
     return game.players[0];
-  }, [game?.players, game?.status, user?.id, cachedSecretAgent]);
+  }, [game?.players, game?.status, game?.id, user?.id, cachedPlayerId, cachedSecretAgent]);
 
   const opponentPlayer = useMemo(() => {
     return (

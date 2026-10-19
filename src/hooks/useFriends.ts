@@ -34,15 +34,25 @@ export function useFriends(user: StoreUser | null) {
   );
 
   const friendsList = useMemo<Friend[]>(() => {
-    return rawFriends.map((f) => {
-      const isOnline = Boolean(presence[f.id]);
+    const list =
+      rawFriends.length > 0
+        ? rawFriends
+        : user && !user.isAnonymous && initialFriendsData
+        ? initialFriendsData.friends
+        : [];
+
+    return list.map((f) => {
+      const isOnline =
+        presence[f.id] !== undefined
+          ? Boolean(presence[f.id])
+          : f.status === "online";
       return {
         ...f,
         status: isOnline ? ("online" as const) : ("offline" as const),
         activity: isOnline ? "In Lobby" : "Offline",
       };
     });
-  }, [rawFriends, presence]);
+  }, [rawFriends, user, initialFriendsData, presence]);
 
   const fetchFriends = useCallback(async () => {
     if (!user || user.isAnonymous) {
@@ -168,15 +178,7 @@ export function useFriends(user: StoreUser | null) {
     }
   }, [lastFriendEvent, fetchFriends]);
 
-  // Update state whenever initialFriendsData arrives from socket
-  useEffect(() => {
-    if (initialFriendsData) {
-      setRawFriends(initialFriendsData.friends);
-      setFriendRequests(initialFriendsData.requests);
-    }
-  }, [initialFriendsData]);
-
-  // When user is not logged in or is anonymous, clear friends
+  // Synchronize friends with socket initialFriendsData and auth user state
   useEffect(() => {
     if (!user || user.isAnonymous) {
       setRawFriends([]);
@@ -184,10 +186,17 @@ export function useFriends(user: StoreUser | null) {
       return;
     }
 
-    // If socket has already delivered initial friends sync, no need to call getFriendships
+    if (initialFriendsData) {
+      setRawFriends(initialFriendsData.friends);
+      setFriendRequests(initialFriendsData.requests);
+    }
+  }, [user, initialFriendsData]);
+
+  // Fallback: only call getFriendships if socket has not delivered friends sync after a grace period
+  useEffect(() => {
+    if (!user || user.isAnonymous) return;
     if (initialFriendsData) return;
 
-    // Fallback: only call getFriendships if socket has not delivered friends sync after a grace period
     const timeout = setTimeout(() => {
       if (!useFriendStore.getState().initialFriendsData) {
         fetchFriends();
