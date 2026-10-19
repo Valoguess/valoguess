@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+   async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/lobby",
+        permanent: true,
+      },
+    ];
+  },
   cacheComponents: true,
   partialPrefetching: true,  
   output: "standalone",
