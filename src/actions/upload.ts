@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { UploadApiResponse } from "cloudinary";
 import { v2 as cloudinary } from "cloudinary";
 import { headers } from "next/headers";
+import { updateTag } from "next/cache";
 import { attempt } from "@/lib/rateLimit";
 
 const MAX_SIZE = 5 * 1024 * 1024;
@@ -130,6 +131,9 @@ export async function uploadUserAvatar(formData: FormData) {
       .set({ image: secureUrl })
       .where(eq(user.id, userId));
 
+    updateTag("users");
+    updateTag(`user-${userId}`);
+
     return {
       success: true,
       url: secureUrl,
@@ -164,6 +168,9 @@ export async function removeUserAvatar() {
     .update(user)
     .set({ image: null })
     .where(eq(user.id, currUser.id));
+
+  updateTag("users");
+  updateTag(`user-${currUser.id}`);
 
   return {
     success: true,
