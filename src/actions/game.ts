@@ -3,6 +3,7 @@
 import { headers as getHeaders } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getPlayerGameHistory } from "@/services/game";
+import { logger } from "@/lib/logger";
 
 export interface MatchHistoryCursor {
   endedAt: string;
@@ -54,6 +55,7 @@ export async function getMatchHistoryAction(
       },
     };
   } catch (err: any) {
+    logger.error({ err }, "Failed to fetch match history");
     return {
       success: false,
       error: err?.message || "Failed to fetch match history",
@@ -73,6 +75,7 @@ export async function revalidateMatchHistoryAction() {
     }
     return { success: false, error: "Unauthorized" };
   } catch (err: any) {
+    logger.error({ err }, "Failed to revalidate match history cache");
     return { success: false, error: err?.message };
   }
 }

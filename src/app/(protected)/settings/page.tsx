@@ -144,7 +144,6 @@ export default function SettingsPage() {
             tagline: nextTagline,
           });
           if (res.success && socket.connected) {
-            console.log("token", data?.token)
             data?.token && refreshAuth(data.token);
           }
         }

@@ -1,4 +1,5 @@
 import { redis } from "./redis";
+import { logger } from "./logger";
 
 const LUA_SCRIPT = `
 local current_key = KEYS[1]
@@ -89,7 +90,7 @@ export async function attempt(
       retryAfter,
     };
   } catch (err) {
-    console.error("[RateLimit] Redis error in attempt, failing open:", err);
+    logger.error({ err, key }, "[RateLimit] Redis error in attempt, failing open");
     return {
       allowed: true,
       remaining: 1,

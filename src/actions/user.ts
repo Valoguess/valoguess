@@ -7,6 +7,7 @@ import { cacheLife, cacheTag, updateTag } from "next/cache";
 
 import { db, user } from "@/db";
 import { auth } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 import { welcomeSchema } from "@/schemas/welcomeSchema";
 
 import {
@@ -59,6 +60,7 @@ export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
     if (error instanceof z.ZodError) {
       return { success: false, error: "Invalid input data" };
     }
+    logger.error({ err: error, userId: currUser.id }, "Failed to update user");
     return { success: false, error: "Failed to update user" };
   }
 }
@@ -91,6 +93,7 @@ export async function updateUserProfile(formData: UpdateProfileSchema) {
     if (error instanceof z.ZodError) {
       return { success: false, error: "Invalid input data" };
     }
+    logger.error({ err: error, userId: currUser.id }, "Failed to update user profile");
     return { success: false, error: "Failed to update user profile" };
   }
 }

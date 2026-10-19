@@ -11,6 +11,7 @@ import {
 import { and, eq, or } from "drizzle-orm";
 import { headers } from "next/headers";
 import { DEFAULT_AVATARS } from "@/consts";
+import { logger } from "@/lib/logger";
 
 const isUuid = (str: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
@@ -157,6 +158,7 @@ export async function sendFriendRequest(targetUsername: string) {
       targetUser: targetUserData,
     };
   } catch (err: any) {
+    logger.error({ err, targetUsername }, "Failed to send friend request");
     return {
       success: false,
       error: err?.message || "Failed to send friend request",
@@ -215,6 +217,7 @@ export async function acceptFriendRequest(targetIdOrFriendshipId: string) {
       requesterId: updated[0].requesterId,
     };
   } catch (err: any) {
+    logger.error({ err, targetIdOrFriendshipId }, "Failed to accept friend request");
     return {
       success: false,
       error: err?.message || "Failed to accept friend request",
@@ -270,6 +273,7 @@ export async function declineFriendRequest(targetIdOrFriendshipId: string) {
       requesterId: updated[0].requesterId,
     };
   } catch (err: any) {
+    logger.error({ err, targetIdOrFriendshipId }, "Failed to decline friend request");
     return {
       success: false,
       error: err?.message || "Failed to decline friend request",
@@ -320,6 +324,7 @@ export async function cancelFriendRequest(targetIdOrFriendshipId: string) {
 
     return { success: true, message: "Friend request cancelled" };
   } catch (err: any) {
+    logger.error({ err, targetIdOrFriendshipId }, "Failed to cancel friend request");
     return {
       success: false,
       error: err?.message || "Failed to cancel friend request",
@@ -374,6 +379,7 @@ export async function removeFriend(targetId: string) {
 
     return { success: true, message: "Friend removed" };
   } catch (err: any) {
+    logger.error({ err, targetId }, "Failed to remove friend");
     return { success: false, error: err?.message || "Failed to remove friend" };
   }
 }

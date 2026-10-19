@@ -8,6 +8,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { headers } from "next/headers";
 import { updateTag } from "next/cache";
 import { attempt } from "@/lib/rateLimit";
+import { logger } from "@/lib/logger";
 
 const MAX_SIZE = 5 * 1024 * 1024;
 
@@ -32,8 +33,8 @@ async function deleteImageByUrl(url: string) {
     
     // Delete the asset from Cloudinary
     await cloudinary.uploader.destroy(publicId, { invalidate: true });
-  } catch {
-    // Fail silently
+  } catch (err) {
+    logger.warn({ err, url }, "Failed to delete old image from Cloudinary");
   }
 }
 
@@ -138,7 +139,8 @@ export async function uploadUserAvatar(formData: FormData) {
       success: true,
       url: secureUrl,
     };
-  } catch {
+  } catch (err) {
+    logger.error({ err, userId }, "Failed to upload avatar");
     return {
       success: false,
       error: "Failed to upload avatar",
