@@ -6,13 +6,14 @@ const nextConfig: NextConfig = {
       {
         source: "/",
         destination: "/lobby",
-        permanent: true,
+        permanent: false,
       },
     ];
   },
   cacheComponents: true,
   partialPrefetching: true,  
   output: "standalone",
+  serverExternalPackages: ["pino", "pino-pretty"],
   images: {
     remotePatterns: [
       {
