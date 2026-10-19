@@ -53,36 +53,48 @@ export async function attempt(
 ): Promise<RateLimitResult> {
   const { maxRequests, windowSeconds } = config;
 
-  const now = Math.floor(Date.now() / 1000);
-  const currentWindow = Math.floor(now / windowSeconds);
-  const previousWindow = currentWindow - 1;
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const currentWindow = Math.floor(now / windowSeconds);
+    const previousWindow = currentWindow - 1;
 
-  // Hash tags ensure both keys map to the same cluster slot
-  const currentKey = `{${key}}:${currentWindow}`;
-  const previousKey = `{${key}}:${previousWindow}`;
+    // Hash tags ensure both keys map to the same cluster slot
+    const currentKey = `{${key}}:${currentWindow}`;
+    const previousKey = `{${key}}:${previousWindow}`;
 
-  const elapsed = (now % windowSeconds) / windowSeconds;
+    const elapsed = (now % windowSeconds) / windowSeconds;
 
-  const result = (await redis.eval(LUA_SCRIPT, 
-    2,
-    currentKey, previousKey,
-    maxRequests.toString(),
-    windowSeconds.toString(),
-    elapsed.toString(),
-  )) as number[];
+    const result = (await redis.eval(
+      LUA_SCRIPT,
+      2,
+      currentKey,
+      previousKey,
+      maxRequests.toString(),
+      windowSeconds.toString(),
+      elapsed.toString(),
+    )) as number[];
 
-  const allowed = result[0] === 1;
-  const remaining = result[1];
+    const allowed = result[0] === 1;
+    const remaining = result[1];
 
-  let retryAfter: number | null = null;
-  if (!allowed) {
+    let retryAfter: number | null = null;
+    if (!allowed) {
       retryAfter = Math.max(1, Math.ceil(windowSeconds * (1 - elapsed)));
-  }
+    }
 
-  return {
-    allowed,
-    remaining,
-    limit: maxRequests,
-    retryAfter,
-  };
+    return {
+      allowed,
+      remaining,
+      limit: maxRequests,
+      retryAfter,
+    };
+  } catch (err) {
+    console.error("[RateLimit] Redis error in attempt, failing open:", err);
+    return {
+      allowed: true,
+      remaining: 1,
+      limit: maxRequests,
+      retryAfter: null,
+    };
+  }
 }
