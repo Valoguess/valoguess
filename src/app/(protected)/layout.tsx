@@ -1,3 +1,5 @@
+import SocketProvider from "@/components/SocketProvider";
+
 export const instant = false;
 
 export default function ProtectedLayout({
@@ -5,5 +7,9 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <SocketProvider>
+      {children}
+    </SocketProvider>
+  );
 }

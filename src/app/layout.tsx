@@ -4,7 +4,6 @@ import "./globals.css";
 
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner"
-import SocketProvider from "@/components/SocketProvider";
 import { AuthInitializer } from "@/components/AuthInitializer";
 
 const rajdhani = Rajdhani({
@@ -183,9 +182,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-[#050811] text-white">
         <AuthInitializer>
-          <SocketProvider>
-            {children}
-          </SocketProvider>
+          {children}
           <Toaster />
         </AuthInitializer>
       </body>
