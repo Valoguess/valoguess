@@ -42,6 +42,10 @@ export function MatchIntroOverlay({
     startingEndsAt ||
     (startingAt ? startingAt + 7000 : initialEndsAtRef.current);
   const secondsRemaining = Math.max(0, Math.ceil((targetEndsAt - now) / 1000));
+  const minutes = Math.floor(secondsRemaining / 60);
+  const seconds = secondsRemaining % 60;
+  const formattedMinutes = String(minutes).padStart(2, '0');
+  const formattedSeconds = String(seconds).padStart(2, '0');
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 100);
@@ -261,7 +265,7 @@ export function MatchIntroOverlay({
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-sm bg-accent/15 border border-accent/40 shadow-[0_0_12px_rgba(255,70,85,0.25)]">
               <Clock className="h-3.5 w-3.5 text-accent animate-pulse" />
               <span className="font-mono text-sm font-black text-white tabular-nums tracking-wider">
-                00:0{secondsRemaining}
+                {formattedMinutes}:{formattedSeconds}
               </span>
             </div>
             <span className="text-[8.5px] font-mono uppercase tracking-[0.25em] text-white/50 mt-1">
