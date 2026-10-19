@@ -26,7 +26,10 @@ if (process.env.SKIP_ENV_VALIDATION === "true" || isBrowser) {
     console.warn("Skipping environment variable validation");
   }
 
-  ENV = process.env as unknown as EnvConfig;
+  ENV = {
+    ...process.env,
+    NEXT_PUBLIC_SOCKET_SERVER_URL: process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!,
+  } as unknown as EnvConfig;
 }
 else {
   const parsed = envSchema.safeParse(process.env);
