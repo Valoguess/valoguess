@@ -11,8 +11,16 @@ export function AuthInitializer({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initializeUser = async (userId: string) => {
-      const user = await getUserById(userId)
-      setUser(user);
+
+      if (session?.user) {
+        setUser({
+          ...session.user,
+          username: session.user.username ?? undefined,
+        });
+      } else {
+        const user = await getUserById(userId)
+        setUser(user);
+      }
     };
 
     if (!isPending) {
