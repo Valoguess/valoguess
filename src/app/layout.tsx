@@ -108,6 +108,7 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/logo.webp", sizes: "180x180", type: "image/webp" }],
   },
+  manifest: "/manifest.webmanifest",
   category: "game",
 };
 
@@ -161,6 +162,34 @@ const jsonLd = {
       },
       playMode: "MultiPlayer",
     },
+    {
+      "@type": "HowTo",
+      "name": "How to Play ValoGuess",
+      "description":
+        "Learn how to play the 1v1 tactical deduction game inspired by Valorant.",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "name": "Create or Join a Match",
+          "text": "Join a party with a friend or opponent and launch a tactical 1v1 duel.",
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Receive Your Secret Agent",
+          "text": "Each player receives a hidden Valorant agent that the other player must deduce.",
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Ask Strategic Questions",
+          "text": "Take turns asking yes/no questions about roles, abilities, and characteristics to eliminate suspects on your grid.",
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Lock In Your Final Guess",
+          "text": "Identify your opponent's secret agent and submit your final guess to win the match.",
+        },
+      ],
+    },
   ],
 };
 
@@ -179,6 +208,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <link rel="preload" href="/valorant.ttf" as="font" type="font/truetype" crossOrigin="anonymous" />
       </head>
       <body className="font-body antialiased bg-[#050811] text-white">
         <AuthInitializer>

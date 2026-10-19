@@ -12,10 +12,34 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/callsign`,
+      url: `${baseUrl}/lobby`,
       lastModified,
-      changeFrequency: "weekly",
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/leaderboard`,
+      lastModified,
+      changeFrequency: "daily",
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/login`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/signup`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/register`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6,
     },
   ];
 }

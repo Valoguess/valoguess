@@ -5,8 +5,16 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
-        disallow: ["/play/", "/api/"],
+        allow: ["/", "/lobby", "/leaderboard", "/login", "/signup", "/register"],
+        disallow: [
+          "/play/",
+          "/play",
+          "/game",
+          "/api/",
+          "/settings",
+          "/history",
+          "/welcome",
+        ],
       },
     ],
     sitemap: "https://valoguess.fun/sitemap.xml",
