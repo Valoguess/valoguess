@@ -51,7 +51,7 @@ export function kickPlayerFromParty(
 }
 
 export function sendMessageToParty(message: string) {
-  socket.emit(ClientEvents.PARTY_CHAT, message);
+  socket.emit(ClientEvents.PARTY_CHAT, {message});
 }
 
 // ==== GAME EVENTS ====
