@@ -1,5 +1,7 @@
-import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useGameStore } from "@/store/gameStore";
+import { useTempResultStore } from "@/store/tempResultStore";
 import { useAuthStore } from "@/store/authStore";
 import { AGENTS, Agent, getAgentById, getQuestionLabel } from "@/lib/data";
 
@@ -12,33 +14,49 @@ export interface TimelineEvent {
 }
 
 export function useResultData() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { game, clearGame } = useGameStore();
+  const { tempResultGame, clearTempResultGame } = useTempResultStore();
   const { user } = useAuthStore();
 
+  const activeGame = tempResultGame || (game?.status === "FINISHED" ? game : null);
+
+  // If user reloads page or visits result without an active finished match, redirect to lobby
+  useEffect(() => {
+    if (!activeGame || activeGame.status !== "FINISHED") {
+      router.replace("/lobby");
+    }
+  }, [activeGame, router]);
+
+  const handleClearResults = () => {
+    clearTempResultGame();
+    clearGame();
+  };
+
   const cachedSecretAgent =
-    typeof window !== "undefined" && game?.id
-      ? sessionStorage.getItem(`secret_agent_${game.id}`)
+    typeof window !== "undefined" && activeGame?.id
+      ? sessionStorage.getItem(`secret_agent_${activeGame.id}`)
       : null;
 
   const myPlayer =
-    (user?.id ? game?.players.find((p) => p.id === user.id) : undefined) ||
+    (user?.id ? activeGame?.players.find((p) => p.id === user.id) : undefined) ||
     (cachedSecretAgent
-      ? game?.players.find((p) => p.state?.secretAgent === cachedSecretAgent)
+      ? activeGame?.players.find((p) => p.state?.secretAgent === cachedSecretAgent)
       : undefined) ||
-    game?.players[0];
+    activeGame?.players[0];
 
   const oppPlayer =
-    game?.players.find((p) => p.id !== myPlayer?.id) ||
-    (game?.players && game.players.length > 1 ? game.players[1] : undefined);
+    activeGame?.players.find((p) => p.id !== myPlayer?.id) ||
+    (activeGame?.players && activeGame.players.length > 1 ? activeGame.players[1] : undefined);
 
-  const gameState = game?.state;
-  const rawResult = (gameState?.result ?? game?.result) as any;
+  const gameState = activeGame?.state;
+  const rawResult = (gameState?.result ?? activeGame?.result) as any;
   const resolvedWinnerId =
     rawResult?.winnerId ??
     rawResult?.winner ??
     (gameState as any)?.winnerId ??
-    (game as any)?.winnerId ??
+    (activeGame as any)?.winnerId ??
     null;
 
   const resultType = (
@@ -63,8 +81,8 @@ export function useResultData() {
 
   const oppAgentId =
     oppPlayer?.state?.secretAgent ||
-    (myAgentId && game?.players && game.players.length > 1
-      ? game.players.find((p) => p.state?.secretAgent && p.state.secretAgent !== myAgentId)?.state?.secretAgent
+    (myAgentId && activeGame?.players && activeGame.players.length > 1
+      ? activeGame.players.find((p) => p.state?.secretAgent && p.state.secretAgent !== myAgentId)?.state?.secretAgent
       : null) ||
     "raze";
   const oppAgentObj: Agent = getAgentById(oppAgentId);
@@ -74,11 +92,11 @@ export function useResultData() {
 
   const roundsPlayed = Math.max(
     1,
-    Math.ceil((gameState?.turnNumber ?? game?.turnNumber ?? 1) / 2)
+    Math.ceil((gameState?.turnNumber ?? activeGame?.turnNumber ?? 1) / 2)
   );
-  const history = gameState?.history ?? game?.history ?? [];
+  const history = gameState?.history ?? activeGame?.history ?? [];
   const totalQuestions = history.length;
-  const maxNos = game?.settings?.maxNos ?? 5;
+  const maxNos = activeGame?.settings?.maxNos ?? 5;
 
   const userNosUsed =
     maxNos === -1
@@ -98,8 +116,8 @@ export function useResultData() {
   const accuracy = isVictory ? "100%" : "0%";
 
   let timeTaken = "Live Match";
-  const startedAt = gameState?.startedAt ?? game?.startedAt;
-  const endedAt = gameState?.endedAt ?? game?.endedAt;
+  const startedAt = gameState?.startedAt ?? activeGame?.startedAt;
+  const endedAt = gameState?.endedAt ?? activeGame?.endedAt;
   if (startedAt && endedAt) {
     const diffMs = Math.max(0, endedAt - startedAt);
     const mins = Math.floor(diffMs / 60000);
@@ -155,8 +173,8 @@ export function useResultData() {
   }
 
   return {
-    game,
-    clearGame,
+    game: activeGame,
+    clearGame: handleClearResults,
     myPlayer,
     oppPlayer,
     myAgentObj,

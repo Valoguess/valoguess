@@ -38,6 +38,12 @@ interface LobbyLeftPanelProps {
   handleJoinPartyWithCode: (code: string) => void;
   handleKickGuest?: () => void;
   myId?: string;
+  userName?: string;
+  showPartyCode: boolean;
+  onToggleRevealCode: () => void;
+  handleCopyCode: () => void;
+  copied: boolean;
+  onOpenInviteDialog?: () => void;
 }
 
 export function LobbyLeftPanel({
@@ -64,6 +70,12 @@ export function LobbyLeftPanel({
   handleJoinPartyWithCode,
   handleKickGuest,
   myId,
+  userName,
+  showPartyCode,
+  onToggleRevealCode,
+  handleCopyCode,
+  copied,
+  onOpenInviteDialog,
 }: LobbyLeftPanelProps) {
   const [isPartyDrawerOpen, setIsPartyDrawerOpen] = useState(false);
   const [isGamemodeDrawerOpen, setIsGamemodeDrawerOpen] = useState(false);
@@ -186,11 +198,17 @@ export function LobbyLeftPanel({
         party={party}
         isHost={isHost}
         myId={myId}
+        userName={userName}
         onLeaveParty={onLeaveParty}
         onCreateParty={handleCreateParty}
         onJoinParty={handleJoinPartyWithCode}
         onKickPlayer={handleKickGuest}
         isCreatingOrJoining={isCreatingOrJoining}
+        showPartyCode={showPartyCode}
+        onToggleRevealCode={onToggleRevealCode}
+        handleCopyCode={handleCopyCode}
+        copied={copied}
+        onOpenInviteDialog={onOpenInviteDialog}
       />
 
       {/* GAMEMODE & SETTINGS DRAWER (SLIDES IN FROM LEFT) */}

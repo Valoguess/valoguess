@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Party } from "@/types/party";
 import { Friend } from "../_components/types";
 import { usePartyStore } from "@/store/partyStore";
@@ -26,14 +26,42 @@ export function useLobbyParty({ party, friendsList }: UseLobbyPartyProps) {
 
   const [partyInput, setPartyInput] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showPartyCode, setShowPartyCode] = useState(false);
   const [isCreatingOrJoining, setIsCreatingOrJoining] = useState(false);
 
-  // When party syncs, clear joining loader
+  // Queued actions when party is lazily created
+  const pendingCopyRef = useRef(false);
+  const pendingRevealRef = useRef(false);
+  const pendingInviteRef = useRef<string | null>(null);
+
+  // When party syncs, clear joining loader and execute queued actions
   useEffect(() => {
-    if (party) {
+    if (party?.id) {
       setIsCreatingOrJoining(false);
+
+      if (pendingRevealRef.current) {
+        pendingRevealRef.current = false;
+        setShowPartyCode(true);
+        toast.success(`Party created! Code #${party.id} revealed.`);
+      }
+
+      if (pendingCopyRef.current) {
+        pendingCopyRef.current = false;
+        navigator.clipboard.writeText(party.id);
+        setCopied(true);
+        toast.success(`Party created! Code #${party.id} copied.`);
+        setTimeout(() => setCopied(false), 2000);
+      }
+
+      if (pendingInviteRef.current) {
+        const friendId = pendingInviteRef.current;
+        pendingInviteRef.current = null;
+        sendInviteToParty(friendId);
+        const friend = friendsList.find((f) => f.id === friendId);
+        toast.success(`Party invite sent to ${friend?.name || "friend"}!`);
+      }
     }
-  }, [party]);
+  }, [party?.id, friendsList]);
 
   // Handle declined party invites from friends
   useEffect(() => {
@@ -93,10 +121,33 @@ export function useLobbyParty({ party, friendsList }: UseLobbyPartyProps) {
     clearParty();
     clearGame();
     setIsCreatingOrJoining(false);
+    setShowPartyCode(false);
+    pendingCopyRef.current = false;
+    pendingRevealRef.current = false;
+    pendingInviteRef.current = null;
   }, [clearParty, clearGame]);
 
+  const handleToggleRevealCode = useCallback(() => {
+    if (showPartyCode) {
+      setShowPartyCode(false);
+      return;
+    }
+    if (!party?.id) {
+      pendingRevealRef.current = true;
+      setIsCreatingOrJoining(true);
+      createParty();
+      return;
+    }
+    setShowPartyCode(true);
+  }, [showPartyCode, party?.id]);
+
   const handleCopyCode = useCallback(() => {
-    if (!party?.id) return;
+    if (!party?.id) {
+      pendingCopyRef.current = true;
+      setIsCreatingOrJoining(true);
+      createParty();
+      return;
+    }
     navigator.clipboard.writeText(party.id);
     setCopied(true);
     toast.success("Party code copied to clipboard!");
@@ -104,9 +155,15 @@ export function useLobbyParty({ party, friendsList }: UseLobbyPartyProps) {
   }, [party?.id]);
 
   const onInviteFriendToParty = useCallback((friend: Friend) => {
+    if (!party?.id) {
+      pendingInviteRef.current = friend.id;
+      setIsCreatingOrJoining(true);
+      createParty();
+      return;
+    }
     sendInviteToParty(friend.id);
     toast.success(`Party invite sent to ${friend.name}!`);
-  }, []);
+  }, [party?.id]);
 
   const handleAcceptPartyInvite = useCallback((inviteId: string, incomingPartyId: string) => {
     setIsCreatingOrJoining(true);
@@ -127,6 +184,9 @@ export function useLobbyParty({ party, friendsList }: UseLobbyPartyProps) {
     partyInput,
     setPartyInput,
     copied,
+    showPartyCode,
+    setShowPartyCode,
+    handleToggleRevealCode,
     isCreatingOrJoining,
     enrichedIncomingInvites,
     handleCreateParty,

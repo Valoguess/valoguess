@@ -18,6 +18,7 @@ import { OpponentQuestionPrompt } from "./_components/OpponentQuestionPrompt";
 import { PartyChatOverlay } from "@/components/chat/PartyChatOverlay";
 import { useRoomTimer } from "@/hooks/useRoomTimer";
 import { useGameStore } from "@/store/gameStore";
+import { useTempResultStore } from "@/store/tempResultStore";
 import { useAuthStore } from "@/store/authStore";
 import { usePlayState } from "./_hooks/usePlayState";
 import { usePlaySocket } from "./_hooks/usePlaySocket";
@@ -184,7 +185,9 @@ function PlayContent() {
           Math.ceil((game.state?.turnNumber ?? game.turnNumber ?? 1) / 2)
         )}
         onComplete={() => {
-          router.replace("/play/result");
+          useTempResultStore.getState().setTempResultGame(game);
+          useGameStore.getState().clearGame();
+          router.replace("/game");
         }}
       />
     );

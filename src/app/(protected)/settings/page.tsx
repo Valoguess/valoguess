@@ -13,7 +13,7 @@ import { ProfileCardPreview } from "./_components/ProfileCardPreview";
 import { IdentitySettingsTab } from "./_components/IdentitySettingsTab";
 import { BannerTaglineTab } from "./_components/BannerTaglineTab";
 import { PrivacyAccountTab } from "./_components/PrivacyAccountTab";
-import { SettingsHeader } from "./_components/SettingsHeader";
+import { TopNavbar } from "@/components/navigation/TopNavbar";
 import { LogoutConfirmationModal } from "./_components/LogoutConfirmationModal";
 import { socket } from "@/socket";
 import { toast } from "sonner";
@@ -214,7 +214,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Header bar */}
-      <SettingsHeader onOpenLogout={() => setShowLogoutModal(true)} />
+      <TopNavbar onOpenLogout={() => setShowLogoutModal(true)} />
 
       {/* Main Settings Content */}
       <div className="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 py-8 flex flex-col gap-8 pb-16">
