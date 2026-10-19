@@ -6,8 +6,11 @@ import ENV from "@/env";
 import { token } from "@/lib/auth-client"
 
 const getSocketServerURL = () => {
-  if (ENV.NEXT_PUBLIC_SOCKET_SERVER_URL) {
-    return ENV.NEXT_PUBLIC_SOCKET_SERVER_URL;
+  const envUrl =
+    process.env.NEXT_PUBLIC_SOCKET_SERVER_URL ||
+    ENV?.NEXT_PUBLIC_SOCKET_SERVER_URL;
+  if (envUrl) {
+    return envUrl;
   }
   if (typeof window !== "undefined") {
     const isLocalhost =
