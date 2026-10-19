@@ -7,7 +7,6 @@ export interface GuessAgentSettings {
   questionCount: number;
   timePerRound: number;
   maxRounds?: number;
-  questionPool?: string[];
 }
 
 export const DefaultGuessAgentSettings: GuessAgentSettings = {
@@ -68,6 +67,7 @@ export interface GuessAgentStateDTO {
   turnNumber?: number;
   currentTurn?: string;
   turnEndTime?: number | null;
+  questionPool?: string[];
   pendingQuestion?: PendingQuestion;
   history: QuestionHistory[];
   result?: GuessAgentResult;
@@ -90,6 +90,7 @@ export interface GuessAgentGameDTO {
   turnNumber?: number;
   currentTurn?: string;
   turnEndTime?: number | null;
+  questionPool?: string[];
   pendingQuestion?: PendingQuestion;
   history?: QuestionHistory[];
   result?: GuessAgentResult;

@@ -98,7 +98,10 @@ export function usePlayState({ game, user }: UsePlayStateProps) {
   const secretAgentId = myPlayer?.state?.secretAgent || cachedSecretAgent;
   const activeSecretAgent: Agent = getAgentById(secretAgentId);
 
-  const questionPoolIds = game?.settings?.questionPool || [];
+  const questionPoolIds = useMemo<string[]>(() => {
+    return gameState?.questionPool ?? game?.questionPool ?? [];
+  }, [gameState?.questionPool, game?.questionPool]);
+
   const gameQuestions: QuestionItem[] = useMemo(() => {
     if (questionPoolIds.length > 0) {
       return questionPoolIds.map(
