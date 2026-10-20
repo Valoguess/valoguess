@@ -82,7 +82,7 @@ export function LobbyClient() {
   }, [user]);
 
   return (
-    <div className="relative h-full w-full flex flex-col justify-between select-none overflow-hidden font-body">
+    <div className="relative h-full w-full flex flex-col justify-between select-none overflow-y-auto lg:overflow-hidden font-body">
       {/* Background Graphics */}
       <div className="absolute inset-0 z-0 select-none pointer-events-none">
         <Image
@@ -101,9 +101,9 @@ export function LobbyClient() {
       <LobbySubheader party={party} />
 
       {/* 2. Main Workspace: Left Control Panel & Center Player Slots */}
-      <div className="relative z-10 flex-1 flex items-stretch justify-between gap-5 pl-6 lg:pl-8 pr-4 py-2 overflow-hidden min-h-0">
+      <div className="relative z-10 flex-1 flex flex-col-reverse lg:flex-row items-center lg:items-stretch justify-between gap-3 sm:gap-4 lg:gap-5 px-3 sm:px-6 lg:pl-8 lg:pr-6 py-2 min-h-0 w-full">
         {/* Left Column: Gamemode Selector & Party Controls */}
-        <aside className="w-70 flex flex-col justify-center shrink-0 select-none z-20 h-full min-h-0 gap-2.5 pb-1">
+        <aside className="w-full max-w-sm sm:max-w-md lg:w-70 lg:max-w-none flex flex-col justify-center shrink-0 select-none z-20 lg:h-full lg:min-h-0 gap-2 sm:gap-2.5 pb-2 lg:pb-1">
           <LobbyLeftPanel
             questionMode={questionMode}
             setQuestionMode={setQuestionMode}
@@ -138,7 +138,7 @@ export function LobbyClient() {
         </aside>
 
         {/* Center Column: Player Podium Slots */}
-        <div className="flex-1 flex items-center justify-center min-w-0 h-full">
+        <div className="w-full flex-1 flex items-center justify-center min-w-0 py-1 lg:py-0">
           <LobbyCenterSlots
             party={party}
             me={me}

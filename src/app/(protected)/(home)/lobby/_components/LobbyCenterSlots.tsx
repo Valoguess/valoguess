@@ -38,11 +38,11 @@ export function LobbyCenterSlots({
   const oppBanner = getAgentBannerPath((opponent as any)?.banner || "jett");
 
   return (
-    <div className="flex-1 flex items-center justify-center gap-4 h-full max-h-130 max-w-5xl">
+    <div className="flex-1 w-full flex items-center justify-center gap-2 sm:gap-4 h-[220px] min-[400px]:h-[260px] sm:h-full max-h-130 max-w-5xl">
       {/* SLOT 1 (LEFT MAIN SLOT - YOU) ALWAYS VISIBLE */}
       <div
         className={cn(
-          "flex flex-col items-center justify-between flex-1 h-full max-h-130 max-w-65 border-2 bg-[#0a0e16]/80 backdrop-blur-md clip-notch-both relative p-4 group transition-all duration-300",
+          "flex flex-col items-center justify-between flex-1 h-full max-h-130 max-w-[150px] min-[400px]:max-w-[170px] sm:max-w-65 border-2 bg-[#0a0e16]/80 backdrop-blur-md clip-notch-both relative p-2 sm:p-4 group transition-all duration-300",
           isHost
             ? "border-accent/60 shadow-[0_0_30px_rgba(255,70,85,0.15)]"
             : "border-mint/40 shadow-[0_0_20px_rgba(60,242,196,0.1)]",
@@ -50,21 +50,21 @@ export function LobbyCenterSlots({
       >
         <div className="w-full flex items-center justify-between z-10">
           {isHost ? (
-            <div className="flex items-center gap-1.5 bg-accent px-2.5 py-1 clip-tag text-white font-display text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(255,70,85,0.4)]">
-              <Crown className="h-3 w-3" />
-              <span>PARTY LEADER</span>
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-accent px-1.5 sm:px-2.5 py-0.5 sm:py-1 clip-tag text-white font-display text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(255,70,85,0.4)]">
+              <Crown className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+              <span>LEADER</span>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 bg-mint/20 border border-mint/40 px-2 py-0.5 text-mint font-display text-[9px] font-bold uppercase tracking-widest rounded-sm">
+            <div className="flex items-center gap-1 bg-mint/20 border border-mint/40 px-1.5 py-0.5 text-mint font-display text-[8px] sm:text-[9px] font-bold uppercase tracking-widest rounded-sm">
               <span>MEMBER</span>
             </div>
           )}
-          <span className="text-[9px] text-mint font-display font-bold uppercase tracking-wider">
+          <span className="text-[8px] sm:text-[9px] text-mint font-display font-bold uppercase tracking-wider">
             READY
           </span>
         </div>
 
-        <div className="relative w-full flex-1 my-2 overflow-hidden rounded-sm border border-white/10 bg-base-950">
+        <div className="relative w-full flex-1 my-1.5 sm:my-2 overflow-hidden rounded-sm border border-white/10 bg-base-950">
           <Image
             src={myBanner}
             alt="Agent Banner"
@@ -74,13 +74,13 @@ export function LobbyCenterSlots({
           <div className="absolute inset-0 bg-linear-to-t from-[#0a0e16] via-transparent to-transparent" />
         </div>
 
-        <div className="w-full text-center z-10 pt-1">
-          <h3 className="font-display text-xl font-black uppercase tracking-wider text-white truncate">
+        <div className="w-full text-center z-10 pt-0.5 sm:pt-1">
+          <h3 className="font-display text-xs sm:text-xl font-black uppercase tracking-wider text-white truncate">
             {me?.name || savedUsername || user?.name || "AGENT"}
           </h3>
           <span
             className={cn(
-              "text-[10px] font-display font-bold uppercase tracking-widest block mt-0.5",
+              "text-[7.5px] sm:text-[10px] font-display font-bold uppercase tracking-widest block mt-0.5",
               isHost ? "text-accent" : "text-mint",
             )}
           >
@@ -94,7 +94,7 @@ export function LobbyCenterSlots({
         /* OPPONENT CARD */
         <div
           className={cn(
-            "flex flex-col items-center justify-between flex-1 h-full max-h-130 max-w-65 border-2 bg-[#0a0e16]/80 backdrop-blur-md clip-notch-both relative p-4 group transition-all duration-300",
+            "flex flex-col items-center justify-between flex-1 h-full max-h-130 max-w-[150px] min-[400px]:max-w-[170px] sm:max-w-65 border-2 bg-[#0a0e16]/80 backdrop-blur-md clip-notch-both relative p-2 sm:p-4 group transition-all duration-300",
             !isHost
               ? "border-accent/60 shadow-[0_0_30px_rgba(255,70,85,0.15)]"
               : "border-mint/40 shadow-[0_0_20px_rgba(60,242,196,0.1)]",
@@ -102,12 +102,12 @@ export function LobbyCenterSlots({
         >
           <div className="w-full flex items-center justify-between z-10">
             {!isHost ? (
-              <div className="flex items-center gap-1.5 bg-accent px-2.5 py-1 clip-tag text-white font-display text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(255,70,85,0.4)]">
-                <Crown className="h-3 w-3" />
-                <span>PARTY LEADER</span>
+              <div className="flex items-center gap-1 sm:gap-1.5 bg-accent px-1.5 sm:px-2.5 py-0.5 sm:py-1 clip-tag text-white font-display text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(255,70,85,0.4)]">
+                <Crown className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                <span>LEADER</span>
               </div>
             ) : (
-              <span className="bg-mint/20 border border-mint/40 px-2 py-0.5 text-mint font-display text-[9px] font-bold uppercase tracking-widest rounded-sm">
+              <span className="bg-mint/20 border border-mint/40 px-1.5 py-0.5 text-mint font-display text-[8px] sm:text-[9px] font-bold uppercase tracking-widest rounded-sm">
                 CHALLENGER
               </span>
             )}
@@ -117,12 +117,12 @@ export function LobbyCenterSlots({
                 className="text-accent/60 hover:text-accent p-1 hover:bg-accent/10 rounded transition cursor-pointer"
                 title="Kick Player"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
             )}
           </div>
 
-          <div className="relative w-full flex-1 my-2 overflow-hidden rounded-sm border border-white/10 bg-base-950">
+          <div className="relative w-full flex-1 my-1.5 sm:my-2 overflow-hidden rounded-sm border border-white/10 bg-base-950">
             <Image
               src={oppBanner}
               alt="Opponent Banner"
@@ -132,13 +132,13 @@ export function LobbyCenterSlots({
             <div className="absolute inset-0 bg-linear-to-t from-[#0a0e16] via-transparent to-transparent" />
           </div>
 
-          <div className="w-full text-center z-10 pt-1">
-            <h3 className="font-display text-xl font-black uppercase tracking-wider text-white truncate">
+          <div className="w-full text-center z-10 pt-0.5 sm:pt-1">
+            <h3 className="font-display text-xs sm:text-xl font-black uppercase tracking-wider text-white truncate">
               {opponent.name || "Opponent"}
             </h3>
             <span
               className={cn(
-                "text-[10px] font-display font-bold uppercase tracking-widest block mt-0.5",
+                "text-[7.5px] sm:text-[10px] font-display font-bold uppercase tracking-widest block mt-0.5",
                 !isHost ? "text-accent" : "text-mint",
               )}
             >
@@ -153,12 +153,15 @@ export function LobbyCenterSlots({
           tabIndex={0}
           onClick={onOpenInviteDialog}
           onKeyDown={(e) => e.key === "Enter" && onOpenInviteDialog()}
-          className="flex flex-col items-center justify-center flex-1 h-full max-h-130 max-w-65 border-2 border-dashed border-white/20 bg-[#0a0e16]/60 backdrop-blur-md clip-notch-both relative cursor-pointer shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+          className="flex flex-col items-center justify-center flex-1 h-full max-h-130 max-w-[150px] min-[400px]:max-w-[170px] sm:max-w-65 border-2 border-dashed border-white/20 bg-[#0a0e16]/60 backdrop-blur-md clip-notch-both relative cursor-pointer shadow-[0_0_20px_rgba(0,0,0,0.5)] p-2 sm:p-4 hover:border-accent/60 transition"
           title="Invite member"
         >
-          <div className="h-16 w-16 rounded-full border border-dashed border-white/20 hover:border-accent text-white/30 hover:text-accent hover:shadow-[0_0_25px_rgba(255,70,85,0.35)] flex items-center justify-center transition-all duration-300 transform hover:scale-110">
-            <UserPlus className="h-7 w-7" />
+          <div className="h-10 w-10 sm:h-16 sm:w-16 rounded-full border border-dashed border-white/20 hover:border-accent text-white/30 hover:text-accent hover:shadow-[0_0_25px_rgba(255,70,85,0.35)] flex items-center justify-center transition-all duration-300 transform hover:scale-110">
+            <UserPlus className="h-4 w-4 sm:h-7 sm:w-7" />
           </div>
+          <span className="text-[8px] sm:text-[9px] font-display font-bold uppercase tracking-widest text-white/40 mt-1.5 sm:mt-2 block">
+            INVITE PLAYER
+          </span>
         </div>
       )}
 

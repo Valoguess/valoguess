@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Friend } from "./types";
+import { Friend } from "@/types/friends";
 import { DEFAULT_AVATARS } from "@/consts";
 
 interface InviteFriendsDialogProps {
