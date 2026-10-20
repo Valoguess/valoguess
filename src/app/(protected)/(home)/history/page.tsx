@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Swords, Trophy, Shield, RefreshCw, Loader2, ArrowRight, Flame, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { TopNavbar } from "@/components/navigation/TopNavbar";
 import { useAuthStore } from "@/store/authStore";
 import { getMatchHistoryAction, revalidateMatchHistoryAction, MatchHistoryCursor } from "@/actions/game";
 import { MatchHistoryCard, MatchHistoryGame } from "./_components/MatchHistoryCard";
@@ -92,7 +91,7 @@ export default function HistoryPage() {
   const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
 
   return (
-    <main className="relative min-h-screen w-full bg-[#040609] text-white flex flex-col font-body selection:bg-accent selection:text-white overflow-x-hidden">
+    <div className="relative min-h-full w-full text-white flex flex-col font-body selection:bg-accent selection:text-white">
       {/* Background artwork */}
       <div className="fixed inset-0 z-0 select-none pointer-events-none">
         <Image
@@ -106,9 +105,6 @@ export default function HistoryPage() {
         <div className="absolute inset-0 bg-linear-to-b from-[#040609]/90 via-[#040609]/80 to-[#040609]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,transparent_20%,#040609_90%)]" />
       </div>
-
-      {/* Top Navbar */}
-      <TopNavbar />
 
       {/* Main Content Area */}
       <div className="relative z-10 flex-1 max-w-5xl w-full mx-auto px-4 py-8 flex flex-col gap-6">
@@ -239,6 +235,6 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

@@ -3,11 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Trophy, Shield, Swords, Sparkles, ArrowRight, Target, Zap } from "lucide-react";
-import { TopNavbar } from "@/components/navigation/TopNavbar";
 
 export default function LeaderboardPage() {
   return (
-    <main className="relative min-h-screen w-full bg-[#040609] text-white flex flex-col font-body selection:bg-accent selection:text-white overflow-x-hidden">
+    <div className="relative min-h-full w-full text-white flex flex-col font-body selection:bg-accent selection:text-white">
       {/* Background artwork */}
       <div className="fixed inset-0 z-0 select-none pointer-events-none">
         <Image
@@ -21,9 +20,6 @@ export default function LeaderboardPage() {
         <div className="absolute inset-0 bg-linear-to-b from-[#040609]/85 via-[#040609]/80 to-[#040609]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,transparent_20%,#040609_90%)]" />
       </div>
-
-      {/* Unified Top Navbar */}
-      <TopNavbar />
 
       {/* Main Container */}
       <div className="relative w-full flex-1 mx-auto px-4 py-12 flex flex-col items-center justify-between">
@@ -62,6 +58,6 @@ export default function LeaderboardPage() {
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-    </main>
+    </div>
   );
 }
