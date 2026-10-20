@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { Camera, Upload, Trash2, Loader2, Lock } from "lucide-react";
-import { uploadUserAvatar, removeUserAvatar } from "@/actions/upload";
+import { uploadUserAvatar, removeUserAvatar } from "@/actions/user";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";

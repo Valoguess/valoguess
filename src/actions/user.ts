@@ -9,6 +9,9 @@ import { db, user } from "@/db";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { welcomeSchema } from "@/schemas/welcomeSchema";
+import { attempt } from "@/lib/rateLimit";
+import { uploadAvatar } from "@/schemas/uploadAvatar";
+import { deleteImageByUrl, uploadAvatarToCloudinary } from "@/lib/cloudinary";
 
 import {
   UpdateProfileSchema,
@@ -51,7 +54,7 @@ export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
       body: updates,
       headers,
     });
-    
+
     updateTag("users");
     updateTag(`user-${currUser.id}`);
 
@@ -63,6 +66,88 @@ export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
     logger.error({ err: error, userId: currUser.id }, "Failed to update user");
     return { success: false, error: "Failed to update user" };
   }
+}
+
+export async function uploadUserAvatar(formData: FormData) {
+  const headers = await getHeaders();
+
+  const session = await auth.api.getSession({
+    headers,
+  });
+  const currUser = session?.user;
+
+  if (!currUser) {
+    throw new Error("User not authenticated");
+  }
+  const result = await attempt(
+    `ratelimit:nextjs:uploadUserAvatar:${currUser.id}`,
+    { maxRequests: 5, windowSeconds: 60 },
+  );
+
+  if (!result.allowed) {
+    return { success: false, error: "Too many requests" };
+  }
+
+  const userId = currUser.id;
+
+  const rawfileData = formData.get("avatar") as File;
+  const { file } = uploadAvatar.parse({ file: rawfileData });
+
+  try {
+    const secureUrl = await uploadAvatarToCloudinary(file, userId);
+
+    await auth.api.updateUser({
+      body: { image: secureUrl },
+      headers: await getHeaders(),
+    });
+
+    updateTag("users");
+    updateTag(`user-${userId}`);
+
+    return {
+      success: true,
+      url: secureUrl,
+    };
+  } catch (err) {
+    logger.error({ err, userId }, "Failed to upload avatar");
+    return {
+      success: false,
+      error: "Failed to upload avatar",
+    };
+  }
+}
+
+export async function removeUserAvatar() {
+  const headers = await getHeaders();
+
+  const session = await auth.api.getSession({
+    headers,
+  });
+  const currUser = session?.user;
+
+  if (!currUser) {
+    throw new Error("User not authenticated");
+  }
+
+  if (!currUser.image) {
+    return {
+      success: true,
+    };
+  }
+
+  await deleteImageByUrl(currUser.image);
+
+  await auth.api.updateUser({
+    body: { image: null },
+    headers,
+  });
+
+  updateTag("users");
+  updateTag(`user-${currUser.id}`);
+
+  return {
+    success: true,
+  };
 }
 
 export async function updateUserProfile(formData: UpdateProfileSchema) {
@@ -93,7 +178,10 @@ export async function updateUserProfile(formData: UpdateProfileSchema) {
     if (error instanceof z.ZodError) {
       return { success: false, error: "Invalid input data" };
     }
-    logger.error({ err: error, userId: currUser.id }, "Failed to update user profile");
+    logger.error(
+      { err: error, userId: currUser.id },
+      "Failed to update user profile",
+    );
     return { success: false, error: "Failed to update user profile" };
   }
 }
