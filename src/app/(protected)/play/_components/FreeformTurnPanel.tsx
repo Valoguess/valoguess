@@ -69,18 +69,18 @@ export function FreeformTurnPanel({
           <span>OPEN TACTICAL DUEL</span>
         </div>
 
-        <h2 className="font-valorant text-2xl md:text-3xl text-white tracking-wider mb-2">
+        <h2 className="font-valorant text-xl sm:text-2xl md:text-3xl text-white tracking-wider mb-2">
           ASK FREELY &amp; DEDUCE
         </h2>
 
         <p className="text-xs text-white/60 max-w-lg mx-auto font-sans leading-relaxed mb-4">
-          Ask <span className="text-white font-semibold">{opponentName}</span> questions freely in Party Chat [T] or voice.
+          Ask <span className="text-white font-semibold">{opponentName}</span> questions freely in Party Chat or voice.
           Whenever they answer <span className="text-[#FF4655] font-bold">&quot;NO&quot;</span>, consume a No.
           When you know their secret agent, submit your guess!
         </p>
 
         {/* Tactical status pill indicators */}
-        <div className="flex items-center justify-center gap-4 text-xs font-mono">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xs font-mono">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-black/40 border border-white/10">
             <span className="text-white/40">YOU:</span>
             <span className="text-mint font-bold">{nosRemaining} NOs</span>
@@ -100,20 +100,20 @@ export function FreeformTurnPanel({
       </div>
 
       {/* Bottom Action Controls */}
-      <div className="border-t border-white/10 pt-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="text-[10px] font-mono text-white/40 flex items-center gap-1.5">
+      <div className="border-t border-white/10 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="text-[10px] font-mono text-white/40 flex items-center justify-center sm:justify-start gap-1.5">
           <MessageSquare className="h-3.5 w-3.5 text-accent" />
-          <span>Press [T] to type in Party Chat</span>
+          <span>Type in Party Chat to converse</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
           {/* Consume No Button */}
           <button
             type="button"
             onClick={onConsumeNo}
             disabled={!hasNosLeft || isConsumingNo}
             className={cn(
-              "px-5 py-2.5 rounded-sm border font-valorant text-xs tracking-wider uppercase transition flex items-center gap-2 cursor-pointer shadow-sm",
+              "px-4 sm:px-5 py-2.5 rounded-sm border font-valorant text-xs tracking-wider uppercase transition flex items-center justify-center gap-2 cursor-pointer shadow-sm",
               hasNosLeft
                 ? "border-violet/60 bg-violet/15 hover:bg-violet/25 text-violet shadow-[0_0_15px_rgba(140,123,255,0.2)] active:scale-98"
                 : "border-white/10 bg-white/5 text-white/30 cursor-not-allowed opacity-50"
@@ -134,7 +134,7 @@ export function FreeformTurnPanel({
             onClick={onOpenGuessModal}
             disabled={!hasGuessesLeft}
             className={cn(
-              "px-6 py-2.5 rounded-sm font-valorant text-xs tracking-wider uppercase transition flex items-center gap-2 cursor-pointer shadow-sm",
+              "px-5 sm:px-6 py-2.5 rounded-sm font-valorant text-xs tracking-wider uppercase transition flex items-center justify-center gap-2 cursor-pointer shadow-sm",
               hasGuessesLeft
                 ? "bg-[#FF4655] hover:bg-[#ff5a67] text-white shadow-[0_0_20px_rgba(255,70,85,0.4)] active:scale-98"
                 : "bg-white/5 border border-white/10 text-white/30 cursor-not-allowed opacity-50"

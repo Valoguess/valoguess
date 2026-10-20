@@ -56,19 +56,19 @@ export function AgentGuessModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-full min-w-0 max-w-md sm:max-w-md bg-[#090d14]/98 border border-[#FF4655]/40 text-white backdrop-blur-2xl shadow-[0_0_50px_rgba(255,70,85,0.25)] py-6 rounded-sm select-none">
-        <DialogHeader className="border-b border-white/10 pb-4 text-left">
+      <DialogContent className="w-[calc(100vw-1.5rem)] sm:max-w-md max-h-[90vh] flex flex-col bg-[#090d14]/98 border border-[#FF4655]/40 text-white backdrop-blur-2xl shadow-[0_0_50px_rgba(255,70,85,0.25)] p-4 sm:p-6 rounded-sm select-none">
+        <DialogHeader className="border-b border-white/10 pb-3 sm:pb-4 text-left shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-sm bg-[#FF4655]/15 border border-[#FF4655]/50 flex items-center justify-center text-[#FF4655] shadow-[0_0_12px_rgba(255,70,85,0.3)]">
-                <Crosshair className="h-5 w-5" />
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-sm bg-[#FF4655]/15 border border-[#FF4655]/50 flex items-center justify-center text-[#FF4655] shadow-[0_0_12px_rgba(255,70,85,0.3)] shrink-0">
+                <Crosshair className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <DialogTitle className="font-valorant text-xl tracking-wider text-white">
+                <DialogTitle className="font-valorant text-lg sm:text-xl tracking-wider text-white">
                   MAKE FINAL GUESS
                 </DialogTitle>
-                <p className="text-xs text-white/50 font-sans mt-0.5">
-                  Select the opponent&apos;s secret agent. Remaining guesses:{" "}
+                <p className="text-[11px] sm:text-xs text-white/50 font-sans mt-0.5">
+                  Select opponent&apos;s agent. Remaining guesses:{" "}
                   <span className="font-bold text-accent">
                     {guessesRemaining}
                   </span>
@@ -79,9 +79,9 @@ export function AgentGuessModal({
         </DialogHeader>
 
         {/* Controls: Search & Role Filters */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 mt-3 shrink-0">
           {/* Role Filter Tabs */}
-          <div className="flex items-center gap-1 p-1 bg-black/50 border border-white/10 rounded-sm w-full sm:w-auto">
+          <div className="flex items-center gap-1 p-1 bg-black/50 border border-white/10 rounded-sm overflow-x-auto scrollbar-none w-full sm:w-auto">
             {(
               ["ALL", "Duelist", "Initiator", "Controller", "Sentinel"] as const
             ).map((r) => (
@@ -89,7 +89,7 @@ export function AgentGuessModal({
                 key={r}
                 onClick={() => setRoleFilter(r)}
                 className={cn(
-                  "px-2 py-1 text-[10px] font-display font-bold uppercase tracking-wider rounded-xs transition-all cursor-pointer",
+                  "px-2 py-1 text-[10px] font-display font-bold uppercase tracking-wider rounded-xs transition-all cursor-pointer whitespace-nowrap shrink-0",
                   roleFilter === r
                     ? "bg-[#FF4655] text-white shadow-[0_0_10px_rgba(255,70,85,0.3)]"
                     : "text-white/50 hover:text-white hover:bg-white/5",
@@ -101,20 +101,20 @@ export function AgentGuessModal({
           </div>
 
           {/* Search Box */}
-          <div className="relative w-full">
+          <div className="relative w-full sm:w-auto sm:flex-1">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
             <Input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search..."
-              className="pl-8 h-8 bg-black/40 border-white/10 text-xs text-white placeholder-white/30 rounded-sm"
+              className="pl-8 h-8 bg-black/40 border-white/10 text-xs text-white placeholder-white/30 rounded-sm w-full"
             />
           </div>
         </div>
 
         {/* Agents Grid */}
-        <div className="mt-4 max-h-85 overflow-y-auto pr-1 scrollbar-thin grid grid-cols-5 gap-2.5">
+        <div className="mt-3 flex-1 min-h-0 max-h-[46vh] sm:max-h-85 overflow-y-auto pr-1 scrollbar-thin grid grid-cols-3 min-[400px]:grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-2.5">
           {filteredAgents.map((agent) => {
             const isEliminated = eliminatedIds.has(agent.id);
             const isSelected = selectedAgentId === agent.id;
@@ -173,7 +173,7 @@ export function AgentGuessModal({
         </div>
 
         {/* Confirmation Footer Bar */}
-        <div className="mt-5 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 bg-black/30 p-3 rounded-sm">
+        <div className="mt-3 sm:mt-5 pt-3 sm:pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2.5 bg-black/30 p-2.5 sm:p-3 rounded-sm shrink-0">
           {selectedAgent ? (
             <div className="flex items-center gap-3">
               <div className="relative h-11 w-11 rounded-xs overflow-hidden border border-[#FF4655] shrink-0">

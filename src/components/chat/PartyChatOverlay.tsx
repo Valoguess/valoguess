@@ -169,13 +169,13 @@ export function PartyChatOverlay({
     <div
       ref={containerRef}
       className={cn(
-        "fixed z-40 w-[380px] sm:w-[420px] transition-all duration-200 select-none font-sans",
+        "fixed z-40 w-[calc(100vw-2rem)] sm:w-[420px] max-w-[420px] left-4 sm:left-6 transition-all duration-200 select-none font-sans",
         isOpen
           ? "h-[220px] sm:h-[240px] bg-[#0e1722]/85 backdrop-blur-sm border border-white/5 shadow-[0_12px_40px_rgba(0,0,0,0.85)] rounded-xs pointer-events-auto flex flex-col"
           : isVisible
           ? "max-h-[180px] bg-black/20 backdrop-blur-xs rounded-xs pointer-events-auto flex flex-col cursor-pointer border border-transparent transition-opacity duration-500 opacity-100"
           : "max-h-[180px] opacity-0 pointer-events-none border-transparent",
-        className || "bottom-6 left-6"
+        className || "bottom-6"
       )}
       onClick={() => {
         if (!isOpen) {

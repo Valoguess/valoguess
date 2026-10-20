@@ -30,18 +30,18 @@ export function GameHeader({
   onLeave,
 }: GameHeaderProps) {
   return (
-    <header className="border-b border-white/10 bg-[#090B11] relative">
+    <header className="border-b border-white/10 bg-[#090B11] relative select-none">
       {/* HUD */}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-8 px-6 py-4">
-        <div className="flex items-center gap-4">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-6 md:gap-8 px-2.5 sm:px-6 py-2 sm:py-3.5">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           {onLeave && (
             <button
               onClick={onLeave}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-white/10 bg-white/[0.02] hover:bg-[#FF4655]/15 hover:border-[#FF4655]/60 text-white/50 hover:text-white transition-all text-[9.5px] font-display font-bold uppercase tracking-widest cursor-pointer shadow-sm group shrink-0"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm border border-white/10 bg-white/[0.02] hover:bg-[#FF4655]/15 hover:border-[#FF4655]/60 text-white/50 hover:text-white transition-all text-[8.5px] sm:text-[9.5px] font-display font-bold uppercase tracking-widest cursor-pointer shadow-sm group shrink-0"
               title="Leave Game"
             >
-              <LogOut className="h-3.5 w-3.5 text-white/40 group-hover:text-[#FF4655] transition-colors" />
-              <span className="hidden sm:inline">LEAVE</span>
+              <LogOut className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white/40 group-hover:text-[#FF4655] transition-colors" />
+              <span className="hidden md:inline">LEAVE</span>
             </button>
           )}
 
@@ -59,27 +59,28 @@ export function GameHeader({
 
         <CenterHUD time={60} round={round} maxRounds={maxRounds} />
 
-        <PlayerSide
-          align="right"
-          name={opponentName}
-          rank="Enemy"
-          rankColor="#8C7BFF"
-          avatar={DEFAULT_AVATARS.OPPONENT}
-          nosUsed={opponentNosUsed}
-          nosMax={nosMax}
-          turn={turnOwner === "opponent" || turnOwner === "opponent-thinking"}
-        />
+        <div className="flex items-center justify-end gap-2 sm:gap-4 min-w-0">
+          <PlayerSide
+            align="right"
+            name={opponentName}
+            rank="Enemy"
+            rankColor="#8C7BFF"
+            avatar={DEFAULT_AVATARS.OPPONENT}
+            nosUsed={opponentNosUsed}
+            nosMax={nosMax}
+            turn={turnOwner === "opponent" || turnOwner === "opponent-thinking"}
+          />
+        </div>
       </div>
     </header>
   );
 }
 
 function CenterHUD({
-  time,
   round,
   maxRounds,
 }: {
-  time: number;
+  time?: number;
   round: number;
   maxRounds: number;
 }) {
@@ -87,35 +88,42 @@ function CenterHUD({
   const { game } = useGameStore();
   const { timeLeft, formattedTime, isInfinite } = useRoomTimer({ game });
 
+  const timerText =
+    isInfinite || timeLeft === -1
+      ? "∞"
+      : timeLeft > 0
+        ? formattedTime
+        : "00:00";
+
   return (
-    <div className="flex flex-col items-center">
-      <div className="flex items-center gap-2">
-        <span className="font-valorant text-2xl tracking-[0.15em] text-white">
-          GUESS THE AGENT
-        </span>
-      </div>
-      <div className="text-[10px] uppercase tracking-[0.25em] text-zinc-500 mt-0.5">
+    <div className="flex flex-col items-center shrink-0">
+      {/* Title (desktop only) */}
+      <span className="font-valorant text-base md:text-xl tracking-[0.15em] text-white hidden sm:block">
+        GUESS THE AGENT
+      </span>
+      <div className="text-[9px] uppercase tracking-[0.25em] text-zinc-500 mt-0.5 hidden sm:block">
         1V1 DUEL
       </div>
 
-      <div className="mt-3 flex items-center gap-4">
-        <div className="h-px w-10 bg-accent/30" />
+      {/* Mobile-optimized Compact Pill */}
+      <div className="flex sm:hidden items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 shadow-inner">
+        <span className="font-valorant text-[10px] text-zinc-400">R{round}</span>
+        <span className="text-white/20 text-xs">/</span>
+        <span className="font-mono text-xs font-bold tabular-nums text-white">{timerText}</span>
+      </div>
+
+      {/* Desktop HUD with timer and lines */}
+      <div className="mt-1 sm:mt-2 hidden sm:flex items-center gap-2 sm:gap-4">
+        <div className="h-px w-6 sm:w-10 bg-accent/30" />
         <div className="flex flex-col items-center">
-          <div className="text-[10px] uppercase tracking-[0.25em] text-zinc-500">
+          <div className="text-[8px] sm:text-[10px] uppercase tracking-[0.25em] text-zinc-500">
             ROUND {round} / {maxRoundsDisplay}
           </div>
-          <div className="font-display text-4xl font-black tabular-nums text-white leading-none mt-1">
-            {isInfinite || timeLeft === -1
-              ? "∞"
-              : timeLeft > 0
-                ? formattedTime
-                : "00:00"}
-          </div>
-          <div className="text-[9px] text-zinc-400 mt-1 uppercase tracking-wider">
-            First player to guess the agent wins!
+          <div className="font-display text-2xl md:text-3xl font-black tabular-nums text-white leading-none mt-0.5 sm:mt-1">
+            {timerText}
           </div>
         </div>
-        <div className="h-px w-10 bg-accent/30" />
+        <div className="h-px w-6 sm:w-10 bg-accent/30" />
       </div>
     </div>
   );
@@ -143,12 +151,12 @@ function PlayerSide({
   return (
     <div
       className={cn(
-        "flex items-center gap-4",
+        "flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0",
         align === "right" && "flex-row-reverse",
       )}
     >
       {/* Avatar Container */}
-      <div className="relative">
+      <div className="relative shrink-0">
         {/* Glow behind avatar */}
         <div
           className={cn(
@@ -160,7 +168,7 @@ function PlayerSide({
         {/* Outer border ring */}
         <div
           className={cn(
-            "relative flex h-16 w-16 items-center justify-center rounded-full p-[2px] transition-all duration-300",
+            "relative flex h-10 w-10 sm:h-13 sm:w-13 md:h-15 md:w-15 items-center justify-center rounded-full p-[1.5px] sm:p-[2px] transition-all duration-300",
             turn
               ? "bg-gradient-to-br from-accent via-accent/50 to-transparent shadow-[0_0_15px_rgba(255,70,85,0.4)]"
               : "border border-white/10 bg-white/[0.02]",
@@ -176,24 +184,24 @@ function PlayerSide({
       {/* Profile Details */}
       <div
         className={cn(
-          "flex flex-col justify-center",
+          "flex flex-col justify-center min-w-0",
           align === "right" ? "items-end" : "items-start",
         )}
       >
         <div
           className={cn(
-            "flex items-center gap-3",
+            "flex items-center gap-1.5 sm:gap-2.5",
             align === "right" && "flex-row-reverse",
           )}
         >
           {/* Name */}
-          <span className="font-display text-xl font-bold uppercase tracking-wide text-white">
+          <span className="font-display text-xs sm:text-base md:text-lg font-bold uppercase tracking-wide text-white truncate max-w-[65px] sm:max-w-[120px] md:max-w-none">
             {name}
           </span>
 
           {/* Rank Badge */}
           <div
-            className="flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+            className="hidden sm:flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider"
             style={{
               borderColor: `${rankColor}55`,
               backgroundColor: `${rankColor}12`,
@@ -207,91 +215,25 @@ function PlayerSide({
           {turn && (
             <div
               className={cn(
-                "clip-tag border px-2 py-0.5",
+                "clip-tag border px-1.5 sm:px-2 py-0.5 shrink-0",
                 align === "left"
                   ? "border-accent bg-accent"
                   : "border-[#8C7BFF]/50 bg-[#8C7BFF]/20",
               )}
             >
-              <span className="font-display text-[9px] font-black uppercase tracking-[0.18em] text-white">
+              <span className="font-display text-[7.5px] sm:text-[9px] font-black uppercase tracking-[0.14em] sm:tracking-[0.18em] text-white">
                 {align === "left" ? "YOUR TURN" : "THINKING"}
               </span>
             </div>
           )}
         </div>
 
-        {/* No's indicators */}
-        <div
-          className={cn(
-            "mt-2.5 flex items-center gap-3",
-            align === "right" && "flex-row-reverse",
-          )}
-        >
-          <span className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 font-medium">
-            NO'S USED
-          </span>
-          <span className="font-display text-base font-bold text-accent">
-            {nosUsed} / {nosMax === -1 ? "∞" : nosMax}
-          </span>
-
-          {/* Circle Dots */}
-          {nosMax === -1 ? (
-            <span className="font-display text-xl font-black text-accent drop-shadow-[0_0_6px_#ff4655]">
-              ∞
-            </span>
-          ) : (
-            <div
-              className={cn(
-                "flex flex-col gap-1",
-                align === "right" && "items-end",
-              )}
-            >
-              {/* Row 1: up to 5 dots */}
-              <div
-                className={cn(
-                  "flex gap-1.5",
-                  align === "right" && "flex-row-reverse",
-                )}
-              >
-                {Array.from({ length: Math.min(5, nosMax) }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "h-2 w-2 rounded-full transition-all duration-300 border",
-                      i < nosUsed
-                        ? "bg-accent border-accent shadow-[0_0_6px_#ff4655]"
-                        : "bg-white/[0.05] border-white/10",
-                    )}
-                  />
-                ))}
-              </div>
-
-              {/* Row 2: dots above 5 */}
-              {nosMax > 5 && (
-                <div
-                  className={cn(
-                    "flex gap-1.5",
-                    align === "right" && "flex-row-reverse",
-                  )}
-                >
-                  {Array.from({ length: nosMax - 5 }).map((_, i) => {
-                    const actualIdx = 5 + i;
-                    return (
-                      <div
-                        key={actualIdx}
-                        className={cn(
-                          "h-2 w-2 rounded-full transition-all duration-300 border",
-                          actualIdx < nosUsed
-                            ? "bg-accent border-accent shadow-[0_0_6px_#ff4655]"
-                            : "bg-white/[0.05] border-white/10",
-                        )}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
+        {/* Tactical Sub-label / NO Tracker */}
+        <div className="flex items-center gap-1 mt-0.5 text-[9px] sm:text-[10px] font-mono text-white/40">
+          <span>NOs:</span>
+          <span className="text-white/80 font-bold">{nosUsed}</span>
+          <span>/</span>
+          <span>{nosMax}</span>
         </div>
       </div>
     </div>

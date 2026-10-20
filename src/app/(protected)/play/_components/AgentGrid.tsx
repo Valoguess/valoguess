@@ -1,7 +1,7 @@
 "use client";
 
 import { X, Search, Crosshair, RotateCcw, AlertTriangle } from "lucide-react";
-import { AGENTS } from "@/lib/data";
+import { AGENTS, Role } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useState } from "react";
@@ -25,6 +25,7 @@ export function AgentGrid({
     new Set(),
   );
   const [showGuessModal, setShowGuessModal] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<Role | "ALL">("ALL");
   const { game } = useGameStore();
   const { user } = useAuthStore();
 
@@ -58,6 +59,11 @@ export function AgentGrid({
   const guessesRemaining = myPlayer?.state?.guessesRemaining ?? 0;
   const yourTurn = isMyTurn && guessesRemaining > 0;
 
+  const filteredAgents =
+    selectedRole === "ALL"
+      ? AGENTS
+      : AGENTS.filter((a) => a.role === selectedRole);
+
   const handleGuessConfirm = (agentId: string) => {
     if (!game || !isMyTurn) return;
     submitGuess(agentId);
@@ -73,23 +79,80 @@ export function AgentGrid({
 
   return (
     <>
-      <div className="clip-notch-both mt-5 flex flex-col border border-white/5 bg-base-850 p-5 shadow-panel">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-display text-sm font-bold uppercase tracking-widest text-accent">
-              Eliminate Agents
-            </span>
-            <span className="text-[10px] font-mono text-white/40 bg-white/5 px-2 py-0.5 rounded">
-              {eliminated.size} / {AGENTS.length} OUT
-            </span>
+      <div className="clip-notch-both mt-3 sm:mt-5 flex flex-col border border-white/5 bg-base-850 p-3 sm:p-5 shadow-panel">
+        {/* Header Bar with Counters, Quick Actions, and Role Filters */}
+        <div className="mb-3 sm:mb-4 flex flex-col gap-2.5 sm:gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="font-display text-xs sm:text-sm font-bold uppercase tracking-widest text-accent">
+                Eliminate Agents
+              </span>
+              <span className="text-[10px] font-mono text-white/50 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                {eliminated.size} / {AGENTS.length} OUT
+              </span>
+            </div>
+
+            {/* Quick Header Actions: Reset & Quick Guess on Mobile */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleResetEliminated}
+                disabled={eliminated.size === 0}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-xs border border-white/10 bg-white/[0.03] hover:bg-white/10 text-white/50 hover:text-white text-[10px] font-display font-bold uppercase tracking-wider transition disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                title="Reset all eliminations"
+              >
+                <RotateCcw className="h-3 w-3" />
+                <span className="hidden min-[380px]:inline">Reset</span>
+              </button>
+
+              {yourTurn && (
+                <button
+                  onClick={handleOpenModal}
+                  className="clip-tag flex items-center gap-1.5 px-3 py-1 bg-accent hover:bg-accent-dim text-white text-[11px] font-valorant uppercase tracking-wider transition shadow-[0_0_12px_rgba(255,70,85,0.4)] active:scale-95 cursor-pointer"
+                  title="Make Final Guess"
+                >
+                  <Crosshair className="h-3.5 w-3.5" />
+                  <span>GUESS</span>
+                </button>
+              )}
+            </div>
           </div>
-          <span className="text-xs text-ink-500">
-            Click on agents to eliminate or restore them
-          </span>
+
+          {/* Role Filter Tabs */}
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-0.5">
+            {(["ALL", "Duelist", "Initiator", "Controller", "Sentinel"] as const).map((r) => {
+              const count =
+                r === "ALL"
+                  ? AGENTS.length
+                  : AGENTS.filter((a) => a.role === r).length;
+              const isSelected = selectedRole === r;
+              return (
+                <button
+                  key={r}
+                  onClick={() => setSelectedRole(r)}
+                  className={cn(
+                    "px-2.5 py-1 text-[10px] font-display font-bold uppercase tracking-wider rounded-xs transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5",
+                    isSelected
+                      ? "bg-accent text-white shadow-[0_0_10px_rgba(255,70,85,0.3)]"
+                      : "text-white/50 hover:text-white bg-white/[0.03] hover:bg-white/5 border border-white/5",
+                  )}
+                >
+                  <span>{r}</span>
+                  <span
+                    className={cn(
+                      "text-[8px] font-mono",
+                      isSelected ? "text-white/80" : "text-white/30",
+                    )}
+                  >
+                    ({count})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="grid grid-cols-10 gap-2.5">
-          {AGENTS.map((a) => {
+        <div className="grid grid-cols-4 min-[440px]:grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-9 xl:grid-cols-10 gap-1.5 sm:gap-2.5">
+          {filteredAgents.map((a) => {
             const isOut = eliminated.has(a.id);
 
             return (
@@ -164,19 +227,19 @@ export function AgentGrid({
         </div>
 
         {/* Bottom Action Bar: Reset Eliminations & Make Final Guess Button */}
-        <div className="mt-5 pt-3 border-t border-white/5 flex items-center justify-between gap-4">
+        <div className="mt-4 sm:mt-5 pt-3 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           {/* Reset Eliminations */}
           <button
             onClick={handleResetEliminated}
             disabled={eliminated.size === 0}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-sm border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] text-white/50 hover:text-white text-xs font-display font-bold uppercase tracking-wider transition disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-sm border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] text-white/50 hover:text-white text-xs font-display font-bold uppercase tracking-wider transition disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>Reset Eliminations</span>
           </button>
 
           {/* MAKE GUESS TRIGGER BUTTON */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between sm:justify-end gap-3">
             <span className="text-[10px] font-mono text-white/40">
               Remaining:{" "}
               <span className="font-bold text-accent">{guessesRemaining}</span>
@@ -186,7 +249,7 @@ export function AgentGrid({
               onClick={handleOpenModal}
               disabled={!yourTurn}
               className={cn(
-                "clip-tag flex items-center justify-center gap-2.5 px-8 py-3 font-valorant text-xs uppercase tracking-[0.15em] text-white transition-all shadow-md cursor-pointer",
+                "clip-tag flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 sm:px-8 py-2.5 sm:py-3 font-valorant text-xs uppercase tracking-[0.15em] text-white transition-all shadow-md cursor-pointer",
                 yourTurn
                   ? "bg-accent hover:bg-accent-dim shadow-[0_0_20px_rgba(255,70,85,0.4)] active:scale-98"
                   : "bg-white/5 text-white/30 border border-white/10 cursor-not-allowed opacity-50",

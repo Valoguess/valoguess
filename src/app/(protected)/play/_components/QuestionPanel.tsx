@@ -50,11 +50,11 @@ export function QuestionPanel({
       : questions.filter((q) => q.category === category);
 
   return (
-    <div className="clip-notch-both flex flex-col border border-white/10 bg-[#07090e]/85 backdrop-blur-md p-5 shadow-panel min-h-[340px] relative overflow-hidden">
+    <div className="clip-notch-both flex flex-col border border-white/10 bg-[#07090e]/85 backdrop-blur-md p-3 sm:p-5 shadow-panel min-h-[300px] sm:min-h-[340px] relative overflow-hidden">
       {/* Header bar */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 shrink-0 border-b border-white/5 pb-3">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+      <div className="mb-3 sm:mb-4 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 shrink-0 border-b border-white/5 pb-2.5 sm:pb-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <span className="h-2 w-2 rotate-45 bg-[#FF4655]" />
             <span className="font-valorant text-xs tracking-widest text-[#FF4655] drop-shadow-[0_0_8px_rgba(255,70,85,0.3)]">
               ASK A QUESTION
@@ -66,15 +66,15 @@ export function QuestionPanel({
           </span>
 
           {disabled && (
-            <div className="flex items-center gap-1.5 text-xs text-white/50 bg-white/5 px-2.5 py-1 rounded-sm border border-white/5">
+            <div className="flex items-center gap-1.5 text-xs text-white/50 bg-white/5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-sm border border-white/5">
               <Loader2 className="h-3 w-3 animate-spin text-accent" />
-              <span>{disabledReason || "Thinking..."}</span>
+              <span className="truncate max-w-[140px] sm:max-w-none">{disabledReason || "Thinking..."}</span>
             </div>
           )}
         </div>
 
         {/* Category Select Dropdown */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Select
             value={category}
             onValueChange={(val) => {
@@ -82,7 +82,7 @@ export function QuestionPanel({
             }}
             disabled={disabled}
           >
-            <SelectTrigger className="w-40 bg-black/60 border-white/10 text-white hover:border-white/20 text-xs h-8">
+            <SelectTrigger className="w-full sm:w-40 bg-black/60 border-white/10 text-white hover:border-white/20 text-xs h-8">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent className="bg-[#090d14] border-white/15 text-white">
@@ -130,8 +130,8 @@ export function QuestionPanel({
                   disabled={disabled || isAsked}
                   title={q.description || q.label}
                   className={cn(
-                    "flex flex-col justify-between rounded-sm border p-3 text-left transition-all relative group overflow-hidden min-h-[78px]",
-                    disabled || isAsked ? "cursor-not-allowed" : "cursor-pointer hover:scale-[1.02]",
+                    "flex flex-col justify-between rounded-sm border p-2 sm:p-3 text-left transition-all relative group overflow-hidden min-h-[70px] sm:min-h-[78px]",
+                    disabled || isAsked ? "cursor-not-allowed" : "cursor-pointer hover:scale-[1.02] active:scale-98",
                     isYes && "border-mint bg-mint/10 text-mint shadow-[0_0_12px_rgba(60,242,196,0.15)] opacity-85",
                     isNo && "border-accent bg-accent/10 text-accent shadow-[0_0_12px_rgba(255,70,85,0.15)] opacity-85",
                     !isAsked && "border-white/10 bg-[#090d14]/90 text-white/90 hover:border-accent/60 hover:bg-[#101622]"

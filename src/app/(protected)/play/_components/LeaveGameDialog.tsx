@@ -16,7 +16,7 @@ export function LeaveGameDialog({
 }: LeaveGameDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#090d14]/95 border border-[#FF4655]/40 max-w-sm p-6 text-center text-white backdrop-blur-xl shadow-[0_0_35px_rgba(255,70,85,0.25)] rounded-sm">
+      <DialogContent className="bg-[#090d14]/95 border border-[#FF4655]/40 w-[calc(100vw-2rem)] max-w-sm p-6 text-center text-white backdrop-blur-xl shadow-[0_0_35px_rgba(255,70,85,0.25)] rounded-sm">
         <div className="flex flex-col items-center">
           <div className="h-12 w-12 rounded-full border border-[#FF4655]/60 bg-[#FF4655]/15 flex items-center justify-center mb-4 text-[#FF4655] shadow-[0_0_15px_rgba(255,70,85,0.3)]">
             <LogOut className="h-6 w-6" />

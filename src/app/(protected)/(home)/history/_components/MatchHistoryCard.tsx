@@ -110,15 +110,15 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
       {/* Main Row */}
       <div
         onClick={() => setIsExpanded((prev) => !prev)}
-        className="p-4 sm:p-5 pl-5 sm:pl-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 cursor-pointer select-none"
+        className="p-3.5 sm:p-5 pl-4.5 sm:pl-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none"
       >
         {/* Left Section: Outcome & Mode Info */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto justify-between md:justify-start">
           {/* Outcome Badge */}
-          <div className="flex flex-col min-w-[90px]">
+          <div className="flex flex-col min-w-[80px] sm:min-w-[90px]">
             <span
               className={cn(
-                "font-valorant text-xl sm:text-2xl tracking-wider leading-none",
+                "font-valorant text-lg sm:text-2xl tracking-wider leading-none",
                 isVictory ? "text-mint" : isDefeat ? "text-accent" : "text-zinc-400"
               )}
             >
@@ -132,12 +132,12 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
           <div className="h-8 w-px bg-white/10 hidden sm:block" />
 
           {/* Time & Duration */}
-          <div className="hidden sm:flex flex-col text-left text-xs">
-            <span className="text-white/80 font-display font-medium flex items-center gap-1.5">
+          <div className="flex flex-col text-right sm:text-left text-xs">
+            <span className="text-white/80 font-display font-medium flex items-center justify-end sm:justify-start gap-1.5">
               <Clock className="h-3.5 w-3.5 text-zinc-400" />
               {durationStr}
             </span>
-            <span className="text-[10px] text-zinc-500 font-mono mt-0.5 flex items-center gap-1.5">
+            <span className="text-[10px] text-zinc-500 font-mono mt-0.5 flex items-center justify-end sm:justify-start gap-1.5">
               <Calendar className="h-3 w-3 text-zinc-600" />
               {relativeTime}
             </span>
@@ -145,10 +145,10 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
         </div>
 
         {/* Center Section: Face-Off (Your Secret Agent vs Opponent Secret Agent) */}
-        <div className="flex items-center gap-6 sm:gap-8 self-center md:self-auto">
+        <div className="flex items-center justify-center gap-2.5 sm:gap-6 md:gap-8 self-center md:self-auto w-full md:w-auto">
           {/* Your Agent */}
-          <div className="flex items-center gap-3">
-            <div className="relative h-12 w-12 rounded-sm overflow-hidden border border-white/20 bg-black shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-sm overflow-hidden border border-white/20 bg-black shrink-0">
               <Image
                 src={myAgent.iconPath}
                 alt={myAgent.name}
@@ -157,37 +157,37 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
               />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-[9px] font-mono uppercase tracking-wider text-zinc-400">
-                YOUR AGENT
+              <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-zinc-400">
+                YOU
               </span>
-              <span className="font-valorant text-sm text-white tracking-wider">
+              <span className="font-valorant text-xs sm:text-sm text-white tracking-wider">
                 {myAgent.name}
               </span>
-              <span className="text-[9px] font-mono text-accent">
+              <span className="text-[8px] sm:text-[9px] font-mono text-accent">
                 {myAgent.role}
               </span>
             </div>
           </div>
 
           {/* VS Divider */}
-          <div className="h-8 w-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center font-valorant text-[10px] text-zinc-400">
+          <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center font-valorant text-[9px] sm:text-[10px] text-zinc-400 shrink-0">
             VS
           </div>
 
           {/* Opponent Agent */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="flex flex-col text-right">
-              <span className="text-[9px] font-mono uppercase tracking-wider text-zinc-400">
+              <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-zinc-400 truncate max-w-[80px] sm:max-w-none">
                 {oppPlayer?.name || "OPPONENT"}
               </span>
-              <span className="font-valorant text-sm text-white tracking-wider">
+              <span className="font-valorant text-xs sm:text-sm text-white tracking-wider">
                 {oppAgent.name}
               </span>
-              <span className="text-[9px] font-mono text-zinc-400">
+              <span className="text-[8px] sm:text-[9px] font-mono text-zinc-400">
                 {oppAgent.role}
               </span>
             </div>
-            <div className="relative h-12 w-12 rounded-sm overflow-hidden border border-white/20 bg-black shrink-0">
+            <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-sm overflow-hidden border border-white/20 bg-black shrink-0">
               <Image
                 src={oppAgent.iconPath}
                 alt={oppAgent.name}

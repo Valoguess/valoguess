@@ -2,9 +2,11 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Activity, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { GameHeader } from "./_components/GameHeader";
 import { SecretAgentCard } from "./_components/SecretAgentCard";
+import { MobileSecretAgentBar } from "./_components/MobileSecretAgentBar";
 import { QuestionPanel } from "./_components/QuestionPanel";
 import { FreeformTurnPanel } from "./_components/FreeformTurnPanel";
 import { AgentGrid } from "./_components/AgentGrid";
@@ -31,6 +33,7 @@ function PlayContent() {
   const [hasCompletedIntro, setHasCompletedIntro] = useState<boolean>(false);
   const [showGuessModal, setShowGuessModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showMobileActivity, setShowMobileActivity] = useState(false);
   const [eliminatedIds, setEliminatedIds] = useState<Set<string>>(new Set());
 
   // Room timer hook
@@ -209,10 +212,23 @@ function PlayContent() {
         onLeave={() => setShowLeaveModal(true)}
       />
 
-      {/* Three-Column Tactical Layout */}
-      <div className="grid grid-cols-[300px_1fr_320px] gap-5 p-6 font-body">
-        {/* Left Column: Your Secret Agent & Leave Game Action */}
-        <div className="flex flex-col gap-4">
+      {/* Tactical Layout: Single column on mobile/tablet, 3-column on desktop (xl:) */}
+      <div className="flex flex-col xl:grid xl:grid-cols-[300px_1fr_320px] gap-4 sm:gap-5 p-3 sm:p-5 md:p-6 font-body max-w-[1800px] mx-auto">
+        {/* Mobile / Tablet Secret Agent Bar (< xl) */}
+        <div className="xl:hidden">
+          <MobileSecretAgentBar
+            agent={activeSecretAgent}
+            time={isInfinite || timeLeft === -1 ? "∞" : formattedTime}
+            round={currentRound}
+            maxRounds={-1}
+            yourTurn={isMyTurn}
+            map="Ascent"
+            onLeaveGame={() => setShowLeaveModal(true)}
+          />
+        </div>
+
+        {/* Left Column: Your Secret Agent & Leave Game Action (xl only) */}
+        <div className="hidden xl:flex flex-col gap-4">
           <SecretAgentCard
             agent={activeSecretAgent}
             time={isInfinite || timeLeft === -1 ? "∞" : formattedTime}
@@ -231,7 +247,7 @@ function PlayContent() {
         </div>
 
         {/* Center Column: Questions Panel or Opponent Prompt + Agent Elimination Grid */}
-        <div className="flex flex-col">
+        <div className="flex flex-col min-w-0">
           {isFreeform ? (
             <FreeformTurnPanel
               onConsumeNo={handleConsumeNo}
@@ -246,21 +262,48 @@ function PlayContent() {
           ) : (
             <>
               {!isOpponentAskingMe && (
-                <QuestionPanel
-                  onAsk={handleAskQuestion}
-                  askedQuestions={askedQuestionsMap}
-                  disabled={!isMyTurn || !!pendingQuestion || isAsking}
-                  disabledReason={
-                    isAsking
-                      ? "Sending question to opponent..."
-                      : isIWaitingForAnswer
-                        ? "Opponent is answering your question..."
-                        : !isMyTurn
-                          ? `${opponentPlayer?.name || "Opponent"} is thinking...`
-                          : undefined
-                  }
-                  questions={gameQuestions}
-                />
+                <>
+                  {/* On Mobile (< md): when NOT your turn, show compact turn indicator banner so AgentGrid stays visible */}
+                  {!isMyTurn && (
+                    <div className="md:hidden flex items-center justify-between p-3 rounded-sm border border-white/10 bg-[#07090e]/95 backdrop-blur-md mb-3 shadow-md">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="relative flex h-2 w-2 shrink-0">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+                        </span>
+                        <span className="text-xs font-mono text-white/80 truncate">
+                          {isAsking
+                            ? "Sending question to opponent..."
+                            : isIWaitingForAnswer
+                              ? `${opponentPlayer?.name || "Opponent"} is answering...`
+                              : `${opponentPlayer?.name || "Opponent"} is thinking...`}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20 shrink-0">
+                        WAITING
+                      </span>
+                    </div>
+                  )}
+
+                  {/* On Desktop always show QuestionPanel; on Mobile only show when it IS your turn */}
+                  <div className={cn(!isMyTurn && "hidden md:block")}>
+                    <QuestionPanel
+                      onAsk={handleAskQuestion}
+                      askedQuestions={askedQuestionsMap}
+                      disabled={!isMyTurn || !!pendingQuestion || isAsking}
+                      disabledReason={
+                        isAsking
+                          ? "Sending question to opponent..."
+                          : isIWaitingForAnswer
+                            ? "Opponent is answering your question..."
+                            : !isMyTurn
+                              ? `${opponentPlayer?.name || "Opponent"} is thinking...`
+                              : undefined
+                      }
+                      questions={gameQuestions}
+                    />
+                  </div>
+                </>
               )}
 
               {isOpponentAskingMe && opponentQuestionObj && (
@@ -280,8 +323,8 @@ function PlayContent() {
           />
         </div>
 
-        {/* Right Column: Live Match Activity Feed */}
-        <div className="h-[calc(100vh-220px)]">
+        {/* Right Column: Live Match Activity Feed (xl only) */}
+        <div className="hidden xl:block h-[calc(100vh-220px)]">
           <ActivityFeed
             entries={activity}
             yourTurn={isMyTurn}
@@ -290,6 +333,53 @@ function PlayContent() {
           />
         </div>
       </div>
+
+      {/* Mobile Floating Activity Log Button (< xl) */}
+      <div className="xl:hidden fixed bottom-6 right-6 z-40">
+        <button
+          onClick={() => setShowMobileActivity(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-base-900/95 border border-white/20 hover:border-accent text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+        >
+          <Activity className="h-4 w-4 text-accent" />
+          <span className="font-valorant text-xs uppercase tracking-wider">Log</span>
+          {activity.length > 0 && (
+            <span className="h-5 w-5 rounded-full bg-accent text-[10px] font-mono font-bold flex items-center justify-center text-white">
+              {activity.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Activity Drawer Backdrop & Sheet */}
+      {showMobileActivity && (
+        <div className="fixed inset-0 z-50 xl:hidden">
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowMobileActivity(false)}
+          />
+          <div className="fixed inset-y-0 right-0 w-full sm:w-96 max-w-[90vw] z-50 bg-base-950 border-l border-white/10 flex flex-col shadow-2xl p-3 sm:p-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-2">
+              <span className="font-valorant text-sm uppercase tracking-widest text-white">
+                TACTICAL LOGS
+              </span>
+              <button
+                onClick={() => setShowMobileActivity(false)}
+                className="p-1 rounded-sm text-zinc-400 hover:text-white hover:bg-white/10 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <ActivityFeed
+                entries={activity}
+                yourTurn={isMyTurn}
+                userName={myPlayer.name || user?.name || "You"}
+                opponentName={opponentPlayer?.name || "Opponent"}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Agent Final Guess Modal */}
       <AgentGuessModal
