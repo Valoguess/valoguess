@@ -33,6 +33,7 @@ interface FriendStore {
       avatar?: string;
     };
   }) => void;
+  clearLastFriendEvent: () => void;
 }
 
 export const useFriendStore = create<FriendStore>((set) => ({
@@ -46,4 +47,5 @@ export const useFriendStore = create<FriendStore>((set) => ({
       friendSyncVersion: state.friendSyncVersion + 1,
       lastFriendEvent: event ? { ...event, timestamp: Date.now() } : null,
     })),
+  clearLastFriendEvent: () => set({ lastFriendEvent: null }),
 }));

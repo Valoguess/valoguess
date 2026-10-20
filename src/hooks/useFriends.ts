@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { StoreUser } from "@/store/authStore";
 import { Friend, FriendRequest } from "@/types/friends";
 import { DEFAULT_AVATARS } from "@/consts";
@@ -29,9 +29,18 @@ export function useFriends(user: StoreUser | null) {
 
   const presence = usePresenceStore((state) => state.presence);
   const lastFriendEvent = useFriendStore((state) => state.lastFriendEvent);
+  const clearLastFriendEvent = useFriendStore(
+    (state) => state.clearLastFriendEvent,
+  );
   const initialFriendsData = useFriendStore(
     (state) => state.initialFriendsData,
   );
+
+  // Track processed event timestamp to prevent duplicate processing on navigation / remount
+  const lastProcessedTimestampRef = useRef<number>(0);
+  // Track requests locally accepted or declined by this user to prevent echo toasts
+  const locallyAcceptedIdsRef = useRef<Set<string>>(new Set());
+  const locallyDeclinedIdsRef = useRef<Set<string>>(new Set());
 
   const friendsList = useMemo<Friend[]>(() => {
     const list =
@@ -142,7 +151,11 @@ export function useFriends(user: StoreUser | null) {
 
   // Handle real-time friend events from socket
   useEffect(() => {
-    if (!lastFriendEvent) return;
+    if (!lastFriendEvent || !lastFriendEvent.timestamp) return;
+
+    // Ignore events that have already been processed to prevent re-firing on navigation/remount
+    if (lastFriendEvent.timestamp <= lastProcessedTimestampRef.current) return;
+    lastProcessedTimestampRef.current = lastFriendEvent.timestamp;
 
     if (lastFriendEvent.type === "request_received") {
       toast.info("New friend request received!");
@@ -166,17 +179,35 @@ export function useFriends(user: StoreUser | null) {
         fetchFriends();
       }
     } else if (lastFriendEvent.type === "request_accepted") {
-      toast.success("Your friend request was accepted!");
       const targetUserId = lastFriendEvent.userId;
-
       setFriendRequests((prev) => prev.filter((r) => r.id !== targetUserId));
       fetchFriends();
+
+      // Only display the toast if the other player accepted our request,
+      // not when we were the one who clicked accept locally.
+      const wasLocallyAccepted = locallyAcceptedIdsRef.current.has(targetUserId);
+      if (wasLocallyAccepted) {
+        locallyAcceptedIdsRef.current.delete(targetUserId);
+      } else {
+        toast.success("Your friend request was accepted!");
+      }
     } else if (lastFriendEvent.type === "request_declined") {
-      toast.warning("Friend request was declined.");
       const targetUserId = lastFriendEvent.userId;
       setFriendRequests((prev) => prev.filter((r) => r.id !== targetUserId));
+
+      // Only display the toast if the other player declined our request,
+      // not when we were the one who clicked decline locally.
+      const wasLocallyDeclined = locallyDeclinedIdsRef.current.has(targetUserId);
+      if (wasLocallyDeclined) {
+        locallyDeclinedIdsRef.current.delete(targetUserId);
+      } else {
+        toast.warning("Friend request was declined.");
+      }
     }
-  }, [lastFriendEvent, fetchFriends]);
+
+    // Clear consumed event from the store so it never lingers
+    clearLastFriendEvent();
+  }, [lastFriendEvent, fetchFriends, clearLastFriendEvent]);
 
   // Synchronize friends with socket initialFriendsData and auth user state
   useEffect(() => {
@@ -272,6 +303,8 @@ export function useFriends(user: StoreUser | null) {
 
   // Accept incoming request
   const handleAcceptRequest = async (requestId: string) => {
+    locallyAcceptedIdsRef.current.add(requestId);
+
     const targetRequest = friendRequests.find((r) => r.id === requestId);
     if (targetRequest) {
       setFriendRequests((prev) => prev.filter((r) => r.id !== requestId));
@@ -291,17 +324,22 @@ export function useFriends(user: StoreUser | null) {
     try {
       const res = await acceptFriendRequest(requestId);
       if (res.success) {
+        if (res.requesterId) {
+          locallyAcceptedIdsRef.current.add(res.requesterId);
+        }
         const msg = res.message || "Friend request accepted!";
         toast.success(msg);
         if (res.requesterId) {
           acceptFriendRequestSocket(res.requesterId);
         }
       } else {
+        locallyAcceptedIdsRef.current.delete(requestId);
         const err = res.error || "Failed to accept request";
         toast.error(err);
         fetchFriends();
       }
     } catch (err: any) {
+      locallyAcceptedIdsRef.current.delete(requestId);
       const msg = err?.message || "Failed to accept request";
       toast.error(msg);
       fetchFriends();
@@ -310,22 +348,28 @@ export function useFriends(user: StoreUser | null) {
 
   // Decline incoming request
   const handleDeclineRequest = async (requestId: string) => {
+    locallyDeclinedIdsRef.current.add(requestId);
     setFriendRequests((prev) => prev.filter((r) => r.id !== requestId));
 
     try {
       const res = await declineFriendRequest(requestId);
       if (res.success) {
+        if (res.requesterId) {
+          locallyDeclinedIdsRef.current.add(res.requesterId);
+        }
         const msg = res.message || "Friend request declined";
         toast.info(msg);
         if (res.requesterId) {
           declineFriendRequestSocket(res.requesterId);
         }
       } else {
+        locallyDeclinedIdsRef.current.delete(requestId);
         const err = res.error || "Failed to decline request";
         toast.error(err);
         fetchFriends();
       }
     } catch (err: any) {
+      locallyDeclinedIdsRef.current.delete(requestId);
       const msg = err?.message || "Failed to decline request";
       toast.error(msg);
       fetchFriends();
