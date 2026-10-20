@@ -12,7 +12,7 @@ type HowToPlayModalProps = {
 export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="bg-transparent border-none max-w-lg p-0 shadow-none outline-none ring-0 focus-visible:ring-0" showCloseButton={false}>
+      <DialogContent className="bg-transparent border-none w-[calc(100vw-2rem)] max-w-lg p-0 shadow-none outline-none ring-0 focus-visible:ring-0 mx-auto" showCloseButton={false}>
         <div className="relative w-full clip-notch-both p-[1px] bg-gradient-to-b from-white/20 to-white/5 pointer-events-auto">
           <div className="clip-notch-both bg-base-900 p-6 md:p-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-grid opacity-[0.02] pointer-events-none" />

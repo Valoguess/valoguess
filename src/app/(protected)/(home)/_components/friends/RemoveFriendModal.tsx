@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { UserMinus } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Friend } from "../types";
+import { Friend } from "@/types/friends";
 
 interface RemoveFriendModalProps {
   friendToRemove: Friend | null;

@@ -19,7 +19,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
-import { Friend, FriendRequest, IncomingPartyInvite } from "./types";
+import { Friend, FriendRequest } from "@/types/friends";
+import { IncomingPartyInvite } from "@/types/party";
 import { DEFAULT_AVATARS } from "@/consts";
 import { FriendRow } from "./friends/FriendRow";
 import {
@@ -30,7 +31,7 @@ import { AddFriendForm } from "./friends/AddFriendForm";
 import { GuestLockedView } from "./friends/GuestLockedView";
 import { RemoveFriendModal } from "./friends/RemoveFriendModal";
 
-interface LobbyFriendsSidebarProps {
+interface HomeFriendsSidebarProps {
   isFriendsCollapsed: boolean;
   setIsFriendsCollapsed: (collapsed: boolean) => void;
   isAnonymous?: boolean;
@@ -52,7 +53,7 @@ interface LobbyFriendsSidebarProps {
   isAddingFriend?: boolean;
 }
 
-export function LobbyFriendsSidebar({
+export function HomeFriendsSidebar({
   isFriendsCollapsed,
   setIsFriendsCollapsed,
   isAnonymous = false,
@@ -72,7 +73,7 @@ export function LobbyFriendsSidebar({
   onAcceptPartyInvite,
   onDeclinePartyInvite,
   isAddingFriend = false,
-}: LobbyFriendsSidebarProps) {
+}: HomeFriendsSidebarProps) {
   const { user } = useAuthStore();
   const [copiedId, setCopiedId] = useState(false);
 
@@ -136,20 +137,11 @@ export function LobbyFriendsSidebar({
   const totalRequestsCount = incomingRequests.length + outgoingRequests.length;
 
   return (
-    <>
-      {/* Background click to close overlay on smaller viewports when expanded */}
-      {!isFriendsCollapsed && (
-        <div
-          className="fixed inset-0 z-45 bg-black/40 backdrop-blur-xs md:hidden"
-          onClick={() => setIsFriendsCollapsed(true)}
-        />
+    <aside
+      className={cn(
+        "flex flex-col h-full w-full bg-[#070a12]/95 border-l border-white/10 backdrop-blur-xl shadow-[0_4px_25px_rgba(0,0,0,0.6)] transition-all duration-300 shrink-0 select-none overflow-hidden justify-between",
       )}
-
-      <aside
-        className={cn(
-          "flex flex-col h-full w-full bg-[#070a12]/95 border-l border-white/10 backdrop-blur-xl shadow-[0_4px_25px_rgba(0,0,0,0.6)] transition-all duration-300 shrink-0 select-none overflow-hidden justify-between z-20",
-        )}
-      >
+    >
         {/* 1. TOP HEADER BAR */}
         <div
           onClick={
@@ -201,9 +193,10 @@ export function LobbyFriendsSidebar({
                 type="button"
                 onClick={() => setIsFriendsCollapsed(true)}
                 className="p-1 hover:bg-white/10 rounded text-white/60 hover:text-white transition cursor-pointer"
-                title="Collapse Friends Menu"
+                title="Close Friends Menu"
               >
-                <ChevronRight className="h-4 w-4" />
+                <X className="h-4 w-4 lg:hidden" />
+                <ChevronRight className="h-4 w-4 hidden lg:block" />
               </button>
             </>
           )}
@@ -622,6 +615,8 @@ export function LobbyFriendsSidebar({
           isRemoving={isRemovingFriend}
         />
       </aside>
-    </>
-  );
-}
+    );
+  }
+
+export { HomeFriendsSidebar as LobbyFriendsSidebar };
+

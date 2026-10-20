@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { X, UserPlus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Friend } from "../types";
+import { Friend } from "@/types/friends";
 
 interface FriendRowProps {
   friend: Friend;

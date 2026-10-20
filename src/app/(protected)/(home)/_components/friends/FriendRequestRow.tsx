@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Check, X } from "lucide-react";
-import { FriendRequest } from "../types";
+import { FriendRequest } from "@/types/friends";
 
 interface IncomingRequestRowProps {
   request: FriendRequest;

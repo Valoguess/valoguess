@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Party } from "@/types/party";
-import { Friend } from "../_components/types";
+import { Friend } from "@/types/friends";
 import { usePartyStore } from "@/store/partyStore";
 import { useGameStore } from "@/store/gameStore";
 import { useInviteStore } from "@/store/inviteStore";

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext } from "react";
-import { Friend, FriendRequest, IncomingPartyInvite } from "../lobby/_components/types";
-import { Party } from "@/types/party";
+import { Friend, FriendRequest } from "@/types/friends";
+import { Party, IncomingPartyInvite } from "@/types/party";
 
 export interface HomeContextValue {
   // Friends state & actions

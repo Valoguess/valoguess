@@ -13,7 +13,7 @@ import { ProfileCardPreview } from "./_components/ProfileCardPreview";
 import { IdentitySettingsTab } from "./_components/IdentitySettingsTab";
 import { BannerTaglineTab } from "./_components/BannerTaglineTab";
 import { PrivacyAccountTab } from "./_components/PrivacyAccountTab";
-import { LogoutConfirmationModal } from "./_components/LogoutConfirmationModal";
+import { LogoutConfirmationModal } from "../_components/LogoutConfirmationModal";
 import { socket } from "@/socket";
 import { toast } from "sonner";
 import { refreshAuth } from "@/socket/emitter";
@@ -223,44 +223,44 @@ export default function SettingsPage() {
         />
 
         {/* Tab Selection */}
-        <div className="flex items-center border-b border-white/10 gap-2 pb-1">
+        <div className="flex items-center border-b border-white/10 gap-1.5 sm:gap-2 pb-1 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setActiveTab("identity")}
             className={cn(
-              "py-2.5 px-5 font-display text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2",
+              "py-2 sm:py-2.5 px-3 sm:px-5 font-display text-[11px] sm:text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
               activeTab === "identity"
                 ? "border-accent text-white bg-white/4"
                 : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
-            <User className="h-4 w-4 text-accent" />
-            <span>1. IDENTITY & AVATAR</span>
+            <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent" />
+            <span>IDENTITY &amp; AVATAR</span>
           </button>
 
           <button
             onClick={() => setActiveTab("banner")}
             className={cn(
-              "py-2.5 px-5 font-display text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2",
+              "py-2 sm:py-2.5 px-3 sm:px-5 font-display text-[11px] sm:text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
               activeTab === "banner"
                 ? "border-accent text-white bg-white/4"
                 : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
-            <ImageIcon className="h-4 w-4 text-amber-400" />
-            <span>2. BANNER & TAGLINE</span>
+            <ImageIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" />
+            <span>BANNER &amp; TAGLINE</span>
           </button>
 
           <button
             onClick={() => setActiveTab("privacy")}
             className={cn(
-              "py-2.5 px-5 font-display text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2",
+              "py-2 sm:py-2.5 px-3 sm:px-5 font-display text-[11px] sm:text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
               activeTab === "privacy"
                 ? "border-accent text-white bg-white/4"
                 : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
-            <Shield className="h-4 w-4 text-mint" />
-            <span>3. PRIVACY & ACCOUNT</span>
+            <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-mint" />
+            <span>PRIVACY &amp; ACCOUNT</span>
           </button>
         </div>
 

@@ -37,12 +37,12 @@ export function ResultFaceOff({
   accuracy,
 }: ResultFaceOffProps) {
   return (
-    <div className="flex flex-col justify-between h-full overflow-hidden py-1">
+    <div className="flex flex-col justify-between h-full py-1 gap-4">
       {/* Result Main Header Title */}
       <div className="flex flex-col items-center text-center">
         <h1
           className={cn(
-            "font-valorant text-6xl font-black uppercase tracking-[0.1em] text-shadow-glow leading-none select-none",
+            "font-valorant text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-[0.1em] text-shadow-glow leading-none select-none",
             isTie
               ? "text-amber-400"
               : isVictory
@@ -62,11 +62,11 @@ export function ResultFaceOff({
       </div>
 
       {/* Agent Reveal Face-off Section */}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-2 my-auto max-h-[460px]">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4 px-1 sm:px-2 my-auto max-h-[460px]">
         {/* User's Secret Agent Card */}
         <div
           className={cn(
-            "clip-notch-both border p-3 bg-[#0d1119] flex flex-col transition-all duration-300 relative",
+            "clip-notch-both border p-2 sm:p-3 bg-[#0d1119] flex flex-col transition-all duration-300 relative",
             isVictory
               ? "border-[#3CF2C4]/50 shadow-[0_0_20px_rgba(60,242,196,0.15)]"
               : isTie
@@ -79,11 +79,11 @@ export function ResultFaceOff({
             <div className="absolute left-0 top-0 h-px w-4 bg-accent/60" />
             <div className="absolute left-0 top-0 h-4 w-px bg-accent/60" />
           </div>
-          <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-[0.2em] mb-2 text-center block">
+          <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold uppercase tracking-[0.2em] mb-1.5 sm:mb-2 text-center block">
             YOUR AGENT
           </span>
 
-          <div className="relative aspect-[4/5] w-full max-w-[210px] mx-auto overflow-hidden border border-white/10 rounded-sm">
+          <div className="relative aspect-[4/5] w-full max-w-[140px] sm:max-w-[210px] mx-auto overflow-hidden border border-white/10 rounded-sm">
             <Image
               src={myAgentObj.bannerPath || `/agents/banner/${myAgentObj.id}.webp`}
               alt={myAgentObj.name}
@@ -92,23 +92,23 @@ export function ResultFaceOff({
             />
           </div>
 
-          <div className="text-center mt-2.5">
-            <h3 className="font-display text-xl font-black uppercase text-white tracking-widest leading-none">
+          <div className="text-center mt-2 sm:mt-2.5">
+            <h3 className="font-display text-sm sm:text-xl font-black uppercase text-white tracking-widest leading-none truncate">
               {myAgentObj.name}
             </h3>
-            <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-semibold mt-1 block leading-none">
+            <span className="text-[8px] sm:text-[9px] text-zinc-500 uppercase tracking-widest font-semibold mt-1 block leading-none">
               {myAgentObj.role}
             </span>
           </div>
         </div>
 
         {/* Mid Crossed Swords */}
-        <div className="text-zinc-700 text-2xl font-light">⚔️</div>
+        <div className="text-zinc-700 text-lg sm:text-2xl font-light">⚔️</div>
 
         {/* Opponent's Agent Card */}
         <div
           className={cn(
-            "clip-notch-both border p-3 bg-[#0d1119] flex flex-col transition-all duration-300 relative",
+            "clip-notch-both border p-2 sm:p-3 bg-[#0d1119] flex flex-col transition-all duration-300 relative",
             isDefeat
               ? "border-accent/40 shadow-[0_0_20px_rgba(255,70,85,0.08)]"
               : isTie
@@ -121,11 +121,11 @@ export function ResultFaceOff({
             <div className="absolute right-0 top-0 h-px w-4 bg-accent/60" />
             <div className="absolute right-0 top-0 h-4 w-px bg-accent/60" />
           </div>
-          <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-[0.2em] mb-2 text-center block">
+          <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold uppercase tracking-[0.2em] mb-1.5 sm:mb-2 text-center block">
             OPPONENT'S AGENT
           </span>
 
-          <div className="relative aspect-[4/5] w-full max-w-[210px] mx-auto overflow-hidden border border-white/10 rounded-sm">
+          <div className="relative aspect-[4/5] w-full max-w-[140px] sm:max-w-[210px] mx-auto overflow-hidden border border-white/10 rounded-sm">
             <Image
               src={oppAgentObj.bannerPath || `/agents/banner/${oppAgentObj.id}.webp`}
               alt={oppAgentObj.name}
@@ -134,11 +134,11 @@ export function ResultFaceOff({
             />
           </div>
 
-          <div className="text-center mt-2.5">
-            <h3 className="font-display text-xl font-black uppercase text-white tracking-widest leading-none">
+          <div className="text-center mt-2 sm:mt-2.5">
+            <h3 className="font-display text-sm sm:text-xl font-black uppercase text-white tracking-widest leading-none truncate">
               {oppAgentObj.name}
             </h3>
-            <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-semibold mt-1 block leading-none">
+            <span className="text-[8px] sm:text-[9px] text-zinc-500 uppercase tracking-widest font-semibold mt-1 block leading-none">
               {oppAgentObj.role}
             </span>
           </div>
@@ -148,7 +148,7 @@ export function ResultFaceOff({
       {/* Reveal Status Alert Banner */}
       <div
         className={cn(
-          "rounded-sm border p-2.5 text-center flex items-center justify-center gap-2 font-semibold text-xs my-3",
+          "rounded-sm border p-2.5 text-center flex items-center justify-center gap-2 font-semibold text-xs my-2 sm:my-3",
           isTie
             ? "border-amber-500/40 bg-amber-500/10 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.1)]"
             : isVictory
@@ -167,11 +167,11 @@ export function ResultFaceOff({
       </div>
 
       {/* Match Stats Table */}
-      <div className="clip-notch-both border border-white/5 bg-base-900 p-4 flex flex-col shrink-0">
+      <div className="clip-notch-both border border-white/5 bg-base-900 p-3 sm:p-4 flex flex-col shrink-0">
         <h4 className="font-display text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-2.5 block leading-none">
           MATCH STATS
         </h4>
-        <div className="grid grid-cols-6 gap-2 text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center">
           <StatCol icon="🎯" label="Rounds Played" val={String(roundsPlayed)} />
           <StatCol
             icon="❓"

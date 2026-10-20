@@ -22,7 +22,7 @@ export function LogoutConfirmationModal({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="bg-[#0b0e14]/95 border border-white/10 max-w-sm p-6 shadow-[0_0_50px_rgba(0,0,0,0.9)] backdrop-blur-xl rounded-none relative overflow-hidden"
+        className="bg-[#0b0e14]/95 border border-white/10 w-[calc(100vw-2rem)] max-w-sm p-6 shadow-[0_0_50px_rgba(0,0,0,0.9)] backdrop-blur-xl rounded-none relative overflow-hidden"
       >
         {/* Top Valorant-style red accent bar */}
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#FF4655]" />
