@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Party } from "@/types/party";
-import { Message } from "@/app/(protected)/lobby/_components/types";
+import { Message } from "@/app/(protected)/(home)/lobby/_components/types";
 
 interface PartyStore {
   hydrated: boolean;
@@ -34,6 +34,6 @@ export const usePartyStore = create<PartyStore>()(
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
       },
-    }
-  )
+    },
+  ),
 );

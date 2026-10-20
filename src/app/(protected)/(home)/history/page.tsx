@@ -96,12 +96,12 @@ export default function HistoryPage() {
       {/* Background artwork */}
       <div className="fixed inset-0 z-0 select-none pointer-events-none">
         <Image
-          src="/bg/bg2.webp"
+          src="/bg/bg3.webp"
           alt="Background"
           fill
           priority
           quality={90}
-          className="object-cover opacity-20 object-center scale-[1.01]"
+          className="object-cover object-center scale-[1.01]"
         />
         <div className="absolute inset-0 bg-linear-to-b from-[#040609]/90 via-[#040609]/80 to-[#040609]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,transparent_20%,#040609_90%)]" />

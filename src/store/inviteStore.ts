@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { IncomingPartyInvite } from "@/app/(protected)/lobby/_components/types";
+import { IncomingPartyInvite } from "@/app/(protected)/(home)/lobby/_components/types";
 
 interface InviteStore {
   incomingInvites: IncomingPartyInvite[];
