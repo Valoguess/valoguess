@@ -23,6 +23,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 const SITE_URL = "https://valoguess.fun";
@@ -107,6 +109,11 @@ export const metadata: Metadata = {
       { url: "/logo.webp", sizes: "192x192", type: "image/webp" },
     ],
     apple: [{ url: "/logo.webp", sizes: "180x180", type: "image/webp" }],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "ValoGuess",
   },
   manifest: "/manifest.webmanifest",
   category: "game",

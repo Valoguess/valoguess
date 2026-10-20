@@ -4,13 +4,13 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { TopNavbar } from "@/components/navigation/TopNavbar";
-import { LobbyFriendsSidebar } from "@/app/(protected)/(home)/lobby/_components/LobbyFriendsSidebar";
-import { HowToPlayModal } from "@/app/(protected)/(home)/lobby/_components/HowToPlayModal";
-import { LogoutConfirmationModal } from "@/app/(protected)/(home)/settings/_components/LogoutConfirmationModal";
+import { HomeFriendsSidebar } from "./HomeFriendsSidebar";
+import { HowToPlayModal } from "./HowToPlayModal";
+import { LogoutConfirmationModal } from "./LogoutConfirmationModal";
 import { useAuthStore } from "@/store/authStore";
 import { usePartyStore } from "@/store/partyStore";
 import { useFriends } from "@/hooks/useFriends";
-import { useLobbyParty } from "@/app/(protected)/(home)/lobby/_hooks/useLobbyParty";
+import { useLobbyParty } from "../_hooks/useLobbyParty";
 import { signOut } from "@/lib/auth-client";
 import { HomeContext, HomeContextValue } from "./HomeContext";
 
@@ -99,12 +99,17 @@ export function HomeShell({ children }: { children: React.ReactNode }) {
 
   return (
     <HomeContext.Provider value={contextValue}>
-      <div className="relative h-screen max-h-screen w-full flex flex-col bg-[#040609] text-white select-none overflow-hidden font-body">
+      <div className="relative h-dvh max-h-dvh w-full flex flex-col bg-[#040609] text-white select-none overflow-hidden font-body">
         {/* Centralized Top Navbar */}
         <TopNavbar
           savedUsername={user?.name || "AGENT"}
           onOpenHowToPlay={() => setShowHowToPlay(true)}
           onOpenLogout={() => setShowLogoutModal(true)}
+          onOpenFriends={() => setIsFriendsCollapsed(false)}
+          friendRequestsCount={
+            friends.friendRequests.filter((r) => r.type === "incoming").length +
+            lobbyParty.enrichedIncomingInvites.length
+          }
         />
 
         {/* Central Workspace Row */}
@@ -114,15 +119,31 @@ export function HomeShell({ children }: { children: React.ReactNode }) {
             {children}
           </main>
 
-          {/* Collapsible Friends Sidebar (Docked on Right) */}
-          <div className="relative h-full w-16 shrink-0">
+          {/* Mobile Backdrop Overlay for Friends Drawer (< lg) */}
+          {!isFriendsCollapsed && (
+            <div
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity"
+              onClick={() => setIsFriendsCollapsed(true)}
+            />
+          )}
+
+          {/* Collapsible Friends Sidebar: slide-over drawer on < lg, docked column on >= lg */}
+          <div
+            className={cn(
+              "transition-all duration-300 h-full",
+              isFriendsCollapsed
+                ? "hidden lg:block lg:relative lg:w-16 lg:shrink-0 lg:z-30"
+                : "fixed inset-y-0 right-0 w-80 sm:w-84 max-w-[88vw] z-50 lg:relative lg:w-16 lg:shrink-0 lg:z-30"
+            )}
+          >
             <div
               className={cn(
-                "transition-all duration-300 h-full shrink-0 z-30 absolute right-0",
-                isFriendsCollapsed ? "w-16" : "w-80 lg:w-84"
+                "transition-all duration-300 h-full shrink-0",
+                "w-full lg:absolute lg:right-0",
+                isFriendsCollapsed ? "lg:w-16" : "lg:w-80 lg:w-84"
               )}
             >
-              <LobbyFriendsSidebar
+              <HomeFriendsSidebar
                 isFriendsCollapsed={isFriendsCollapsed}
                 setIsFriendsCollapsed={setIsFriendsCollapsed}
                 isAnonymous={isAnonymous}
