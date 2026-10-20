@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Party } from "@/types/party";
-import { Message } from "@/app/(protected)/(home)/lobby/_components/types";
+import { Message } from "@/types/chat";
 
 interface PartyStore {
   hydrated: boolean;
