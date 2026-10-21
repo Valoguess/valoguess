@@ -90,6 +90,20 @@ function PlayContent() {
     }
   }, [game?.id, game?.status]);
 
+  // Reset eliminated agents and intro overlay on new match or game ID change
+  useEffect(() => {
+    if (game?.id) {
+      setEliminatedIds(new Set());
+    }
+  }, [game?.id]);
+
+  useEffect(() => {
+    if (game?.status === "STARTING" || game?.status === "WAITING") {
+      setHasCompletedIntro(false);
+      setEliminatedIds(new Set());
+    }
+  }, [game?.status]);
+
   // Navigate to lobby if no active match
   useEffect(() => {
     if (!gameHydrated) return;
@@ -106,6 +120,11 @@ function PlayContent() {
       else next.add(id);
       return next;
     });
+  };
+
+  // Handle resetting all eliminations
+  const handleResetEliminated = () => {
+    setEliminatedIds(new Set());
   };
 
   // 1. Loading screen
@@ -188,6 +207,7 @@ function PlayContent() {
           Math.ceil((game.state?.turnNumber ?? game.turnNumber ?? 1) / 2)
         )}
         onComplete={() => {
+          setEliminatedIds(new Set());
           useTempResultStore.getState().setTempResultGame(game);
           useGameStore.getState().clearGame();
           router.replace("/game");
@@ -319,6 +339,7 @@ function PlayContent() {
           <AgentGrid
             externalEliminated={eliminatedIds}
             onToggleEliminated={handleToggleEliminated}
+            onResetEliminated={handleResetEliminated}
             onOpenGuessModal={() => setShowGuessModal(true)}
           />
         </div>

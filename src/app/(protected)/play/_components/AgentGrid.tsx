@@ -13,12 +13,14 @@ import { AgentGuessModal } from "./AgentGuessModal";
 interface AgentGridProps {
   externalEliminated?: Set<string>;
   onToggleEliminated?: (id: string) => void;
+  onResetEliminated?: () => void;
   onOpenGuessModal?: () => void;
 }
 
 export function AgentGrid({
   externalEliminated,
   onToggleEliminated,
+  onResetEliminated,
   onOpenGuessModal,
 }: AgentGridProps = {}) {
   const [internalEliminated, setInternalEliminated] = useState<Set<string>>(
@@ -48,6 +50,9 @@ export function AgentGrid({
   };
 
   const handleResetEliminated = () => {
+    if (onResetEliminated) {
+      onResetEliminated();
+    }
     setInternalEliminated(new Set());
   };
 
