@@ -81,8 +81,8 @@ export function LobbyClient() {
           quality={100}
           className="object-cover object-center scale-[1.01]"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-[#040609]/80 via-transparent to-[#040609]/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,#040609_90%)]" />
+        <div className="absolute inset-0 bg-linear-to-b from-[#040609]/70 to-[#040609]/80" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,#040609_90%)]" />
       </div>
 
       {/* 1. Sub-Header Bar */}
