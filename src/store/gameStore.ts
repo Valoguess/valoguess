@@ -1,6 +1,14 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { GuessAgentGameDTO } from "@/types/game";
+
+// Purge any legacy stale gameStore from localStorage
+if (typeof window !== "undefined") {
+  try {
+    localStorage.removeItem("gameStore");
+  } catch {
+    // Ignore storage errors
+  }
+}
 
 interface GameStore {
   hydrated: boolean;
@@ -11,20 +19,10 @@ interface GameStore {
   clearGame: () => void;
 }
 
-export const useGameStore = create<GameStore>()(
-  persist(
-    (set) => ({
-      hydrated: false,
-      game: null,
-      setGame: (game) => set({ game }),
-      clearGame: () => set({ game: null }),
-      setHydrated: (hydrated) => set({ hydrated }),
-    }),
-    {
-      name: "gameStore",
-      onRehydrateStorage: () => (state) => {
-        state?.setHydrated(true);
-      },
-    }
-  )
-);
+export const useGameStore = create<GameStore>((set) => ({
+  hydrated: true,
+  game: null,
+  setGame: (game) => set({ game }),
+  clearGame: () => set({ game: null }),
+  setHydrated: (hydrated) => set({ hydrated }),
+}));
