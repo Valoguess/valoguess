@@ -64,19 +64,24 @@ export function MatchEndingOverlay({
 
   // Countdown timer for automatic advancement
   useEffect(() => {
+    let completed = false;
+  
     const interval = setInterval(() => {
-      setSecondsRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          onComplete();
-          return 0;
-        }
-        return prev - 1;
-      });
+      setSecondsRemaining((prev) => Math.max(0, prev - 1));
     }, 1000);
-
-    return () => clearInterval(interval);
-  }, [onComplete]);
+  
+    const completionTimer = setTimeout(() => {
+      if (!completed) {
+        completed = true;
+        onComplete();
+      }
+    }, durationMs);
+  
+    return () => {
+      clearInterval(interval);
+      clearTimeout(completionTimer);
+    };
+  }, [onComplete, durationMs]);
 
   // Color schemes based on match outcome
   const theme = isTie
