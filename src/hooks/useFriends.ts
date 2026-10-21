@@ -232,7 +232,7 @@ export function useFriends(user: StoreUser | null) {
       if (!useFriendStore.getState().initialFriendsData) {
         fetchFriends();
       }
-    }, 4000);
+    }, 2000);
 
     return () => clearTimeout(timeout);
   }, [user, initialFriendsData, fetchFriends]);
