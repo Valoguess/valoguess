@@ -228,12 +228,81 @@ function PlayerSide({
           )}
         </div>
 
-        {/* Tactical Sub-label / NO Tracker */}
-        <div className="flex items-center gap-1 mt-0.5 text-[9px] sm:text-[10px] font-mono text-white/40">
-          <span>NOs:</span>
-          <span className="text-white/80 font-bold">{nosUsed}</span>
-          <span>/</span>
-          <span>{nosMax}</span>
+        {/* No's indicators & Circle Dots */}
+        <div
+          className={cn(
+            "mt-1 sm:mt-2 flex items-center gap-1.5 sm:gap-3",
+            align === "right" && "flex-row-reverse",
+          )}
+        >
+          <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] text-zinc-500 font-medium hidden sm:inline">
+            NO&apos;S USED
+          </span>
+          <span className="text-[8.5px] font-mono text-white/40 sm:hidden">
+            NOs:
+          </span>
+          <span className="font-display text-xs sm:text-base font-bold text-accent">
+            {nosUsed} / {nosMax === -1 ? "∞" : nosMax}
+          </span>
+
+          {/* Circle Dots */}
+          {nosMax === -1 ? (
+            <span className="font-display text-base sm:text-xl font-black text-accent drop-shadow-[0_0_6px_#ff4655]">
+              ∞
+            </span>
+          ) : (
+            <div
+              className={cn(
+                "flex flex-col gap-1",
+                align === "right" && "items-end",
+              )}
+            >
+              {/* Row 1: up to 5 dots */}
+              <div
+                className={cn(
+                  "flex gap-1 sm:gap-1.5",
+                  align === "right" && "flex-row-reverse",
+                )}
+              >
+                {Array.from({ length: Math.min(5, nosMax) }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full transition-all duration-300 border",
+                      i < nosUsed
+                        ? "bg-accent border-accent shadow-[0_0_6px_#ff4655]"
+                        : "bg-white/[0.05] border-white/10",
+                    )}
+                  />
+                ))}
+              </div>
+
+              {/* Row 2: dots above 5 */}
+              {nosMax > 5 && (
+                <div
+                  className={cn(
+                    "flex gap-1 sm:gap-1.5",
+                    align === "right" && "flex-row-reverse",
+                  )}
+                >
+                  {Array.from({ length: nosMax - 5 }).map((_, i) => {
+                    const actualIdx = 5 + i;
+                    return (
+                      <div
+                        key={actualIdx}
+                        className={cn(
+                          "h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full transition-all duration-300 border",
+                          actualIdx < nosUsed
+                            ? "bg-accent border-accent shadow-[0_0_6px_#ff4655]"
+                            : "bg-white/[0.05] border-white/10",
+                        )}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
