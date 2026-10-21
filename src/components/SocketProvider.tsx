@@ -20,8 +20,19 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [error, setError] = useState<any>(null);
+  const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
+  const hasSyncedPartyRef = React.useRef(false);
+  const hasSyncedFriendsRef = React.useRef(false);
   const partyHydrated = usePartyStore((s) => s.hydrated);
   const gameHydrated = useGameStore((s) => s.hydrated);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsInitialSyncDone(true);
+    }, 2500);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   const { user } = useAuthStore();
   const { setGame, clearGame } = useGameStore();
@@ -31,6 +42,11 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   const { party, setParty, clearParty, addPartyMessage } = usePartyStore();
 
   const handlePartySync = (syncedParty: Party | null) => {
+    hasSyncedPartyRef.current = true;
+    if (hasSyncedFriendsRef.current) {
+      setIsInitialSyncDone(true);
+    }
+
     if (!syncedParty) {
       clearParty();
       return;
@@ -161,6 +177,11 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleFriendsSync = (data: any) => {
+    hasSyncedFriendsRef.current = true;
+    if (hasSyncedPartyRef.current) {
+      setIsInitialSyncDone(true);
+    }
+
     if (!data) return;
 
     let friendsArr: any[] = [];
@@ -348,8 +369,29 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     };
   }, [partyHydrated, gameHydrated]);
 
-  if (!partyHydrated || !gameHydrated) {
-    return <div style={{ display: 'none' }}>{children}</div>;
+  if (!isInitialSyncDone) {
+    return (
+      <main className="min-h-screen w-full bg-[#040609] flex flex-col items-center justify-center text-white select-none font-body">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative flex items-center justify-center w-14 h-14">
+            <div className="absolute inset-0 rounded-full bg-accent/20 blur-xl animate-pulse" />
+            <svg viewBox="0 0 100 100" className="w-12 h-12 relative z-10 animate-pulse">
+              <path d="M15 15 L45 15 L25 85 Z" fill="#FFFFFF" />
+              <path d="M32 15 L52 15 L37 75 Z" fill="#FF4655" />
+              <path d="M58 15 L88 15 L78 85 Z" fill="#FF4655" />
+            </svg>
+          </div>
+          <div className="flex flex-col items-center text-center space-y-1">
+            <span className="font-valorant text-xs sm:text-sm text-white tracking-[0.25em] uppercase">
+              INITIALIZING PROTOCOL
+            </span>
+            <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
+              SYNCHRONIZING TACTICAL NETWORK...
+            </span>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
