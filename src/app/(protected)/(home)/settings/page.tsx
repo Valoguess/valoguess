@@ -182,16 +182,16 @@ export default function SettingsPage() {
   // Logout handler
   const handleLogout = async () => {
     setIsLoggingOut(true);
+    toast.loading("Signing out...", { id: "logout-toast" });
     try {
+      socket.disconnect();
       await signOut();
-      clearUser();
-      router.replace("/login");
-    } catch {
-      clearUser();
-      router.replace("/login");
+    } catch (err) {
+      console.error("Signout error:", err);
     } finally {
-      setIsLoggingOut(false);
-      setShowLogoutModal(false);
+      clearUser();
+      toast.dismiss("logout-toast");
+      window.location.href = "/login";
     }
   };
 

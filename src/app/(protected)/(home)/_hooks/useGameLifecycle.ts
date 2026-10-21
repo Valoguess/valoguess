@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { socket } from "@/socket";
 import { ServerEvents } from "@/socket/events";
@@ -25,6 +25,7 @@ export function useGameLifecycle({
 }: UseGameLifecycleProps) {
   const router = useRouter();
   const { game, clearGame } = useGameStore();
+  const [isStartingGame, setIsStartingGame] = useState(false);
   const startedGameRef = useRef<string | null>(null);
 
   const isHost = party ? party.leaderId === userId : true;
@@ -37,26 +38,49 @@ export function useGameLifecycle({
     }
   }, []);
 
+  // Reset starting state if party changes or opponent leaves
+  useEffect(() => {
+    if (!opponent?.id) {
+      setIsStartingGame(false);
+    }
+  }, [opponent?.id]);
+
   // Game lifecycle handling: auto-redirect all party members in (home) to /play when game starts
   useEffect(() => {
     if (!game) return;
 
-    if (isHost && game.status === "WAITING") {
-      if (startedGameRef.current !== game.id) {
-        startedGameRef.current = game.id;
-        startGame();
+    if (game.status === "WAITING") {
+      setIsStartingGame(true);
+      if (isHost) {
+        if (startedGameRef.current !== game.id) {
+          startedGameRef.current = game.id;
+          startGame();
+        }
       }
       return;
     }
 
     if (game.status === "STARTING" || game.status === "PLAYING") {
+      setIsStartingGame(true);
       router.push("/play");
     }
   }, [game?.status, game?.id, isHost, router]);
 
+  // Safety fallback: if match launch hangs for > 8s without transitioning to STARTING/PLAYING, reset
+  useEffect(() => {
+    if (!isStartingGame) return;
+    const timer = setTimeout(() => {
+      if (!game || game.status === "WAITING" || game.status === "FINISHED") {
+        setIsStartingGame(false);
+      }
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [isStartingGame, game]);
+
   // Socket error handler
   useEffect(() => {
     const onError = (err: any) => {
+      setIsStartingGame(false);
       onSetIsCreatingOrJoining?.(false);
       startedGameRef.current = null;
       if (err?.code === "GAME_ALREADY_STARTED" && game?.id) {
@@ -79,6 +103,8 @@ export function useGameLifecycle({
   const handleStartGame = useCallback(() => {
     if (!party?.id || !isHost || !opponent?.id) return;
 
+    setIsStartingGame(true);
+
     if (game?.id && game.status === "WAITING") {
       if (startedGameRef.current !== game.id) {
         startedGameRef.current = game.id;
@@ -100,5 +126,6 @@ export function useGameLifecycle({
 
   return {
     handleStartGame,
+    isStartingGame,
   };
 }

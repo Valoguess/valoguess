@@ -45,6 +45,7 @@ export function LobbyClient() {
     showPartyCode,
     handleToggleRevealCode,
     isCreatingOrJoining,
+    isStartingGame,
     handleCreateParty,
     handleJoinPartyWithCode,
     handleKickGuest,
@@ -98,6 +99,7 @@ export function LobbyClient() {
             party={party}
             opponent={opponent}
             onStartGame={handleStartGame}
+            isStartingGame={isStartingGame}
             onOpenSettings={() => setShowSettingsModal(true)}
             onLeaveParty={handleLeaveParty}
             timer={timer}

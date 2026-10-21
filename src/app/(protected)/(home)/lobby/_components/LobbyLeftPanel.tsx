@@ -8,6 +8,7 @@ import {
   Hash,
   PlayOff,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Party } from "@/types/party";
@@ -21,6 +22,7 @@ interface LobbyLeftPanelProps {
   party: Party | null;
   opponent: any;
   onStartGame: () => void;
+  isStartingGame?: boolean;
   onOpenSettings?: () => void;
   onLeaveParty: () => void;
   timer: number;
@@ -53,6 +55,7 @@ export function LobbyLeftPanel({
   party,
   opponent,
   onStartGame,
+  isStartingGame = false,
   onOpenSettings,
   onLeaveParty,
   timer,
@@ -82,6 +85,7 @@ export function LobbyLeftPanel({
 
   const hasOpponent = Boolean(opponent);
   const canStart = Boolean(party && isHost && hasOpponent);
+  const isLaunching = Boolean(isStartingGame);
 
   return (
     <>
@@ -91,10 +95,15 @@ export function LobbyLeftPanel({
           <div
             role="button"
             tabIndex={0}
-            onClick={() => setIsGamemodeDrawerOpen(true)}
-            onKeyDown={(e) => e.key === "Enter" && setIsGamemodeDrawerOpen(true)}
-            className="clip-notch-both border border-white/10 hover:border-white/25 bg-[#090d14]/85 hover:bg-[#0c121d]/90 backdrop-blur-xl p-2.5 sm:p-3.5 shadow-[0_4px_25px_rgba(0,0,0,0.6)] relative overflow-hidden cursor-pointer transition-all group flex items-center justify-between"
-            title="Click to open Game Mode drawer"
+            onClick={() => !isLaunching && setIsGamemodeDrawerOpen(true)}
+            onKeyDown={(e) => !isLaunching && e.key === "Enter" && setIsGamemodeDrawerOpen(true)}
+            className={cn(
+              "clip-notch-both border border-white/10 bg-[#090d14]/85 backdrop-blur-xl p-2.5 sm:p-3.5 shadow-[0_4px_25px_rgba(0,0,0,0.6)] relative overflow-hidden transition-all group flex items-center justify-between",
+              isLaunching
+                ? "opacity-60 cursor-not-allowed"
+                : "hover:border-white/25 hover:bg-[#0c121d]/90 cursor-pointer"
+            )}
+            title={isLaunching ? "Match launching..." : "Click to open Game Mode drawer"}
           >
             <div className="absolute top-0 left-0 w-1 h-full bg-[#FF4655] group-hover:w-1.5 transition-all" />
 
@@ -119,10 +128,15 @@ export function LobbyLeftPanel({
           <div
             role="button"
             tabIndex={0}
-            onClick={() => setIsPartyDrawerOpen(true)}
-            onKeyDown={(e) => e.key === "Enter" && setIsPartyDrawerOpen(true)}
-            className="clip-notch-both border border-white/10 hover:border-white/25 bg-[#090d14]/85 hover:bg-[#0c121d]/90 backdrop-blur-xl p-2.5 sm:p-3.5 shadow-[0_4px_25px_rgba(0,0,0,0.6)] relative overflow-hidden cursor-pointer transition-all group flex items-center justify-between"
-            title="Click to open Party drawer"
+            onClick={() => !isLaunching && setIsPartyDrawerOpen(true)}
+            onKeyDown={(e) => !isLaunching && e.key === "Enter" && setIsPartyDrawerOpen(true)}
+            className={cn(
+              "clip-notch-both border border-white/10 bg-[#090d14]/85 backdrop-blur-xl p-2.5 sm:p-3.5 shadow-[0_4px_25px_rgba(0,0,0,0.6)] relative overflow-hidden transition-all group flex items-center justify-between",
+              isLaunching
+                ? "opacity-60 cursor-not-allowed"
+                : "hover:border-white/25 hover:bg-[#0c121d]/90 cursor-pointer"
+            )}
+            title={isLaunching ? "Match launching..." : "Click to open Party drawer"}
           >
             <div className="absolute top-0 left-0 w-1 h-full bg-[#FF4655] group-hover:w-1.5 transition-all" />
 
@@ -152,37 +166,52 @@ export function LobbyLeftPanel({
           <button
             type="button"
             onClick={party ? onStartGame : handleCreateParty}
-            disabled={party ? !canStart : isCreatingOrJoining}
+            disabled={isLaunching || (party ? !canStart : isCreatingOrJoining)}
             className={cn(
               "w-full h-11 sm:h-12 font-valorant text-xs sm:text-sm tracking-[0.15em] sm:tracking-[0.2em] uppercase text-white flex items-center justify-center gap-2 transition-all duration-300 relative clip-notch-both border",
-              canStart || !party
-                ? "bg-[#FF4655] hover:bg-[#ff5a67] border-[#FF4655] shadow-[0_0_30px_rgba(255,70,85,0.45)] cursor-pointer active:scale-98"
-                : "bg-white/5 border-white/10 text-white/30 cursor-not-allowed opacity-60"
+              isLaunching
+                ? "bg-[#FF4655]/85 border-[#FF4655] shadow-[0_0_35px_rgba(255,70,85,0.7)] cursor-wait animate-pulse"
+                : canStart || !party
+                  ? "bg-[#FF4655] hover:bg-[#ff5a67] border-[#FF4655] shadow-[0_0_30px_rgba(255,70,85,0.45)] cursor-pointer active:scale-98"
+                  : "bg-white/5 border-white/10 text-white/30 cursor-not-allowed opacity-60"
             )}
           >
-            {party && canStart ? (
-              <Play className="h-3.5 w-3.5 fill-white" />
+            {isLaunching ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin text-white" />
+                <span>LAUNCHING MATCH...</span>
+              </>
             ) : (
-              <Play className="h-3.5 w-3.5" />
+              <>
+                {party && canStart ? (
+                  <Play className="h-3.5 w-3.5 fill-white" />
+                ) : (
+                  <Play className="h-3.5 w-3.5" />
+                )}
+                <span>
+                  {!party
+                    ? isCreatingOrJoining
+                      ? "CREATING PARTY..."
+                      : "CREATE PARTY"
+                    : isHost
+                      ? hasOpponent
+                        ? "START MATCH"
+                        : "WAITING FOR OPPONENT"
+                      : "WAITING FOR LEADER"}
+                </span>
+              </>
             )}
-            <span>
-              {!party
-                ? isCreatingOrJoining
-                  ? "CREATING PARTY..."
-                  : "CREATE PARTY"
-                : isHost
-                  ? hasOpponent
-                    ? "START MATCH"
-                    : "WAITING FOR OPPONENT"
-                  : "WAITING FOR LEADER"}
-            </span>
           </button>
 
           {party !== null && (
             <button
               type="button"
+              disabled={isLaunching}
               onClick={onLeaveParty}
-              className="w-full py-1.5 rounded-sm tracking-widest uppercase text-white/70 text-xs sm:text-sm font-display flex items-center justify-center gap-1.5 transition-all duration-300 border bg-white/2 hover:bg-[#FF4655]/10 border-white/10 hover:border-[#FF4655]/40 hover:text-[#FF4655] cursor-pointer active:scale-98"
+              className={cn(
+                "w-full py-1.5 rounded-sm tracking-widest uppercase text-white/70 text-xs sm:text-sm font-display flex items-center justify-center gap-1.5 transition-all duration-300 border bg-white/2 hover:bg-[#FF4655]/10 border-white/10 hover:border-[#FF4655]/40 hover:text-[#FF4655]",
+                isLaunching ? "opacity-40 cursor-not-allowed" : "cursor-pointer active:scale-98"
+              )}
             >
               <LogOut className="h-3 w-3" />
               <span>LEAVE PARTY</span>

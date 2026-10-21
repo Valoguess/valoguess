@@ -13,6 +13,8 @@ import { useFriends } from "@/hooks/useFriends";
 import { useLobbyParty } from "../_hooks/useLobbyParty";
 import { useGameLifecycle } from "../_hooks/useGameLifecycle";
 import { signOut } from "@/lib/auth-client";
+import { socket } from "@/socket";
+import { toast } from "sonner";
 import { HomeContext, HomeContextValue } from "./HomeContext";
 
 export function HomeShell({ children }: { children: React.ReactNode }) {
@@ -45,16 +47,16 @@ export function HomeShell({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
+    toast.loading("Signing out...", { id: "logout-toast" });
     try {
+      socket.disconnect();
       await signOut();
-      clearUser();
-      router.replace("/login");
-    } catch {
-      clearUser();
-      router.replace("/login");
+    } catch (err) {
+      console.error("Signout error:", err);
     } finally {
-      setIsLoggingOut(false);
-      setShowLogoutModal(false);
+      clearUser();
+      toast.dismiss("logout-toast");
+      window.location.href = "/login";
     }
   };
 
@@ -95,6 +97,7 @@ export function HomeShell({ children }: { children: React.ReactNode }) {
     handleAcceptPartyInvite: lobbyParty.handleAcceptPartyInvite,
     handleDeclinePartyInvite: lobbyParty.handleDeclinePartyInvite,
     handleStartGame: gameLifecycle.handleStartGame,
+    isStartingGame: gameLifecycle.isStartingGame,
 
     // Friends sidebar
     isFriendsCollapsed,
