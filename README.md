@@ -1,6 +1,6 @@
 # ValoGuess Web
 
-ValoGuess is a real-time 1v1 tactical deduction web game inspired by the classic "Guess Who?", adapted for the Valorant universe. Two players face off on an interactive board of 26 Valorant agents, ask targeted questions to eliminate possibilities, and race to deduce the opponent's secret agent.
+ValoGuess is a real-time 1v1 tactical deduction web game inspired by the classic "Guess Who?", adapted for the Valorant universe. Two players face off on an interactive board of 29 Valorant agents (excluding Hush, the new agent), ask targeted questions to eliminate possibilities, and race to deduce the opponent's secret agent.
 
 This repository hosts the frontend web client and primary application service, built with Next.js 16, React 19, and Tailwind CSS. It manages the player-facing interface, user authentication, profile customization, career match history, and communicates over WebSockets with the [ValoGuess Socket Server](https://github.com/Valoguess/valoguess-socket-server).
 
