@@ -36,6 +36,7 @@ export interface HomeContextValue {
   onInviteFriendToParty: (friend: Friend) => void;
   handleAcceptPartyInvite: (inviteId: string, partyId: string) => void;
   handleDeclinePartyInvite: (inviteId: string) => void;
+  handleStartGame: () => void;
 
   // Friends Sidebar collapsible state
   isFriendsCollapsed: boolean;

@@ -11,7 +11,6 @@ import { LobbyCenterSlots } from "./LobbyCenterSlots";
 import { PartyChatOverlay } from "@/components/chat/PartyChatOverlay";
 import { LobbySettings } from "./LobbySettings";
 import { InviteFriendsDialog } from "./InviteFriendsDialog";
-import { useLobbyGameLifecycle } from "../_hooks/useLobbyGameLifecycle";
 import { useHomeContext } from "../../_components/HomeContext";
 
 export function LobbyClient() {
@@ -53,6 +52,7 @@ export function LobbyClient() {
     handleCopyCode,
     copied,
     onInviteFriendToParty,
+    handleStartGame,
   } = useHomeContext();
 
   const myId = user?.id;
@@ -61,19 +61,6 @@ export function LobbyClient() {
     party?.members.find((m) => m.id === myId) ||
     (user ? { id: user.id, name: user.name || "AGENT" } : null);
   const opponent = party?.members.find((m) => m.id !== myId);
-
-  // Game lifecycle & match creation hook
-  const { handleStartGame } = useLobbyGameLifecycle({
-    party,
-    isHost,
-    opponentId: opponent?.id,
-    questionMode,
-    timer,
-    maxNos,
-    maxGuesses,
-    questionCount,
-    onSetIsCreatingOrJoining: () => {},
-  });
 
   useEffect(() => {
     if (user?.name) {

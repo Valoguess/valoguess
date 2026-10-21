@@ -11,6 +11,7 @@ import { useAuthStore } from "@/store/authStore";
 import { usePartyStore } from "@/store/partyStore";
 import { useFriends } from "@/hooks/useFriends";
 import { useLobbyParty } from "../_hooks/useLobbyParty";
+import { useGameLifecycle } from "../_hooks/useGameLifecycle";
 import { signOut } from "@/lib/auth-client";
 import { HomeContext, HomeContextValue } from "./HomeContext";
 
@@ -34,6 +35,12 @@ export function HomeShell({ children }: { children: React.ReactNode }) {
   const lobbyParty = useLobbyParty({
     party,
     friendsList: friends.friendsList,
+  });
+
+  // Game lifecycle handling for all (home) pages: auto-redirects to /play when match starts
+  const gameLifecycle = useGameLifecycle({
+    party,
+    userId: user?.id,
   });
 
   const handleLogout = async () => {
@@ -87,6 +94,7 @@ export function HomeShell({ children }: { children: React.ReactNode }) {
     onInviteFriendToParty: lobbyParty.onInviteFriendToParty,
     handleAcceptPartyInvite: lobbyParty.handleAcceptPartyInvite,
     handleDeclinePartyInvite: lobbyParty.handleDeclinePartyInvite,
+    handleStartGame: gameLifecycle.handleStartGame,
 
     // Friends sidebar
     isFriendsCollapsed,

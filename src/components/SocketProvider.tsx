@@ -130,6 +130,13 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     }
 
     setGame(syncedGame);
+
+    if (
+      (syncedGame.status === "STARTING" || syncedGame.status === "PLAYING") &&
+      pathname !== "/play"
+    ) {
+      router.push("/play");
+    }
   };
 
   const handleError = (err: any) => {

@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { socket } from "@/socket";
@@ -5,46 +7,37 @@ import { ServerEvents } from "@/socket/events";
 import { useGameStore } from "@/store/gameStore";
 import { createGame, startGame } from "@/socket/emitter";
 import { Party } from "@/types/party";
-import { GuessAgentQuestionMode } from "@/types/game";
+import { useGameSettingsStore } from "@/store/gameSettingsStore";
 import { toast } from "sonner";
 
-interface UseLobbyGameLifecycleProps {
+interface UseGameLifecycleProps {
   party: Party | null;
-  isHost: boolean;
-  opponentId?: string;
-  questionMode: GuessAgentQuestionMode;
-  timer: number;
-  maxNos: number;
-  maxGuesses: number;
-  questionCount: number;
+  userId?: string;
   onSetErrorMsg?: (msg: string) => void;
-  onSetIsCreatingOrJoining: (val: boolean) => void;
+  onSetIsCreatingOrJoining?: (val: boolean) => void;
 }
 
-export function useLobbyGameLifecycle({
+export function useGameLifecycle({
   party,
-  isHost,
-  opponentId,
-  questionMode,
-  timer,
-  maxNos,
-  maxGuesses,
-  questionCount,
+  userId,
   onSetErrorMsg,
   onSetIsCreatingOrJoining,
-}: UseLobbyGameLifecycleProps) {
+}: UseGameLifecycleProps) {
   const router = useRouter();
   const { game, clearGame } = useGameStore();
   const startedGameRef = useRef<string | null>(null);
 
-  // Clear any finished or waiting stale game state on lobby entry
+  const isHost = party ? party.leaderId === userId : true;
+  const opponent = party?.members?.find((m) => m.id !== userId);
+
+  // Clear any finished or waiting stale game state on (home) entry
   useEffect(() => {
     if (game && (game.status === "FINISHED" || game.status === "WAITING")) {
       clearGame();
     }
   }, []);
 
-  // Game lifecycle handling
+  // Game lifecycle handling: auto-redirect all party members in (home) to /play when game starts
   useEffect(() => {
     if (!game) return;
 
@@ -59,12 +52,12 @@ export function useLobbyGameLifecycle({
     if (game.status === "STARTING" || game.status === "PLAYING") {
       router.push("/play");
     }
-  }, [game, isHost, router]);
+  }, [game?.status, game?.id, isHost, router]);
 
   // Socket error handler
   useEffect(() => {
     const onError = (err: any) => {
-      onSetIsCreatingOrJoining(false);
+      onSetIsCreatingOrJoining?.(false);
       startedGameRef.current = null;
       if (err?.code === "GAME_ALREADY_STARTED" && game?.id) {
         router.push("/play");
@@ -84,7 +77,7 @@ export function useLobbyGameLifecycle({
 
   // Start game handler (Party Leader only, 2 players required)
   const handleStartGame = useCallback(() => {
-    if (!party?.id || !isHost || !opponentId) return;
+    if (!party?.id || !isHost || !opponent?.id) return;
 
     if (game?.id && game.status === "WAITING") {
       if (startedGameRef.current !== game.id) {
@@ -95,14 +88,15 @@ export function useLobbyGameLifecycle({
     }
 
     startedGameRef.current = null;
+    const settings = useGameSettingsStore.getState();
     createGame({
-      questionMode: questionMode ?? "PRESET",
-      timePerRound: timer,
-      maxNos,
-      maxGuesses,
-      questionCount,
+      questionMode: settings.questionMode ?? "PRESET",
+      timePerRound: settings.timer,
+      maxNos: settings.maxNos,
+      maxGuesses: settings.maxGuesses,
+      questionCount: settings.questionCount,
     });
-  }, [party?.id, isHost, opponentId, game?.id, game?.status, questionMode, timer, maxNos, maxGuesses, questionCount]);
+  }, [party?.id, isHost, opponent?.id, game?.id, game?.status]);
 
   return {
     handleStartGame,
