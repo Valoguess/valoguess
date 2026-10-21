@@ -29,7 +29,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsInitialSyncDone(true);
-    }, 2500);
+    }, 1200);
 
     return () => clearTimeout(timeout);
   }, []);
@@ -129,9 +129,13 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     const currentUserId = user?.id || useAuthStore.getState().user?.id;
     if (typeof window !== "undefined" && syncedGame?.id) {
       const me =
-        (currentUserId ? syncedGame.players?.find((p) => p.id === currentUserId) : undefined) ||
+        (currentUserId
+          ? syncedGame.players?.find((p) => p.id === currentUserId)
+          : undefined) ||
         (syncedGame.status !== "FINISHED"
-          ? syncedGame.players?.find((p) => p.state && p.state.secretAgent !== null)
+          ? syncedGame.players?.find(
+              (p) => p.state && p.state.secretAgent !== null,
+            )
           : undefined);
 
       if (me) {
@@ -306,6 +310,17 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleOpponentDisconnected = (data: {
+    playerName: string;
+    reconnectWindowMs: number;
+  }) => {
+    const seconds = Math.round((data?.reconnectWindowMs ?? 60000) / 1000);
+    toast.warning(
+      `${data?.playerName ?? "Opponent"} disconnected. They have ${seconds}s to reconnect or you win.`,
+      { duration: seconds * 1000, closeButton: true },
+    );
+  };
+
   useEffect(() => {
     if (!partyHydrated || !gameHydrated) return;
 
@@ -327,6 +342,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       ServerEvents.FRIEND_REQUEST_DECLINED,
       handleFriendRequestDeclined,
     );
+    socket.on(ServerEvents.OPPONENT_DISCONNECTED, handleOpponentDisconnected);
 
     if (!socket.connected) {
       socket.connect();
@@ -362,6 +378,10 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
         ServerEvents.FRIEND_REQUEST_DECLINED,
         handleFriendRequestDeclined,
       );
+      socket.off(
+        ServerEvents.OPPONENT_DISCONNECTED,
+        handleOpponentDisconnected,
+      );
 
       clearInterval(heartbeat);
       socket.disconnect();
@@ -375,7 +395,10 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col items-center gap-4">
           <div className="relative flex items-center justify-center w-14 h-14">
             <div className="absolute inset-0 rounded-full bg-accent/20 blur-xl animate-pulse" />
-            <svg viewBox="0 0 100 100" className="w-12 h-12 relative z-10 animate-pulse">
+            <svg
+              viewBox="0 0 100 100"
+              className="w-12 h-12 relative z-10 animate-pulse"
+            >
               <path d="M15 15 L45 15 L25 85 Z" fill="#FFFFFF" />
               <path d="M32 15 L52 15 L37 75 Z" fill="#FF4655" />
               <path d="M58 15 L88 15 L78 85 Z" fill="#FF4655" />
@@ -394,11 +417,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return (
-    <>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }
 
 export default SocketProvider;

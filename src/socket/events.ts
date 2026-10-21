@@ -57,5 +57,7 @@ export const ServerEvents = {
   GAME_SYNC: "game:sync",
   GAME_END: "game:end",
 
+  OPPONENT_DISCONNECTED: "opponent:disconnected",
+
   ERROR: "app:error",
 } as const;
