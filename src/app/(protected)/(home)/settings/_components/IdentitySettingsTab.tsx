@@ -83,7 +83,7 @@ export function IdentitySettingsTab({
               onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
               disabled={isAnonymous || usernameCooldownDays > 0}
               placeholder="username"
-              className="pl-8 bg-black/60 border-white/15 text-white font-mono text-sm h-11 focus:border-accent disabled:opacity-40 disabled:cursor-not-allowed uppercase"
+              className="pl-8 bg-black/60 border-white/15 text-white font-mono text-sm h-11 focus:border-accent disabled:opacity-40 disabled:cursor-not-allowed"
             />
             {usernameCooldownDays > 0 && (
               <Lock className="h-4 w-4 text-white/40 absolute right-3 top-1/2 -translate-y-1/2" />
@@ -145,7 +145,7 @@ export function IdentitySettingsTab({
               onChange={(e) => setName(e.target.value.slice(0, 24))}
               disabled={nameCooldownDays > 0}
               placeholder="ENTER DISPLAY NAME"
-              className="bg-black/60 border-white/15 text-white font-display text-sm uppercase h-11 focus:border-accent disabled:opacity-40 disabled:cursor-not-allowed"
+              className="bg-black/60 border-white/15 text-white font-mono text-sm h-11 focus:border-accent disabled:opacity-40 disabled:cursor-not-allowed"
             />
             {nameCooldownDays > 0 && (
               <Lock className="h-4 w-4 text-white/40 absolute right-3 top-1/2 -translate-y-1/2" />
