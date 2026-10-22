@@ -46,6 +46,7 @@
 
   --font-display: var(--font-display), sans-serif;
   --font-body: var(--font-body), sans-serif;
+  --font-valorant: var(--font-valorant), var(--font-display), sans-serif;
 
   --shadow-panel: 0 0 0 1px rgba(255,255,255,0.04), 0 12px 32px -12px rgba(0,0,0,0.6);
   --shadow-glow: 0 0 24px rgba(255,70,85,0.35);
@@ -53,17 +54,11 @@
   --background-image-diagonal-fade: linear-gradient(115deg, rgba(255,70,85,0.08) 0%, rgba(255,70,85,0) 35%);
 }
 
-@font-face {
-  font-family: "Valorant";
-  src: url("/valorant.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
 
 :root {
   --font-display: "Rajdhani", sans-serif;
   --font-body: "Inter", sans-serif;
+  --font-valorant: "Oxanium", sans-serif;
 }
 
 html,
@@ -105,7 +100,7 @@ body {
   clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
 }
 @utility font-valorant {
-  font-family: "Valorant", var(--font-display), sans-serif;
+  font-family: var(--font-valorant), var(--font-display), sans-serif;
 }
 @utility text-shadow-glow {
   text-shadow: 0 0 18px rgba(255, 70, 85, 0.5);

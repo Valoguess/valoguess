@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Rajdhani, Inter } from "next/font/google";
+import { Rajdhani, Inter, Oxanium } from "next/font/google";
 import "./globals.css";
 
 import { cn } from "@/lib/utils";
@@ -15,6 +15,14 @@ const rajdhani = Rajdhani({
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-body",
+});
+
+const oxanium = Oxanium({
+  weight: ["600", "700", "800"],
+  display: "swap",
+  style: ["normal"],
+  subsets: ["latin"],
+  variable: "--font-valorant",
 });
 
 export const viewport: Viewport = {
@@ -208,14 +216,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(rajdhani.variable, inter.variable, "font-sans", "dark")}
+      className={cn(rajdhani.variable, inter.variable, oxanium.variable, "font-sans", "dark")}
     >
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <link rel="preload" href="/valorant.ttf" as="font" type="font/truetype" crossOrigin="anonymous" />
       </head>
       <body className="font-body antialiased bg-[#050811] text-white">
         <AuthInitializer>
