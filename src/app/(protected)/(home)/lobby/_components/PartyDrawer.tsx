@@ -344,7 +344,7 @@ export function PartyDrawer({
                 value={joinCodeInput}
                 onChange={(e) => setJoinCodeInput(e.target.value)}
                 placeholder="ENTER PARTY CODE #"
-                className="flex-1 h-9 bg-black/60 border border-white/15 px-3 rounded-sm font-display text-xs uppercase tracking-wider text-white placeholder-white/30 focus:outline-none focus:border-accent"
+                className="flex-1 h-9 bg-black/60 border border-white/15 px-3 rounded-sm font-display text-xs tracking-wider text-white placeholder-white/30 focus:outline-none focus:border-accent"
               />
               <button
                 type="submit"
