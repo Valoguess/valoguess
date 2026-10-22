@@ -9,6 +9,7 @@ import ENV from "@/env";
 import { redis } from "./redis";
 import { db, schema } from "@/db";
 import { sendMagicLinkEmail } from "./resend";
+import { migrateAnonUser } from "@/services/user";
 
 export const auth = betterAuth({
   baseURL: ENV.BETTER_AUTH_URL,
@@ -69,6 +70,15 @@ export const auth = betterAuth({
       }
     }),
     anonymous({
+      disableDeleteAnonymousUser: true,
+      onLinkAccount: async ({ anonymousUser, newUser }) => {
+        const guestId = anonymousUser.user.id;
+        const userId = newUser.user.id;
+
+        if (guestId === userId) return;
+
+        await migrateAnonUser(guestId, userId);
+      },
     }),
     username({
       displayUsername: false,

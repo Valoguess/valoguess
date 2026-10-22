@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { logger } from "./lib/logger";
 
 const authRoutes = ["/login", "/signup", "/register"];
 
@@ -11,8 +12,8 @@ export async function proxy(request: NextRequest) {
     session = await auth.api.getSession({
       headers: request.headers,
     });
-  } catch {
-    // Session retrieval error in proxy
+  } catch (error) {
+    logger.error({ err: error }, "Failed to get session");
   }
 
   const isAuthRoute = authRoutes.some((route) => path.startsWith(route));
@@ -21,7 +22,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (session && isAuthRoute) {
+  if (session && isAuthRoute && !session.user.isAnonymous) {
     return NextResponse.redirect(new URL("/lobby", request.url));
   }
 
