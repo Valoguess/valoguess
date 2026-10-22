@@ -131,10 +131,10 @@ export async function uploadUserAvatar(formData: FormData) {
 
   const userId = currUser.id;
 
-  const rawfileData = formData.get("avatar") as File;
-  const { file } = uploadAvatar.parse({ file: rawfileData });
-
   try {
+    const rawfileData = formData.get("avatar") as File;
+    const { file } = uploadAvatar.parse({ file: rawfileData });
+
     const secureUrl = await uploadAvatarToCloudinary(file, userId);
 
     await auth.api.updateUser({
@@ -202,11 +202,15 @@ export async function updateUserProfile(formData: UpdateProfileSchema) {
 
   try {
     const { banner, tagline } = updateProfileSchema.parse(formData);
+    
+    if (!banner && !tagline) {
+      return { success: true };
+    }
 
     await auth.api.updateUser({
       body: {
-        ...(banner !== undefined ? { banner } : {}),
-        ...(tagline !== undefined ? { tagline } : {}),
+        ...(banner !== undefined && { banner }),
+        ...(tagline !== undefined && { tagline }),
       },
       headers,
     });
