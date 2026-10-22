@@ -24,7 +24,7 @@ function LoginContent() {
 
   // Redirect when session is active (AuthInitializer handles store hydration)
   useEffect(() => {
-    if (session?.user) {
+    if (session?.user && !session.user.isAnonymous) {
       router.replace(redirectUrl);
     }
   }, [session, router, redirectUrl]);
