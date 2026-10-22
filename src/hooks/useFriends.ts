@@ -93,8 +93,8 @@ export function useFriends(user: StoreUser | null) {
                 ? `@${friendUser.username}`
                 : undefined,
               avatar: friendUser.image || DEFAULT_AVATARS.USER,
-              status: "online",
-              activity: "In Lobby",
+              status: "offline",
+              activity: "Offline",
             });
           }
           continue;
