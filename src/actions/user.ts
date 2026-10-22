@@ -31,23 +31,56 @@ export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
     const { username: nextUsername, name: nextName } =
       welcomeSchema.parse(formData);
 
+    if (!nextName && !nextUsername) {
+      return { success: false, error: "No data to update" };
+    }
+
     const existing = await getUserById(currUser.id);
 
+    if (!existing) {
+      return { success: false, error: "User not found" };
+    }
+
+    const COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
+    const now = new Date();
+
+    const canUpdate = (lastUpdatedAt: Date | null | undefined) =>
+      !lastUpdatedAt ||
+      now.getTime() - new Date(lastUpdatedAt).getTime() >= COOLDOWN_MS;
+
     const updates: {
-      name: string;
-      username: string;
+      name?: string;
+      username?: string;
       nameUpdatedAt?: Date;
       usernameUpdatedAt?: Date;
-    } = {
-      name: nextName,
-      username: nextUsername,
-    };
+    } = {};
 
-    if (!existing?.nameUpdatedAt || existing.name !== nextName) {
-      updates.nameUpdatedAt = new Date();
+    if (nextName && nextName !== existing.name) {
+      if (!canUpdate(existing.nameUpdatedAt)) {
+        return {
+          success: false,
+          error: "You can change your name only once every 30 days",
+        };
+      }
+
+      updates.name = nextName;
+      updates.nameUpdatedAt = now;
     }
-    if (!existing?.usernameUpdatedAt || existing.username !== nextUsername) {
-      updates.usernameUpdatedAt = new Date();
+
+    if (nextUsername && nextUsername !== existing.username) {
+      if (!canUpdate(existing.usernameUpdatedAt)) {
+        return {
+          success: false,
+          error: "You can change your username only once every 30 days",
+        };
+      }
+
+      updates.username = nextUsername;
+      updates.usernameUpdatedAt = now;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return { success: true };
     }
 
     await auth.api.updateUser({
@@ -61,10 +94,18 @@ export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
     return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { success: false, error: "Invalid input data" };
+      return {
+        success: false,
+        error: "Invalid input data",
+      };
     }
+
     logger.error({ err: error, userId: currUser.id }, "Failed to update user");
-    return { success: false, error: "Failed to update user" };
+
+    return {
+      success: false,
+      error: "Failed to update user",
+    };
   }
 }
 
