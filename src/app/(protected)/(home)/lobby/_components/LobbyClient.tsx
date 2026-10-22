@@ -81,7 +81,7 @@ export function LobbyClient() {
           quality={100}
           className="object-cover object-center scale-[1.01]"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-[#040609]/70 to-[#040609]/80" />
+        <div className="absolute inset-0 bg-linear-to-b from-[#040609]/60 to-[#040609]/70" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,#040609_90%)]" />
       </div>
 
