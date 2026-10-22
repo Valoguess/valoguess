@@ -18,6 +18,11 @@ export async function migrateAnonUser(guestId: string, userId: string) {
         .where(eq(userSettings.userId, guestId));
     }
 
+    await tx
+      .update(game)
+      .set({ hostId: userId })
+      .where(eq(game.hostId, guestId));
+
     const guestGames = await tx
       .select({ gameId: gamePlayer.gameId })
       .from(gamePlayer)
