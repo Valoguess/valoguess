@@ -406,10 +406,10 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex flex-col items-center text-center space-y-1">
             <span className="font-valorant text-xs sm:text-sm text-white tracking-[0.25em] uppercase">
-              INITIALIZING PROTOCOL
+              INITIALIZING VALOGUESS
             </span>
             <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
-              SYNCHRONIZING TACTICAL NETWORK...
+              SYNCHRONIZING VALOGUESS NETWORK...
             </span>
           </div>
         </div>
