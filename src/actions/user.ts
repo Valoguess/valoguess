@@ -86,7 +86,7 @@ export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
     } = {};
 
     if (nextName && nextName !== existing.name) {
-      if (user.isAnonymous && !nextUsername?.startsWith("Guest.")) {
+      if (currUser.isAnonymous && !nextUsername?.startsWith("Guest.")) {
         return {
           success: false,
           error: "Anonymous users cannot change their name prefix",
@@ -105,7 +105,7 @@ export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
     }
 
     if (nextUsername && nextUsername !== existing.username) {
-      if (user.isAnonymous) {
+      if (currUser.isAnonymous) {
         return {
           success: false,
           error: "Anonymous users cannot change their username",
