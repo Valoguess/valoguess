@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ChevronDown, Swords, Trophy, ShieldAlert, CheckCircle2, XCircle, Clock, Calendar } from "lucide-react";
+import { ChevronDown, Swords, Trophy, Clock, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAgentById } from "@/consts";
 
@@ -99,7 +99,6 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
           : "border-white/10 hover:border-white/20"
       )}
     >
-      {/* Left Outcome Color Bar */}
       <div
         className={cn(
           "absolute top-0 left-0 bottom-0 w-1.5 transition-all",
@@ -107,14 +106,11 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
         )}
       />
 
-      {/* Main Row */}
       <div
         onClick={() => setIsExpanded((prev) => !prev)}
         className="p-3.5 sm:p-5 pl-4.5 sm:pl-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none"
       >
-        {/* Left Section: Outcome & Mode Info */}
         <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto justify-between md:justify-start">
-          {/* Outcome Badge */}
           <div className="flex flex-col min-w-[80px] sm:min-w-[90px]">
             <span
               className={cn(
@@ -131,7 +127,6 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
 
           <div className="h-8 w-px bg-white/10 hidden sm:block" />
 
-          {/* Time & Duration */}
           <div className="flex flex-col text-right sm:text-left text-xs">
             <span className="text-white/80 font-display font-medium flex items-center justify-end sm:justify-start gap-1.5">
               <Clock className="h-3.5 w-3.5 text-zinc-400" />
@@ -144,9 +139,7 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
           </div>
         </div>
 
-        {/* Center Section: Face-Off (Your Secret Agent vs Opponent Secret Agent) */}
         <div className="flex items-center justify-center gap-2.5 sm:gap-6 md:gap-8 self-center md:self-auto w-full md:w-auto">
-          {/* Your Agent */}
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-sm overflow-hidden border border-white/20 bg-black shrink-0">
               <Image
@@ -169,7 +162,6 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
             </div>
           </div>
 
-          {/* VS Divider */}
           <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center font-valorant text-[9px] sm:text-[10px] text-zinc-400 shrink-0">
             VS
           </div>
@@ -198,7 +190,6 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
           </div>
         </div>
 
-        {/* Right Section: Telemetry Highlights & Expand Toggle */}
         <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-4">
           <div className="flex items-center gap-3 text-xs font-mono">
             <div className="px-2.5 py-1 rounded bg-white/[0.03] border border-white/10 text-zinc-300">
@@ -222,7 +213,6 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
         </div>
       </div>
 
-      {/* Expanded Accordion Details Panel */}
       {isExpanded && (
         <div className="border-t border-white/10 bg-black/40 p-5 pl-6 animate-in fade-in duration-200">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
@@ -252,7 +242,6 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
               </div>
             </div>
 
-            {/* Opponent Breakdown */}
             <div className="space-y-3">
               <h4 className="font-valorant text-xs tracking-wider text-zinc-300 flex items-center gap-2">
                 <Trophy className="h-3.5 w-3.5 text-amber-400" />
