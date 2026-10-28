@@ -123,6 +123,12 @@ export default function SettingsPage() {
           if (res.success && socket.connected) {
             data?.token && refreshAuth(data.token);
           }
+
+          if (!res.success) {
+            toast.error(res.error || "Failed to update identity");
+            setIsSaving(false);
+            return;
+          }
         }
 
         if (nextBanner !== user?.banner || nextTagline !== user?.tagline) {
@@ -173,13 +179,13 @@ export default function SettingsPage() {
     try {
       socket.disconnect();
       await signOut();
-    } catch (err) {
-      console.error("Signout error:", err);
-    } finally {
-      clearUser();
-      toast.dismiss("logout-toast");
-      window.location.href = "/login";
-    }
+    } catch {
+      toast.error("Failed to sign out. Please try again.", { id: "logout-toast" });
+      return;
+    } 
+    clearUser();
+    toast.dismiss("logout-toast");
+    window.location.href = "/login";
   };
 
   return (
