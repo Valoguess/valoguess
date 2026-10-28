@@ -19,7 +19,7 @@ export function WelcomeHeader() {
         <div className="flex flex-col text-left leading-tight">
           <span className="font-bold text-base tracking-wider text-white">VALOGUESS</span>
           <span className="text-[10px] font-medium uppercase tracking-widest text-[#FF4655]">
-            AGENT ONBOARDING
+            ONBOARDING
           </span>
         </div>
       </Link>

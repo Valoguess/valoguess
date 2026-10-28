@@ -38,7 +38,6 @@ export function DisplayNameField({
       </div>
 
       {isAnonymous ? (
-        /* Anonymous User: Can only customize after Guest.[5-6letters] */
         <div className="space-y-2">
           <div className="relative flex items-center w-full h-12 bg-black/50 border border-white/15 rounded-xl overflow-hidden focus-within:border-[#FF4655] transition-colors">
             {/* Fixed, Locked Guest Prefix */}
@@ -47,13 +46,12 @@ export function DisplayNameField({
               <span>{guestPrefix}</span>
             </div>
 
-            {/* Editable Suffix */}
             <input
               type="text"
               value={displayNameSuffix}
               onChange={(e) => setDisplayNameSuffix(e.target.value)}
               placeholder=" (add custom name, e.g. Ace)"
-              maxLength={25}
+              maxLength={12}
               className="w-full h-full bg-transparent px-3 text-sm text-white placeholder-zinc-500 focus:outline-none font-sans"
             />
           </div>
@@ -66,7 +64,6 @@ export function DisplayNameField({
           </div>
         </div>
       ) : (
-        /* Non-Anonymous User: Standard Display Name Input */
         <div>
           <div className="relative">
             <input

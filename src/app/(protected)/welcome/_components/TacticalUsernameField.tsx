@@ -57,7 +57,7 @@ export function TacticalUsernameField({
           disabled={isAnonymous}
           readOnly={isAnonymous}
           placeholder={isAnonymous ? "guest_handle" : "e.g. shadow_reaper"}
-          maxLength={20}
+          maxLength={16}
           className={`w-full h-12 border rounded-xl pl-8 pr-10 text-sm font-sans transition-colors ${
             isAnonymous
               ? "bg-white/[0.03] border-white/10 text-zinc-400 cursor-not-allowed select-none opacity-80"
@@ -94,7 +94,6 @@ export function TacticalUsernameField({
         </div>
       </div>
 
-      {/* Status or Helper Message */}
       {isAnonymous ? (
         <p className="text-[11px] text-zinc-500 mt-1.5 leading-relaxed">
           Guest accounts cannot change their tactical username. Sign in with
@@ -118,7 +117,6 @@ export function TacticalUsernameField({
             </div>
           )}
 
-          {/* Suggestions if taken */}
           {usernameStatus === "taken" && suggestions.length > 0 && (
             <div className="mt-2.5 p-2.5 rounded-lg bg-[#FF4655]/10 border border-[#FF4655]/20 text-xs">
               <span className="text-zinc-300 font-medium block mb-1.5">
@@ -139,7 +137,6 @@ export function TacticalUsernameField({
             </div>
           )}
 
-          {/* Randomizer helper */}
           <div className="flex justify-between items-center mt-2">
             <span className="text-[11px] text-zinc-500">
               Letters, numbers, underscores and hyphens
