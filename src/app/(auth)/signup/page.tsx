@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, ArrowRight, CheckCircle2, Users } from "lucide-react";
+
 import { signIn, googleSignIn, useSession } from "@/lib/auth-client";
-import { AuthBackground } from "@/components/auth/AuthBackground";
-import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthCard } from "@/components/auth/AuthCard";
-import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { AuthHeader } from "@/components/auth/AuthHeader";
 import { MagicLinkForm } from "@/components/auth/MagicLinkForm";
+import { AuthBackground } from "@/components/auth/AuthBackground";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 
 function SignupContent() {
   const router = useRouter();
@@ -22,26 +23,25 @@ function SignupContent() {
   const [isLoadingGuest, setIsLoadingGuest] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Redirect when session is active (AuthInitializer handles store hydration)
   useEffect(() => {
     if (session?.user) {
       router.replace(redirectUrl);
     }
   }, [session, router, redirectUrl]);
 
-  // Google Sign-Up Handler
   const handleGoogleSignUp = async () => {
     setIsLoadingGoogle(true);
     setErrorMessage("");
     try {
       await googleSignIn("/welcome");
     } catch (err: any) {
-      setErrorMessage(err?.message || "Failed to initialize Google authentication.");
+      setErrorMessage(
+        err?.message || "Failed to initialize Google authentication.",
+      );
       setIsLoadingGoogle(false);
     }
   };
 
-  // Instant Guest Login Handler
   const handleGuestLogin = async () => {
     setIsLoadingGuest(true);
     setErrorMessage("");
@@ -62,33 +62,13 @@ function SignupContent() {
       <AuthHeader mode="signup" />
 
       <AuthCard
-        badgeText="Protocol Enrollment // New Agent"
-        title="Enlist in ValoGuess"
-        description="Sign up with Google, dispatch a tactical Magic Link to your email, or jump straight in as a guest."
+        badgeText="Valoguess Sign Up"
+        title="Sign Up to ValoGuess"
+        description=""
         errorMessage={errorMessage}
         footer={
           <>
-            {/* Tactical Highlights */}
-            <div className="grid grid-cols-2 gap-2.5">
-              <div className="p-3 rounded-xl border border-white/10 bg-black/40 flex items-start gap-2.5">
-                <CheckCircle2 className="h-4 w-4 text-mint shrink-0 mt-0.5" />
-                <div>
-                  <span className="text-xs font-semibold text-white block">Custom Handle</span>
-                  <span className="text-[10px] text-zinc-400">Claim your @username</span>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl border border-white/10 bg-black/40 flex items-start gap-2.5">
-                <Users className="h-4 w-4 text-violet shrink-0 mt-0.5" />
-                <div>
-                  <span className="text-xs font-semibold text-white block">Party Duels</span>
-                  <span className="text-[10px] text-zinc-400">Challenge friends 1v1</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Link to Login */}
-            <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-between text-xs">
+            <div className="pt-4 flex items-center justify-between text-xs">
               <span className="text-zinc-400">Already registered?</span>
               <Link
                 href="/login"
@@ -108,12 +88,16 @@ function SignupContent() {
           label="Sign Up with Google"
         />
 
-        <div className="relative py-1 flex items-center justify-center">
-          <div className="border-t border-white/10 w-full" />
-          <span className="bg-[#090d16] px-3 text-[11px] text-zinc-500 uppercase tracking-wider font-semibold">
+        <div className="flex items-center gap-3 py-1">
+          <span className="h-px flex-1 bg-white/10" />
+
+          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
             or sign up with email
           </span>
+
+          <span className="h-px flex-1 bg-white/10" />
         </div>
+
 
         <MagicLinkForm
           callbackURL="/welcome"
@@ -121,12 +105,16 @@ function SignupContent() {
           disabled={isLoadingGoogle || isLoadingGuest}
         />
 
-        <div className="relative py-1 flex items-center justify-center">
-          <div className="border-t border-white/10 w-full" />
-          <span className="bg-[#090d16] px-3 text-[11px] text-zinc-500 uppercase tracking-wider font-semibold">
+        <div className="flex items-center gap-3 py-1">
+          <span className="h-px flex-1 bg-white/10" />
+
+          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
             or play as guest
           </span>
+
+          <span className="h-px flex-1 bg-white/10" />
         </div>
+
 
         <button
           type="button"
@@ -140,13 +128,21 @@ function SignupContent() {
               <span>Creating Guest Profile...</span>
             </>
           ) : (
-            <span>Play as Guest (Instant Play)</span>
+            <span>Play as Guest</span>
           )}
         </button>
       </AuthCard>
 
       <div className="relative z-10 w-full text-center text-xs text-zinc-600 font-normal select-none shrink-0">
-        © 2026 ValoGuess • 1v1 Tactical Deduction Arena
+        © 2026 ValoGuess • Made with ❤️ by{" "}
+        <a
+          href="https://github.com/heyneerav"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#0091ff] hover:text-[#0091ff]/80 transition"
+        >
+          Neerav
+        </a>
       </div>
     </main>
   );
@@ -163,7 +159,9 @@ export default function SignupPage() {
               <path d="M32 15 L52 15 L37 75 Z" fill="#FF4655" />
               <path d="M58 15 L88 15 L78 85 Z" fill="#FF4655" />
             </svg>
-            <span className="text-xs text-zinc-400 tracking-wider">Loading Registration...</span>
+            <span className="text-xs text-zinc-400 tracking-wider">
+              Loading Registration...
+            </span>
           </div>
         </main>
       }

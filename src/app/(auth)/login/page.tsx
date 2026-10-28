@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { Loader2, ArrowRight } from "lucide-react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, ArrowRight, Zap, Shield } from "lucide-react";
+
 import { signIn, googleSignIn, useSession } from "@/lib/auth-client";
-import { AuthBackground } from "@/components/auth/AuthBackground";
-import { AuthHeader } from "@/components/auth/AuthHeader";
+
 import { AuthCard } from "@/components/auth/AuthCard";
-import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { AuthHeader } from "@/components/auth/AuthHeader";
 import { MagicLinkForm } from "@/components/auth/MagicLinkForm";
+import { AuthBackground } from "@/components/auth/AuthBackground";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 
 function LoginContent() {
   const router = useRouter();
@@ -22,26 +24,25 @@ function LoginContent() {
   const [isLoadingGuest, setIsLoadingGuest] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Redirect when session is active (AuthInitializer handles store hydration)
   useEffect(() => {
     if (session?.user && !session.user.isAnonymous) {
       router.replace(redirectUrl);
     }
   }, [session, router, redirectUrl]);
 
-  // Google Login Handler
   const handleGoogleLogin = async () => {
     setIsLoadingGoogle(true);
     setErrorMessage("");
     try {
       await googleSignIn(redirectUrl);
     } catch (err: any) {
-      setErrorMessage(err?.message || "Failed to initialize Google authentication.");
+      setErrorMessage(
+        err?.message || "Failed to initialize Google authentication.",
+      );
       setIsLoadingGoogle(false);
     }
   };
 
-  // Instant Guest Login Handler
   const handleGuestLogin = async () => {
     setIsLoadingGuest(true);
     setErrorMessage("");
@@ -62,39 +63,19 @@ function LoginContent() {
       <AuthHeader mode="login" />
 
       <AuthCard
-        badgeText="Tactical Access // Sign In"
+        badgeText="Valoguess Sign In"
         title="Sign In to ValoGuess"
-        description="Sign in with Google, request a tactical Magic Link via email, or jump straight into a duel as a guest."
+        description=""
         errorMessage={errorMessage}
         footer={
           <>
-            {/* Tactical Highlights */}
-            <div className="grid grid-cols-2 gap-2.5">
-              <div className="p-3 rounded-xl border border-white/10 bg-black/40 flex items-start gap-2.5">
-                <Zap className="h-4 w-4 text-mint shrink-0 mt-0.5" />
-                <div>
-                  <span className="text-xs font-semibold text-white block">Instant Access</span>
-                  <span className="text-[10px] text-zinc-400">Play matches immediately</span>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl border border-white/10 bg-black/40 flex items-start gap-2.5">
-                <Shield className="h-4 w-4 text-violet shrink-0 mt-0.5" />
-                <div>
-                  <span className="text-xs font-semibold text-white block">Cloud Sync</span>
-                  <span className="text-[10px] text-zinc-400">Save match history</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Link to Signup */}
-            <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-between text-xs">
+            <div className="pt-4 flex items-center justify-between text-xs">
               <span className="text-zinc-400">Don't have an account?</span>
               <Link
                 href="/signup"
                 className="text-[#FF4655] hover:text-[#ff6b77] font-semibold flex items-center gap-1 transition"
               >
-                <span>Enlist Account</span>
+                <span>Sign Up</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
@@ -108,11 +89,14 @@ function LoginContent() {
           label="Continue with Google"
         />
 
-        <div className="relative py-1 flex items-center justify-center">
-          <div className="border-t border-white/10 w-full" />
-          <span className="bg-[#090d16] px-3 text-[11px] text-zinc-500 uppercase tracking-wider font-semibold">
+        <div className="flex items-center gap-3 py-1">
+          <span className="h-px flex-1 bg-white/10" />
+
+          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
             or sign in with email
           </span>
+
+          <span className="h-px flex-1 bg-white/10" />
         </div>
 
         <MagicLinkForm
@@ -120,11 +104,14 @@ function LoginContent() {
           disabled={isLoadingGoogle || isLoadingGuest}
         />
 
-        <div className="relative py-1 flex items-center justify-center">
-          <div className="border-t border-white/10 w-full" />
-          <span className="bg-[#090d16] px-3 text-[11px] text-zinc-500 uppercase tracking-wider font-semibold">
+        <div className="flex items-center gap-3 py-1">
+          <span className="h-px flex-1 bg-white/10" />
+
+          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
             or play as guest
           </span>
+
+          <span className="h-px flex-1 bg-white/10" />
         </div>
 
         <button
@@ -139,13 +126,21 @@ function LoginContent() {
               <span>Creating Guest Profile...</span>
             </>
           ) : (
-            <span>Play as Guest (Instant Play)</span>
+            <span>Play as Guest</span>
           )}
         </button>
       </AuthCard>
 
       <div className="relative z-10 w-full text-center text-xs text-zinc-600 font-normal select-none shrink-0">
-        © 2026 ValoGuess • 1v1 Tactical Deduction Arena
+        © 2026 ValoGuess • Made with ❤️ by{" "}
+        <a
+          href="https://github.com/heyneerav"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#0091ff] hover:text-[#0091ff]/80 transition"
+        >
+          Neerav
+        </a>
       </div>
     </main>
   );
@@ -162,7 +157,9 @@ export default function LoginPage() {
               <path d="M32 15 L52 15 L37 75 Z" fill="#FF4655" />
               <path d="M58 15 L88 15 L78 85 Z" fill="#FF4655" />
             </svg>
-            <span className="text-xs text-zinc-400 tracking-wider">Loading Authentication...</span>
+            <span className="text-xs text-zinc-400 tracking-wider">
+              Loading Authentication...
+            </span>
           </div>
         </main>
       }

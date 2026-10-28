@@ -27,14 +27,14 @@ export function AuthHeader({ mode }: AuthHeaderProps) {
             VALOGUESS
           </span>
           <span className="text-[10px] font-medium uppercase tracking-widest text-[#FF4655]">
-            {isLogin ? "TACTICAL AUTHENTICATION" : "AGENT ENROLLMENT"}
+            {isLogin ? "Sign In" : "Sign Up"}
           </span>
         </div>
       </Link>
 
       <div className="flex items-center gap-2">
         <span className="text-xs text-zinc-500 font-medium hidden sm:inline">
-          {isLogin ? "New agent?" : "Already registered?"}
+          {isLogin ? "New User?" : "Already registered?"}
         </span>
         <Link
           href={isLogin ? "/signup" : "/login"}
