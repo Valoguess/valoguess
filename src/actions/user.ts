@@ -8,15 +8,45 @@ import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { db, user } from "@/db";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
-import { welcomeSchema } from "@/schemas/welcomeSchema";
 import { attempt } from "@/lib/rateLimit";
-import { uploadAvatar } from "@/schemas/uploadAvatar";
 import { deleteImageByUrl, uploadAvatarToCloudinary } from "@/lib/cloudinary";
+
+import { uploadAvatar } from "@/schemas/uploadAvatar";
+import { welcomeSchema } from "@/schemas/welcomeSchema";
+import { usernameSchema } from "@/schemas/usernameSchema";
 
 import {
   UpdateProfileSchema,
   updateProfileSchema,
 } from "@/schemas/updateProfile";
+
+export async function checkUsername(username: string) {
+  const parsed = usernameSchema.safeParse(username);
+
+  if (!parsed.success) {
+    return {
+      available: false,
+      message: parsed.error.issues[0]?.message ?? "Invalid username",
+    };
+  }
+  
+  if (!parsed.data) {
+    return {
+      available: false,
+      message: "Username cannot be empty",
+    };
+  }
+
+  const [existingUser] = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(eq(user.username, parsed.data))
+    .limit(1);
+
+  return existingUser
+    ? { available: false, message: "Username is already taken" }
+    : { available: true, message: "Username is available" };
+}
 
 export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
   const headers = await getHeaders();
@@ -56,6 +86,13 @@ export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
     } = {};
 
     if (nextName && nextName !== existing.name) {
+      if (user.isAnonymous && !nextUsername?.startsWith("Guest.")) {
+        return {
+          success: false,
+          error: "Anonymous users cannot change their name prefix",
+        };
+      }
+
       if (!canUpdate(existing.nameUpdatedAt)) {
         return {
           success: false,
@@ -68,10 +105,26 @@ export async function updateUser(formData: z.infer<typeof welcomeSchema>) {
     }
 
     if (nextUsername && nextUsername !== existing.username) {
+      if (user.isAnonymous) {
+        return {
+          success: false,
+          error: "Anonymous users cannot change their username",
+        };
+      }
+      
       if (!canUpdate(existing.usernameUpdatedAt)) {
         return {
           success: false,
           error: "You can change your username only once every 30 days",
+        };
+      }
+
+      const usernameCheck = await checkUsername(nextUsername);
+
+      if (!usernameCheck.available) {
+        return {
+          success: false,
+          error: usernameCheck.message,
         };
       }
 
@@ -202,7 +255,7 @@ export async function updateUserProfile(formData: UpdateProfileSchema) {
 
   try {
     const { banner, tagline } = updateProfileSchema.parse(formData);
-    
+
     if (!banner && !tagline) {
       return { success: true };
     }
