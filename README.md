@@ -111,10 +111,19 @@ Copy the example environment file to `.env` and fill in your own values:
 cp .env.example .env
 ```
 
-Apply the Drizzle schema to your local database and start Next.js:
+A docker compose file is given for PostgreSQL.
+``` bash
+docker compose up -d postgres
+```
+
+Apply the Drizzle schema to your local database:
 
 ``` bash
 pnpm exec drizzle-kit push
+```
+
+Start Nextjs Development Server:
+``` bash
 pnpm run dev
 ```
 
