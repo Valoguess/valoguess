@@ -26,14 +26,12 @@ export function ProfileAvatarUploadCard({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  // Image Cropper Modal State
   const [showCropModal, setShowCropModal] = useState(false);
   const [selectedRawFile, setSelectedRawFile] = useState<File | null>(null);
 
   const currentAvatar = previewUrl || user?.image || defaultIconPath;
   const hasCustomAvatar = Boolean(previewUrl || user?.image);
 
-  // Initial file select intercepts to show ImageCropModal
   const handleFileSelect = (file: File) => {
     if (!file) return;
 
@@ -51,9 +49,7 @@ export function ProfileAvatarUploadCard({
     setShowCropModal(true);
   };
 
-  // Called after user confirms and crops image in modal
   const uploadCroppedFile = async (croppedFile: File) => {
-    // Local instant preview of the cropped result
     const localUrl = URL.createObjectURL(croppedFile);
     setPreviewUrl(localUrl);
     setIsUploading(true);
@@ -68,7 +64,6 @@ export function ProfileAvatarUploadCard({
         throw new Error(res.error || "Failed to upload avatar.");
       }
 
-      // Update authStore
       if (user) {
         setUser({
           ...user,
@@ -126,18 +121,13 @@ export function ProfileAvatarUploadCard({
 
   return (
     <div className="bg-[#080B10]/70 border border-white/10 rounded-sm p-6 text-left space-y-5 relative overflow-hidden animate-fade-in shadow-xl">
-      {/* Red Accent Header Edge */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-accent to-transparent" />
 
-      {/* Header Info */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="font-valorant text-sm tracking-wider text-white flex items-center gap-2">
-              <Camera className="h-4 w-4 text-accent" /> PROFILE IMAGE / TACTICAL AVATAR
-            </span>
-            <span className="text-[9px] font-mono uppercase tracking-widest text-mint bg-mint/10 border border-mint/20 px-2 py-0.5 rounded">
-              CLOUDINARY CDN
+              <Camera className="h-4 w-4 text-accent" /> PROFILE AVATAR
             </span>
           </div>
           <p className="text-xs text-zinc-400 leading-relaxed">
@@ -152,9 +142,7 @@ export function ProfileAvatarUploadCard({
         )}
       </div>
 
-      {/* Main Avatar Controls Row */}
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pt-1">
-        {/* Avatar Display Frame with Hover Overlay */}
         <div className="relative group shrink-0">
           <div
             className={cn(
@@ -170,7 +158,6 @@ export function ProfileAvatarUploadCard({
               unoptimized={currentAvatar.startsWith("blob:")}
             />
 
-            {/* Loading Overlay */}
             {isUploading && (
               <div className="absolute inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center text-white space-y-1">
                 <Loader2 className="h-6 w-6 animate-spin text-accent" />
@@ -178,7 +165,6 @@ export function ProfileAvatarUploadCard({
               </div>
             )}
 
-            {/* Online indicator */}
             <div className="absolute bottom-1 right-1 h-4 w-4 z-100 bg-mint rounded-full border-t border-l border-black shadow-[0_0_8px_#3cf2c4]" />
           </div>
 
@@ -195,7 +181,6 @@ export function ProfileAvatarUploadCard({
           )}
         </div>
 
-        {/* Dropzone & Action Buttons */}
         <div className="flex-1 w-full space-y-3">
           <div
             onDragOver={(e) => {

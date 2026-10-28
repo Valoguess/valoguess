@@ -18,11 +18,9 @@ export function LobbyClient() {
 
   const [savedUsername, setSavedUsername] = useState<string>("AGENT");
 
-  // Modals state
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
 
-  // Match Settings State (persisted in localStorage via Zustand)
   const {
     questionMode,
     setQuestionMode,
@@ -38,7 +36,6 @@ export function LobbyClient() {
     setShowMoreOptions,
   } = useGameSettingsStore();
 
-  // Shared Home Context (Party, Friends, Invites)
   const {
     party,
     friendsList,
@@ -71,7 +68,6 @@ export function LobbyClient() {
 
   return (
     <div className="relative h-full w-full flex flex-col justify-between select-none overflow-y-auto lg:overflow-hidden font-body">
-      {/* Background Graphics */}
       <div className="absolute inset-0 z-0 select-none pointer-events-none">
         <Image
           src="/bg/bg2.webp"
@@ -85,12 +81,9 @@ export function LobbyClient() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,#040609_90%)]" />
       </div>
 
-      {/* 1. Sub-Header Bar */}
       <LobbySubheader party={party} />
 
-      {/* 2. Main Workspace: Left Control Panel & Center Player Slots */}
       <div className="relative z-10 flex-1 flex flex-col-reverse lg:flex-row items-center lg:items-stretch justify-between gap-3 sm:gap-4 lg:gap-5 px-3 sm:px-6 lg:pl-8 lg:pr-6 py-2 min-h-0 w-full">
-        {/* Left Column: Gamemode Selector & Party Controls */}
         <aside className="w-full max-w-sm sm:max-w-md lg:w-70 lg:max-w-none flex flex-col justify-center shrink-0 select-none z-20 lg:h-full lg:min-h-0 gap-2 sm:gap-2.5 pb-2 lg:pb-1">
           <LobbyLeftPanel
             questionMode={questionMode}
@@ -126,7 +119,6 @@ export function LobbyClient() {
           />
         </aside>
 
-        {/* Center Column: Player Podium Slots */}
         <div className="w-full flex-1 flex items-center justify-center min-w-0 py-1 lg:py-0">
           <LobbyCenterSlots
             party={party}
@@ -142,10 +134,8 @@ export function LobbyClient() {
         </div>
       </div>
 
-      {/* Floating Party Chat */}
       <PartyChatOverlay className="bottom-6 left-6" />
 
-      {/* Custom Game Settings Modal */}
       <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
         <DialogContent className="bg-transparent border-none max-w-xl p-0 shadow-none outline-none">
           <div className="relative w-full h-135">
@@ -168,7 +158,6 @@ export function LobbyClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Online Friends Invite Dialog */}
       <InviteFriendsDialog
         isOpen={isInviteDialogOpen}
         onOpenChange={setIsInviteDialogOpen}

@@ -43,33 +43,26 @@ export default function SettingsPage() {
     );
   }, [user, session]);
 
-  // Form states initialized directly from user schema
   const [name, setName] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [tagline, setTagline] = useState<string>("");
   const [selectedBannerId, setSelectedBannerId] = useState<string>("omen");
 
-  // Cooldown states calculated from database timestamps
   const [nameCooldownDays, setNameCooldownDays] = useState<number>(0);
   const [usernameCooldownDays, setUsernameCooldownDays] = useState<number>(0);
 
-  // Banner filter & search
   const [selectedRole, setSelectedRole] = useState<string>("ALL");
   const [bannerSearch, setBannerSearch] = useState<string>("");
 
-  // Navigation tab
   const [activeTab, setActiveTab] = useState<"identity" | "banner" | "privacy">(
     "identity",
   );
 
-  // Save state
   const [isSaving, setIsSaving] = useState(false);
 
-  // Logout modal state
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Load initial settings from user store and database fields
   useEffect(() => {
     const initialName = user?.name || "AGENT";
     setName(initialName);
@@ -90,14 +83,12 @@ export default function SettingsPage() {
     setUsernameCooldownDays(getDaysRemaining(user?.usernameUpdatedAt));
   }, [user]);
 
-  // Selected banner object
   const currentBanner = useMemo(() => {
     return (
       AGENT_BANNERS.find((b) => b.id === selectedBannerId) || AGENT_BANNERS[0]!
     );
   }, [selectedBannerId]);
 
-  // Filtered banners list
   const filteredBanners = useMemo(() => {
     return AGENT_BANNERS.filter((b) => {
       const matchesRole =
@@ -110,7 +101,6 @@ export default function SettingsPage() {
     });
   }, [selectedRole, bannerSearch]);
 
-  // Save handler using database server actions
   const handleSaveSettings = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setIsSaving(true);
@@ -122,8 +112,7 @@ export default function SettingsPage() {
       const nextBanner = selectedBannerId;
 
       if (session?.user?.id) {
-        // Save identity changes
-        const { data, error } = await token()
+        const { data, error } = await token();
 
         if (nextName !== user?.name || nextUsername !== user?.username) {
           const res = await updateUser({
@@ -136,7 +125,6 @@ export default function SettingsPage() {
           }
         }
 
-        // Save profile customisations (banner, tagline)
         if (nextBanner !== user?.banner || nextTagline !== user?.tagline) {
           const res = await updateUserProfile({
             banner: nextBanner,
@@ -179,7 +167,6 @@ export default function SettingsPage() {
     }
   };
 
-  // Logout handler
   const handleLogout = async () => {
     setIsLoggingOut(true);
     toast.loading("Signing out...", { id: "logout-toast" });
@@ -197,7 +184,6 @@ export default function SettingsPage() {
 
   return (
     <div className="relative min-h-full w-full text-white flex flex-col font-body selection:bg-accent selection:text-white">
-      {/* Background artwork */}
       <div className="fixed inset-0 z-0 select-none pointer-events-none">
         <Image
           src="/bg/bg2.webp"
@@ -211,9 +197,7 @@ export default function SettingsPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,transparent_20%,#040609_90%)]" />
       </div>
 
-      {/* Main Settings Content */}
       <div className="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 py-8 flex flex-col gap-8 pb-16">
-        {/* Live Player Card Preview */}
         <ProfileCardPreview
           currentBanner={currentBanner}
           name={name}
@@ -222,7 +206,6 @@ export default function SettingsPage() {
           avatarUrl={user?.image}
         />
 
-        {/* Tab Selection */}
         <div className="flex items-center border-b border-white/10 gap-1.5 sm:gap-2 pb-1 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setActiveTab("identity")}
@@ -264,7 +247,6 @@ export default function SettingsPage() {
           </button>
         </div>
 
-        {/* Tab Panels */}
         {activeTab === "identity" && (
           <IdentitySettingsTab
             isAnonymous={isAnonymous}
@@ -314,7 +296,6 @@ export default function SettingsPage() {
         )}
       </div>
 
-      {/* Logout confirmation dialog */}
       <LogoutConfirmationModal
         isOpen={showLogoutModal}
         onOpenChange={setShowLogoutModal}

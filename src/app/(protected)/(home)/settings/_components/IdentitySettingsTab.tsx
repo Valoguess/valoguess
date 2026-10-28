@@ -35,14 +35,12 @@ export function IdentitySettingsTab({
 }: IdentitySettingsTabProps) {
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* AVATAR UPLOAD SECTION */}
       <ProfileAvatarUploadCard
         isAnonymous={isAnonymous}
         defaultIconPath={defaultIconPath}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* 1. USERNAME FIELD */}
       <div className="bg-[#080B10]/70 border border-white/10 rounded-sm p-6 flex flex-col justify-between text-left space-y-4">
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
@@ -50,7 +48,6 @@ export function IdentitySettingsTab({
               <AtSign className="h-4 w-4 text-accent" /> UNIQUE USERNAME
             </span>
 
-            {/* Cooldown Status Badge */}
             {isAnonymous ? (
               <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF4655] bg-[#FF4655]/10 px-2 py-0.5 rounded border border-[#FF4655]/30">
                 LOCKED (GUEST)
