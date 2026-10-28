@@ -17,7 +17,6 @@ export const DefaultGuessAgentSettings: GuessAgentSettings = {
   timePerRound: -1,
 };
 
-// Alias for backwards compatibility
 export type Settings = GuessAgentSettings;
 export const DefaultSettings = DefaultGuessAgentSettings;
 

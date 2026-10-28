@@ -1,7 +1,6 @@
 import { create } from "zustand";
 
 interface PresenceStore {
-  // Map of userId -> online boolean
   presence: Record<string, boolean>;
   setFriendsPresence: (friends: { userId: string; online: boolean }[]) => void;
   setSinglePresence: (userId: string, online: boolean) => void;

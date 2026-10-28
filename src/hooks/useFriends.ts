@@ -1,11 +1,16 @@
 "use client";
 
+import { toast } from "sonner";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { StoreUser } from "@/store/authStore";
-import { Friend, FriendRequest } from "@/types/friends";
+
+import { logger } from "@/lib/logger";
 import { DEFAULT_AVATARS } from "@/consts";
-import { usePresenceStore } from "@/store/presenceStore";
+import { Friend, FriendRequest } from "@/types/friends";
+
+import { StoreUser } from "@/store/authStore";
 import { useFriendStore } from "@/store/friendStore";
+import { usePresenceStore } from "@/store/presenceStore";
+
 import {
   sendFriendRequestSocket,
   acceptFriendRequestSocket,
@@ -19,7 +24,6 @@ import {
   cancelFriendRequest,
   removeFriend,
 } from "@/actions/friends";
-import { toast } from "sonner";
 
 export function useFriends(user: StoreUser | null) {
   const [friendInput, setFriendInput] = useState("");
@@ -36,9 +40,7 @@ export function useFriends(user: StoreUser | null) {
     (state) => state.initialFriendsData,
   );
 
-  // Track processed event timestamp to prevent duplicate processing on navigation / remount
   const lastProcessedTimestampRef = useRef<number>(0);
-  // Track requests locally accepted or declined by this user to prevent echo toasts
   const locallyAcceptedIdsRef = useRef<Set<string>>(new Set());
   const locallyDeclinedIdsRef = useRef<Set<string>>(new Set());
 
@@ -47,8 +49,8 @@ export function useFriends(user: StoreUser | null) {
       rawFriends.length > 0
         ? rawFriends
         : user && !user.isAnonymous && initialFriendsData
-        ? initialFriendsData.friends
-        : [];
+          ? initialFriendsData.friends
+          : [];
 
     return list.map((f) => {
       const isOnline =
@@ -144,16 +146,14 @@ export function useFriends(user: StoreUser | null) {
 
       setRawFriends(friends);
       setFriendRequests([...receivedRequests, ...sentRequests]);
-    } catch {
-      // Graceful fallback on network/session error
+    } catch (error) {
+      logger.error({ error }, "Failed to fetch friends");
     }
   }, [user]);
 
-  // Handle real-time friend events from socket
   useEffect(() => {
     if (!lastFriendEvent || !lastFriendEvent.timestamp) return;
 
-    // Ignore events that have already been processed to prevent re-firing on navigation/remount
     if (lastFriendEvent.timestamp <= lastProcessedTimestampRef.current) return;
     lastProcessedTimestampRef.current = lastFriendEvent.timestamp;
 
@@ -175,7 +175,6 @@ export function useFriends(user: StoreUser | null) {
           },
         ]);
       } else {
-        // Fallback to fetch if socket server didn't include requester details
         fetchFriends();
       }
     } else if (lastFriendEvent.type === "request_accepted") {
@@ -183,9 +182,8 @@ export function useFriends(user: StoreUser | null) {
       setFriendRequests((prev) => prev.filter((r) => r.id !== targetUserId));
       fetchFriends();
 
-      // Only display the toast if the other player accepted our request,
-      // not when we were the one who clicked accept locally.
-      const wasLocallyAccepted = locallyAcceptedIdsRef.current.has(targetUserId);
+      const wasLocallyAccepted =
+        locallyAcceptedIdsRef.current.has(targetUserId);
       if (wasLocallyAccepted) {
         locallyAcceptedIdsRef.current.delete(targetUserId);
       } else {
@@ -195,9 +193,8 @@ export function useFriends(user: StoreUser | null) {
       const targetUserId = lastFriendEvent.userId;
       setFriendRequests((prev) => prev.filter((r) => r.id !== targetUserId));
 
-      // Only display the toast if the other player declined our request,
-      // not when we were the one who clicked decline locally.
-      const wasLocallyDeclined = locallyDeclinedIdsRef.current.has(targetUserId);
+      const wasLocallyDeclined =
+        locallyDeclinedIdsRef.current.has(targetUserId);
       if (wasLocallyDeclined) {
         locallyDeclinedIdsRef.current.delete(targetUserId);
       } else {
@@ -205,11 +202,9 @@ export function useFriends(user: StoreUser | null) {
       }
     }
 
-    // Clear consumed event from the store so it never lingers
     clearLastFriendEvent();
   }, [lastFriendEvent, fetchFriends, clearLastFriendEvent]);
 
-  // Synchronize friends with socket initialFriendsData and auth user state
   useEffect(() => {
     if (!user || user.isAnonymous) {
       setRawFriends([]);
@@ -223,7 +218,6 @@ export function useFriends(user: StoreUser | null) {
     }
   }, [user, initialFriendsData]);
 
-  // Fallback: only call getFriendships if socket has not delivered friends sync after a grace period
   useEffect(() => {
     if (!user || user.isAnonymous) return;
     if (initialFriendsData) return;
@@ -237,7 +231,6 @@ export function useFriends(user: StoreUser | null) {
     return () => clearTimeout(timeout);
   }, [user, initialFriendsData, fetchFriends]);
 
-  // Add friend
   const handleAddFriend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!friendInput.trim() || isAddingFriend) return;
@@ -296,12 +289,12 @@ export function useFriends(user: StoreUser | null) {
     } catch (err: any) {
       const msg = err?.message || "Failed to send friend request";
       toast.error(msg);
+      logger.error({ err }, "Error sending friend request");
     } finally {
       setIsAddingFriend(false);
     }
   };
 
-  // Accept incoming request
   const handleAcceptRequest = async (requestId: string) => {
     locallyAcceptedIdsRef.current.add(requestId);
 
@@ -346,7 +339,6 @@ export function useFriends(user: StoreUser | null) {
     }
   };
 
-  // Decline incoming request
   const handleDeclineRequest = async (requestId: string) => {
     locallyDeclinedIdsRef.current.add(requestId);
     setFriendRequests((prev) => prev.filter((r) => r.id !== requestId));
@@ -376,7 +368,6 @@ export function useFriends(user: StoreUser | null) {
     }
   };
 
-  // Cancel outgoing request
   const handleCancelRequest = async (requestId: string) => {
     setFriendRequests((prev) => prev.filter((r) => r.id !== requestId));
 
@@ -397,7 +388,6 @@ export function useFriends(user: StoreUser | null) {
     }
   };
 
-  // Remove friend
   const handleRemoveFriend = async (friendId: string) => {
     setRawFriends((prev) => prev.filter((f) => f.id !== friendId));
 
@@ -418,7 +408,6 @@ export function useFriends(user: StoreUser | null) {
     }
   };
 
-  // Invite friend
   const handleInviteFriend = (friend: Friend) => {
     const msg = `Invited ${friend.name} to party!`;
     toast.success(msg);

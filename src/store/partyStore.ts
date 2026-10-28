@@ -1,13 +1,16 @@
 import { create } from "zustand";
+import { logger } from "@/lib/logger";
 import { Party } from "@/types/party";
 import { Message } from "@/types/chat";
 
-// Purge any legacy stale partyStore from localStorage
 if (typeof window !== "undefined") {
   try {
     localStorage.removeItem("partyStore");
-  } catch {
-    // Ignore storage errors
+  } catch (error) {
+    logger.error(
+      { error },
+      "Failed to purge legacy partyStore from localStorage",
+    );
   }
 }
 

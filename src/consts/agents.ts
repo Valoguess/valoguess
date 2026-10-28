@@ -8,7 +8,6 @@ export interface Agent {
   iconPath: string;
 }
 
-// Alias for settings and player cards
 export type AgentBanner = Agent;
 
 export const AGENTS: Agent[] = [

@@ -1,12 +1,15 @@
 import { create } from "zustand";
+import { logger } from "@/lib/logger";
 import { GuessAgentGameDTO } from "@/types/game";
 
-// Purge any legacy stale gameStore from localStorage
 if (typeof window !== "undefined") {
   try {
     localStorage.removeItem("gameStore");
-  } catch {
-    // Ignore storage errors
+  } catch (error) {
+    logger.error(
+      { error },
+      "Failed to purge legacy gameStore from localStorage",
+    );
   }
 }
 

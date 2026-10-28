@@ -59,7 +59,6 @@ export async function attempt(
     const currentWindow = Math.floor(now / windowSeconds);
     const previousWindow = currentWindow - 1;
 
-    // Hash tags ensure both keys map to the same cluster slot
     const currentKey = `{${key}}:${currentWindow}`;
     const previousKey = `{${key}}:${previousWindow}`;
 
