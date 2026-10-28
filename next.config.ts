@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-   async redirects() {
+  async redirects() {
     return [
       {
         source: "/",
@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   serverExternalPackages: ["pino", "pino-pretty"],
   images: {
+    qualities: [75, 90, 100],
     remotePatterns: [
       {
         protocol: "https",
