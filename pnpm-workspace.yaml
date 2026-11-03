@@ -13,3 +13,6 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-arm64-msvc@16.4.3'
   - '@next/swc-win32-x64-msvc@16.4.3'
   - next@16.4.3
+overrides:
+  minimatch: "^11.0.1"
+  deepmerge: "4.3.1"
