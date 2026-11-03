@@ -1,11 +1,6 @@
 import { db, user } from "@/db";
 import { eq, or, ilike } from "drizzle-orm";
 
-export async function getUserById(userId: string) {
-  const userData = await db.select().from(user).where(eq(user.id, userId)).limit(1);
-  return userData || null;
-}
-
 export async function getUserByUsername(username: string) {
   const clean = username.trim().replace(/^@/, "");
   if (!clean) return null;
