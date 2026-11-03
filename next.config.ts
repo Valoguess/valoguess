@@ -35,7 +35,6 @@ const nextConfig: NextConfig = {
   },
   cacheComponents: true,
   partialPrefetching: true,
-  output: "standalone",
   serverExternalPackages: ["pino", "pino-pretty"],
   images: {
     qualities: [75, 90, 100],
