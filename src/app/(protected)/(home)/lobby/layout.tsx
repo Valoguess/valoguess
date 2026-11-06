@@ -3,14 +3,14 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Lobby",
   description:
-    "ValoGuess match lobby. Join parties, invite online friends, configure game modes, and prepare for tactical 1v1 agent deduction duels.",
+    "ValoGuess match lobby. Join parties, invite online friends, configure game modes, and challenge opponents in 1v1 Valorant agent guessing matches.",
   alternates: {
     canonical: "/lobby",
   },
   openGraph: {
     title: "Lobby | ValoGuess",
     description:
-      "Join match lobbies and challenge friends in real-time tactical 1v1 Valorant agent deduction.",
+      "Join match lobbies and challenge friends to real-time 1v1 Valorant guess-the-agent matches.",
     url: "/lobby",
   },
 };

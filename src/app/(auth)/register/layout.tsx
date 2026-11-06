@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Register | ValoGuess",
     description:
-      "Register for ValoGuess to challenge friends in real-time 1v1 tactical deduction.",
+      "Register for ValoGuess to challenge friends in real-time 1v1 agent guessing matches.",
     url: "/register",
   },
 };

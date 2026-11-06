@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Settings & Profile",
   description:
-    "Customize your ValoGuess agent banner, tactical tagline, display name, and account preferences.",
+    "Customize your ValoGuess agent banner, player tagline, display name, and account preferences.",
   robots: {
     index: false,
     follow: false,

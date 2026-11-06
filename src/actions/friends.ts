@@ -93,7 +93,6 @@ export async function sendFriendRequest(targetUsername: string) {
       avatar: targetUser.image || DEFAULT_AVATARS.USER,
     };
 
-    // Check existing friendship
     const existing = await getFriendshipService(currUser.id, targetUser.id);
 
     if (existing) {
@@ -111,7 +110,6 @@ export async function sendFriendRequest(targetUsername: string) {
             error: `Friend request to ${displayName} is already pending`,
           };
         } else {
-          // The target user already sent a pending request to current user, auto-accept it!
           await db
             .update(friendship)
             .set({ status: "ACCEPTED" })
@@ -127,7 +125,6 @@ export async function sendFriendRequest(targetUsername: string) {
         }
       }
 
-      // If status was DECLINED, reset to PENDING with current user as requester
       await db
         .update(friendship)
         .set({

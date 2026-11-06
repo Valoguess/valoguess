@@ -9,6 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/play/",
           "/play",
+          "/game/",
           "/game",
           "/api/",
           "/settings",

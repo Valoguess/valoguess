@@ -32,7 +32,6 @@ export async function getMatchHistoryAction(
 
     const data = await getPlayerGameHistory(currUser.id, limit, parsedCursor);
 
-    // Format dates to ISO strings for safe serialization across server-client boundary
     const serializedItems = data.items.map((item) => ({
       ...item,
       startedAt: item.startedAt ? new Date(item.startedAt).toISOString() : null,

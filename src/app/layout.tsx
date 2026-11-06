@@ -40,11 +40,11 @@ const SITE_URL = "https://valoguess.fun";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "ValoGuess — The Tactical 1v1 Valorant Guess Who Game",
+    default: "ValoGuess — 1v1 Valorant Guess the Agent Game",
     template: "%s | ValoGuess",
   },
   description:
-    "Play ValoGuess: A real-time 1v1 multiplayer deduction game based on Valorant. Pick your secret agent, ask strategic questions, eliminate suspects, and outsmart your opponent!",
+    "Play ValoGuess: A real-time 1v1 multiplayer guess-the-agent game based on Valorant. Pick your secret agent, ask strategic questions, eliminate suspects, and guess who your opponent picked!",
   applicationName: "ValoGuess",
   authors: [{ name: "ValoGuess", url: SITE_URL }],
   generator: "Next.js",
@@ -54,13 +54,13 @@ export const metadata: Metadata = {
     "Valorant Guess Who",
     "Valorant guessing game",
     "Valorant trivia",
-    "Valorant 1v1 duel",
+    "Valorant 1v1",
     "Valorant agent guesser",
-    "Valorant mini game",
-    "tactical guessing game",
-    "online deduction game",
+    "guess the agent",
     "guess the secret agent",
+    "Valorant mini game",
     "Valorant agents game",
+    "online guessing game",
   ],
   referrer: "origin-when-cross-origin",
   creator: "ValoGuess",
@@ -74,9 +74,9 @@ export const metadata: Metadata = {
     canonical: SITE_URL,
   },
   openGraph: {
-    title: "ValoGuess — The Tactical 1v1 Valorant Guess Who Game",
+    title: "ValoGuess — 1v1 Valorant Guess the Agent Game",
     description:
-      "Challenge friends in real-time 1v1 tactical deduction! Ask strategic questions, narrow down agent abilities, and guess the secret agent before your opponent does.",
+      "Challenge friends in real-time 1v1 agent guessing matches! Ask questions, narrow down agent abilities, and guess the secret agent before your opponent does.",
     url: SITE_URL,
     siteName: "ValoGuess",
     images: [
@@ -84,7 +84,7 @@ export const metadata: Metadata = {
         url: "/logo.webp",
         width: 1200,
         height: 630,
-        alt: "ValoGuess - Tactical 1v1 Valorant Guess Who Game",
+        alt: "ValoGuess - 1v1 Valorant Guess the Agent Game",
       },
     ],
     locale: "en_US",
@@ -92,9 +92,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ValoGuess — The Tactical 1v1 Valorant Guess Who Game",
+    title: "ValoGuess — 1v1 Valorant Guess the Agent Game",
     description:
-      "Play 1v1 tactical agent deduction online on valoguess.fun! Ask questions, eliminate suspects, and guess your opponent's secret agent.",
+      "Play 1v1 Valorant guess-the-agent online on valoguess.fun! Ask questions, eliminate suspects, and guess your opponent's secret agent.",
     images: ["/logo.webp"],
     creator: "@valoguess",
   },
@@ -136,7 +136,7 @@ const jsonLd = {
       url: SITE_URL,
       name: "ValoGuess",
       description:
-        "The ultimate multiplayer 1v1 tactical deduction game inspired by Valorant.",
+        "The ultimate multiplayer 1v1 guess-the-agent game inspired by Valorant.",
       publisher: {
         "@type": "Organization",
         name: "ValoGuess",

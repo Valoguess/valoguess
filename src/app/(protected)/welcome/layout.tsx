@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Welcome Recruit",
-  description: "Set up your agent callsign and initialize your ValoGuess tactical dossier.",
+  title: "Welcome",
+  description: "Set up your player profile and choose your username on ValoGuess.",
   robots: {
     index: false,
     follow: false,

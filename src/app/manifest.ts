@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "ValoGuess — Tactical 1v1 Valorant Guess Who Game",
+    name: "ValoGuess — 1v1 Valorant Guess the Agent Game",
     short_name: "ValoGuess",
     description:
-      "Play ValoGuess: A real-time 1v1 multiplayer deduction game based on Valorant. Pick your secret agent, ask strategic questions, eliminate suspects, and outsmart your opponent!",
+      "Play ValoGuess: A real-time 1v1 multiplayer guess-the-agent game based on Valorant. Pick your secret agent, ask questions, eliminate agents, and guess who your opponent picked!",
     start_url: "/",
     scope: "/",
     display: "standalone",
