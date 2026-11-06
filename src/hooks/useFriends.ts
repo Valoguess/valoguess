@@ -10,6 +10,7 @@ import { Friend, FriendRequest } from "@/types/friends";
 import { StoreUser } from "@/store/authStore";
 import { useFriendStore } from "@/store/friendStore";
 import { usePresenceStore } from "@/store/presenceStore";
+import { usePartyStore } from "@/store/partyStore";
 
 import {
   sendFriendRequestSocket,
@@ -25,6 +26,11 @@ import {
   removeFriend,
 } from "@/actions/friends";
 
+function sanitizeUsername(username?: string) {
+  if (!username) return undefined;
+  return username.startsWith("@") ? username : `@${username}`;
+}
+
 export function useFriends(user: StoreUser | null) {
   const [friendInput, setFriendInput] = useState("");
   const [rawFriends, setRawFriends] = useState<Friend[]>([]);
@@ -32,12 +38,13 @@ export function useFriends(user: StoreUser | null) {
   const [isAddingFriend, setIsAddingFriend] = useState(false);
 
   const presence = usePresenceStore((state) => state.presence);
+  const party = usePartyStore((state) => state.party);
   const lastFriendEvent = useFriendStore((state) => state.lastFriendEvent);
   const clearLastFriendEvent = useFriendStore(
-    (state) => state.clearLastFriendEvent,
+    (state) => state.clearLastFriendEvent
   );
   const initialFriendsData = useFriendStore(
-    (state) => state.initialFriendsData,
+    (state) => state.initialFriendsData
   );
 
   const lastProcessedTimestampRef = useRef<number>(0);
@@ -49,21 +56,49 @@ export function useFriends(user: StoreUser | null) {
       rawFriends.length > 0
         ? rawFriends
         : user && !user.isAnonymous && initialFriendsData
-          ? initialFriendsData.friends
-          : [];
+        ? initialFriendsData.friends
+        : [];
+
+    const partyMemberIds = new Set(
+      party?.members?.map((m) => m.id) ?? []
+    );
 
     return list.map((f) => {
-      const isOnline =
-        presence[f.id] !== undefined
-          ? Boolean(presence[f.id])
-          : f.status === "online";
+      const pres = presence[f.id];
+      const isPartyMember = partyMemberIds.has(f.id);
+
+      let status: "online" | "ingame" | "offline";
+      if (pres !== undefined) {
+        status =
+          typeof pres === "boolean"
+            ? pres
+              ? "online"
+              : "offline"
+            : pres;
+      } else if (f.status === "ingame" || f.status === "online") {
+        status = f.status;
+      } else {
+        status = "offline";
+      }
+
+      if (isPartyMember && status === "offline") {
+        status = "online";
+      }
+
       return {
         ...f,
-        status: isOnline ? ("online" as const) : ("offline" as const),
-        activity: isOnline ? "In Lobby" : "Offline",
+        status,
+        activity:
+          status === "ingame"
+            ? "In Match"
+            : status === "online"
+            ? isPartyMember
+              ? "In Your Party"
+              : "In Lobby"
+            : "Offline",
       };
     });
-  }, [rawFriends, user, initialFriendsData, presence]);
+  }, [rawFriends, user, initialFriendsData, presence, party?.members]);
 
   const fetchFriends = useCallback(async () => {
     if (!user || user.isAnonymous) {
@@ -88,15 +123,17 @@ export function useFriends(user: StoreUser | null) {
               : friendship.requester;
 
           if (friendUser) {
+            const pres = usePresenceStore.getState().presence[friendUser.id];
+            const isOnline =
+              pres === "online" ||
+              pres === "ingame";
             friends.push({
               id: friendUser.id,
               name: friendUser.name || "Player",
-              username: friendUser.username
-                ? `@${friendUser.username}`
-                : undefined,
+              username: sanitizeUsername(friendUser.username),
               avatar: friendUser.image || DEFAULT_AVATARS.USER,
-              status: "offline",
-              activity: "Offline",
+              status: pres === "ingame" ? "ingame" : isOnline ? "online" : "offline",
+              activity: pres === "ingame" ? "In Match" : isOnline ? "In Lobby" : "Offline",
             });
           }
           continue;
@@ -110,9 +147,7 @@ export function useFriends(user: StoreUser | null) {
             receivedRequests.push({
               id: friendship.requester.id,
               name: friendship.requester.name || "Player",
-              username: friendship.requester.username
-                ? `@${friendship.requester.username}`
-                : undefined,
+              username: sanitizeUsername(friendship.requester.username),
               avatar: friendship.requester.image || DEFAULT_AVATARS.OPPONENT,
               type: "incoming",
               createdAt: friendship.createdAt
@@ -131,9 +166,7 @@ export function useFriends(user: StoreUser | null) {
             sentRequests.push({
               id: friendship.receiver.id,
               name: friendship.receiver.name || "Player",
-              username: friendship.receiver.username
-                ? `@${friendship.receiver.username}`
-                : undefined,
+              username: sanitizeUsername(friendship.receiver.username),
               avatar: friendship.receiver.image || DEFAULT_AVATARS.GUEST,
               type: "outgoing",
               createdAt: friendship.createdAt
@@ -161,25 +194,35 @@ export function useFriends(user: StoreUser | null) {
       toast.info("New friend request received!");
       if (lastFriendEvent.requester) {
         const req = lastFriendEvent.requester;
+        const newReq: FriendRequest = {
+          id: req.id,
+          name: req.name || "Player",
+          username: sanitizeUsername(req.username),
+          avatar: req.avatar || DEFAULT_AVATARS.OPPONENT,
+          type: "incoming",
+          createdAt: new Date().toISOString(),
+        };
         setFriendRequests((prev) => [
           ...prev.filter((r) => r.id !== req.id),
-          {
-            id: req.id,
-            name: req.name || "Player",
-            username: req.username
-              ? `@${req.username.replace(/^@/, "")}`
-              : undefined,
-            avatar: req.avatar || DEFAULT_AVATARS.OPPONENT,
-            type: "incoming",
-            createdAt: new Date().toISOString(),
-          },
+          newReq,
         ]);
+        const currentInitial = useFriendStore.getState().initialFriendsData;
+        if (currentInitial) {
+          useFriendStore.getState().setInitialFriendsData({
+            friends: currentInitial.friends,
+            requests: [
+              ...currentInitial.requests.filter((r) => r.id !== req.id),
+              newReq,
+            ],
+          });
+        }
       } else {
         fetchFriends();
       }
     } else if (lastFriendEvent.type === "request_accepted") {
       const targetUserId = lastFriendEvent.userId;
       setFriendRequests((prev) => prev.filter((r) => r.id !== targetUserId));
+      usePresenceStore.getState().setSinglePresence(targetUserId, true);
       fetchFriends();
 
       const wasLocallyAccepted =
@@ -192,6 +235,13 @@ export function useFriends(user: StoreUser | null) {
     } else if (lastFriendEvent.type === "request_declined") {
       const targetUserId = lastFriendEvent.userId;
       setFriendRequests((prev) => prev.filter((r) => r.id !== targetUserId));
+      const currentInitial = useFriendStore.getState().initialFriendsData;
+      if (currentInitial) {
+        useFriendStore.getState().setInitialFriendsData({
+          friends: currentInitial.friends,
+          requests: currentInitial.requests.filter((r) => r.id !== targetUserId),
+        });
+      }
 
       const wasLocallyDeclined =
         locallyDeclinedIdsRef.current.has(targetUserId);
@@ -226,7 +276,7 @@ export function useFriends(user: StoreUser | null) {
       if (!useFriendStore.getState().initialFriendsData) {
         fetchFriends();
       }
-    }, 2000);
+    }, 4000);
 
     return () => clearTimeout(timeout);
   }, [user, initialFriendsData, fetchFriends]);
@@ -246,35 +296,63 @@ export function useFriends(user: StoreUser | null) {
 
         if (res.targetUser) {
           if (res.autoAccepted) {
+            const newFriend: Friend = {
+              id: res.targetUser.id,
+              name: res.targetUser.name,
+              username: sanitizeUsername(res.targetUser.username),
+              avatar: res.targetUser.avatar,
+              status: "online",
+              activity: "In Lobby",
+            };
             setRawFriends((prev) => [
               ...prev.filter((f) => f.id !== res.targetUser!.id),
-              {
-                id: res.targetUser!.id,
-                name: res.targetUser!.name,
-                username: res.targetUser!.username,
-                avatar: res.targetUser!.avatar,
-                status: "online",
-                activity: "In Lobby",
-              },
+              newFriend,
             ]);
             setFriendRequests((prev) =>
-              prev.filter((r) => r.id !== res.targetUser!.id),
+              prev.filter((r) => r.id !== res.targetUser!.id)
             );
+            const currentInitial = useFriendStore.getState().initialFriendsData;
+            if (currentInitial) {
+              useFriendStore.getState().setInitialFriendsData({
+                friends: [
+                  ...currentInitial.friends.filter(
+                    (f) => f.id !== res.targetUser!.id
+                  ),
+                  newFriend,
+                ],
+                requests: currentInitial.requests.filter(
+                  (r) => r.id !== res.targetUser!.id
+                ),
+              });
+            }
             if (res.receiverId) {
               acceptFriendRequestSocket(res.receiverId);
             }
           } else {
+            const newRequest: FriendRequest = {
+              id: res.targetUser.id,
+              name: res.targetUser.name,
+              username: sanitizeUsername(res.targetUser.username),
+              avatar: res.targetUser.avatar,
+              type: "outgoing",
+              createdAt: new Date().toISOString(),
+            };
             setFriendRequests((prev) => [
               ...prev.filter((r) => r.id !== res.targetUser!.id),
-              {
-                id: res.targetUser!.id,
-                name: res.targetUser!.name,
-                username: res.targetUser!.username,
-                avatar: res.targetUser!.avatar,
-                type: "outgoing",
-                createdAt: new Date().toISOString(),
-              },
+              newRequest,
             ]);
+            const currentInitial = useFriendStore.getState().initialFriendsData;
+            if (currentInitial) {
+              useFriendStore.getState().setInitialFriendsData({
+                friends: currentInitial.friends,
+                requests: [
+                  ...currentInitial.requests.filter(
+                    (r) => r.id !== res.targetUser!.id
+                  ),
+                  newRequest,
+                ],
+              });
+            }
             if (res.receiverId) {
               sendFriendRequestSocket(res.receiverId);
             }
@@ -301,17 +379,30 @@ export function useFriends(user: StoreUser | null) {
     const targetRequest = friendRequests.find((r) => r.id === requestId);
     if (targetRequest) {
       setFriendRequests((prev) => prev.filter((r) => r.id !== requestId));
+      const newFriend: Friend = {
+        id: targetRequest.id,
+        name: targetRequest.name,
+        username: targetRequest.username,
+        avatar: targetRequest.avatar,
+        status: "online",
+        activity: "In Lobby",
+      };
       setRawFriends((prev) => [
         ...prev.filter((f) => f.id !== targetRequest.id),
-        {
-          id: targetRequest.id,
-          name: targetRequest.name,
-          username: targetRequest.username,
-          avatar: targetRequest.avatar,
-          status: "online",
-          activity: "In Lobby",
-        },
+        newFriend,
       ]);
+      usePresenceStore.getState().setSinglePresence(targetRequest.id, true);
+
+      const currentInitial = useFriendStore.getState().initialFriendsData;
+      if (currentInitial) {
+        useFriendStore.getState().setInitialFriendsData({
+          friends: [
+            ...currentInitial.friends.filter((f) => f.id !== targetRequest.id),
+            newFriend,
+          ],
+          requests: currentInitial.requests.filter((r) => r.id !== requestId),
+        });
+      }
     }
 
     try {
@@ -343,6 +434,14 @@ export function useFriends(user: StoreUser | null) {
     locallyDeclinedIdsRef.current.add(requestId);
     setFriendRequests((prev) => prev.filter((r) => r.id !== requestId));
 
+    const currentInitial = useFriendStore.getState().initialFriendsData;
+    if (currentInitial) {
+      useFriendStore.getState().setInitialFriendsData({
+        friends: currentInitial.friends,
+        requests: currentInitial.requests.filter((r) => r.id !== requestId),
+      });
+    }
+
     try {
       const res = await declineFriendRequest(requestId);
       if (res.success) {
@@ -371,6 +470,14 @@ export function useFriends(user: StoreUser | null) {
   const handleCancelRequest = async (requestId: string) => {
     setFriendRequests((prev) => prev.filter((r) => r.id !== requestId));
 
+    const currentInitial = useFriendStore.getState().initialFriendsData;
+    if (currentInitial) {
+      useFriendStore.getState().setInitialFriendsData({
+        friends: currentInitial.friends,
+        requests: currentInitial.requests.filter((r) => r.id !== requestId),
+      });
+    }
+
     try {
       const res = await cancelFriendRequest(requestId);
       if (res.success) {
@@ -390,6 +497,14 @@ export function useFriends(user: StoreUser | null) {
 
   const handleRemoveFriend = async (friendId: string) => {
     setRawFriends((prev) => prev.filter((f) => f.id !== friendId));
+
+    const currentInitial = useFriendStore.getState().initialFriendsData;
+    if (currentInitial) {
+      useFriendStore.getState().setInitialFriendsData({
+        friends: currentInitial.friends.filter((f) => f.id !== friendId),
+        requests: currentInitial.requests,
+      });
+    }
 
     try {
       const res = await removeFriend(friendId);
