@@ -88,7 +88,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
 
     const heartbeatInterval = setInterval(() => {
       sendHeartbeat();
-    }, 15000);
+    }, 30000);
 
     const handleVisibilityOrFocus = () => {
       if (document.visibilityState === "visible") {

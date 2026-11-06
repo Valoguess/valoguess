@@ -12,8 +12,16 @@ import { GuessAgentGameDTO } from "@/types/game";
 import { DEFAULT_AVATARS } from "@/consts";
 import { toast } from "sonner";
 
-export function sendHeartbeat() {
+let lastHeartbeatSentAt = 0;
+const HEARTBEAT_INTERVAL_MS = 30000;
+
+export function sendHeartbeat(force = false) {
+  const now = Date.now();
+  if (!force && now - lastHeartbeatSentAt < HEARTBEAT_INTERVAL_MS) {
+    return;
+  }
   if (socket.connected) {
+    lastHeartbeatSentAt = now;
     socket.emit(ClientEvents.PLAYER_HEARTBEAT);
   }
 }

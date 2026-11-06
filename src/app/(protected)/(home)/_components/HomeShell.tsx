@@ -13,7 +13,6 @@ import { useLobbyParty } from "../_hooks/useLobbyParty";
 import { useGameLifecycle } from "../_hooks/useGameLifecycle";
 import { signOut } from "@/lib/auth-client";
 import { socket } from "@/socket";
-import { sendHeartbeat } from "@/socket/handlers";
 import { toast } from "sonner";
 import { HomeContext, HomeContextValue } from "./HomeContext";
 
@@ -38,10 +37,6 @@ export function HomeShell({ children }: { children: React.ReactNode }) {
     party,
     userId: user?.id,
   });
-
-  useEffect(() => {
-    sendHeartbeat();
-  }, []);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
