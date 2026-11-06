@@ -12,6 +12,7 @@ import { ResultFooter } from "./_components/ResultFooter";
 
 function GameResultContent() {
   const {
+    isLoading,
     clearGame,
     myAgentObj,
     oppAgentObj,
@@ -31,14 +32,22 @@ function GameResultContent() {
     timeline,
   } = useResultData();
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#040609] flex flex-col items-center justify-center text-white">
+        <Loader2 className="h-10 w-10 text-accent animate-spin" />
+        <span className="text-xs text-white/50 uppercase tracking-widest mt-4 font-display">
+          Loading Match Results...
+        </span>
+      </div>
+    );
+  }
+
   return (
-    <main className="min-h-screen w-full overflow-x-hidden overflow-y-auto bg-base-950 text-white select-none flex flex-col font-body">
-      {/* 1. Top Header Navigation */}
+    <main className="min-h-screen w-full overflow-x-hidden overflow-y-auto bg-[#040609] text-white select-none flex flex-col font-body">
       <ResultHeader onBackToLobby={() => clearGame()} />
 
-      {/* 2. Main Grid Content: Left Sidebar, Center Face-Off, Right Timeline */}
       <div className="flex-1 p-3 sm:p-5 flex flex-col xl:grid xl:grid-cols-[280px_1fr_320px] gap-5 max-w-[1600px] mx-auto w-full">
-        {/* Left Profile & Stats (Order 2 on mobile, Order 1 on desktop) */}
         <div className="order-2 xl:order-1">
           <ResultProfileSidebar
             userName={userName}
@@ -56,7 +65,6 @@ function GameResultContent() {
           />
         </div>
 
-        {/* Center Result Face-Off (Order 1 on mobile, Order 2 on desktop) */}
         <div className="order-1 xl:order-2">
           <ResultFaceOff
             isVictory={isVictory}
@@ -75,7 +83,6 @@ function GameResultContent() {
           />
         </div>
 
-        {/* Right Match Timeline (Order 3) */}
         <div className="order-3">
           <ResultTimelineSidebar
             timeline={timeline}
@@ -85,10 +92,8 @@ function GameResultContent() {
         </div>
       </div>
 
-      {/* 3. Footer Navigation Buttons */}
       <ResultFooter onBackToLobby={() => clearGame()} />
 
-      {/* 4. In-Game Party Chat Overlay */}
       <PartyChatOverlay className="bottom-20 left-4 sm:left-6" />
     </main>
   );
@@ -98,9 +103,9 @@ export default function GameResultPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-base-950 flex flex-col items-center justify-center text-white">
+        <div className="min-h-screen bg-[#040609] flex flex-col items-center justify-center text-white">
           <Loader2 className="h-10 w-10 text-accent animate-spin" />
-          <span className="text-xs text-ink-500 uppercase tracking-widest mt-4 font-display">
+          <span className="text-xs text-white/50 uppercase tracking-widest mt-4 font-display">
             Loading Match Results...
           </span>
         </div>
