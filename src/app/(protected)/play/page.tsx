@@ -28,6 +28,7 @@ import { usePlaySocket } from "./_hooks/usePlaySocket";
 function PlayContent() {
   const router = useRouter();
   const { game, hydrated: gameHydrated } = useGameStore();
+  const { tempResultGame } = useTempResultStore();
   const { user } = useAuthStore();
 
   const [hasCompletedIntro, setHasCompletedIntro] = useState<boolean>(false);
@@ -100,11 +101,27 @@ function PlayContent() {
   }, [game?.status]);
 
   useEffect(() => {
+    if (game?.status === "FINISHED") {
+      useTempResultStore.getState().setTempResultGame(game);
+    }
+  }, [game]);
+
+  const finishedMatchGame =
+    game?.status === "FINISHED"
+      ? game
+      : tempResultGame?.status === "FINISHED"
+      ? tempResultGame
+      : null;
+
+  useEffect(() => {
     if (!gameHydrated) return;
     if (!game) {
+      if (tempResultGame?.status === "FINISHED") {
+        return;
+      }
       router.replace("/lobby");
     }
-  }, [game, gameHydrated, router]);
+  }, [game, gameHydrated, router, tempResultGame]);
 
   const handleToggleEliminated = (id: string) => {
     setEliminatedIds((prev) => {
@@ -118,6 +135,68 @@ function PlayContent() {
   const handleResetEliminated = () => {
     setEliminatedIds(new Set());
   };
+
+  if (finishedMatchGame) {
+    const rawResult = (finishedMatchGame.state?.result ?? finishedMatchGame.result) as any;
+    const resolvedWinnerId =
+      rawResult?.winnerId ??
+      rawResult?.winner ??
+      (finishedMatchGame.state as any)?.winnerId ??
+      (finishedMatchGame as any)?.winnerId ??
+      null;
+
+    const resultType = (
+      typeof rawResult === "string"
+        ? rawResult
+        : rawResult?.result ?? (resolvedWinnerId ? "WIN" : "TIE")
+    ).toUpperCase();
+
+    const isTie = resultType === "TIE" || resultType === "DRAW";
+    const myId = user?.id || myPlayer?.id;
+    const isVictory = Boolean(
+      !isTie &&
+        resolvedWinnerId &&
+        (resolvedWinnerId === myId || (myPlayer?.id && resolvedWinnerId === myPlayer.id))
+    );
+
+    const opponentMember =
+      opponentPlayer ||
+      (myPlayer?.id ? finishedMatchGame.players.find((p) => p.id !== myPlayer.id) : undefined) ||
+      finishedMatchGame.players[1];
+
+    const myAgentKey =
+      secretAgentId ||
+      myPlayer?.state?.secretAgent ||
+      (typeof window !== "undefined" && finishedMatchGame.id
+        ? sessionStorage.getItem(`secret_agent_${finishedMatchGame.id}`)
+        : null);
+
+    const oppAgentKey =
+      opponentMember?.state?.secretAgent ||
+      (myAgentKey && finishedMatchGame.players.length > 1
+        ? finishedMatchGame.players.find((p) => p.state?.secretAgent && p.state.secretAgent !== myAgentKey)?.state?.secretAgent
+        : null);
+
+    return (
+      <MatchEndingOverlay
+        isVictory={isVictory}
+        isTie={isTie}
+        userName={myPlayer?.name || user?.name || "You"}
+        opponentName={opponentMember?.name || "Opponent"}
+        myAgentId={myAgentKey}
+        oppAgentId={oppAgentKey}
+        roundsPlayed={Math.max(
+          1,
+          Math.ceil((finishedMatchGame.state?.turnNumber ?? finishedMatchGame.turnNumber ?? 1) / 2)
+        )}
+        onComplete={() => {
+          setEliminatedIds(new Set());
+          useTempResultStore.getState().setTempResultGame(finishedMatchGame);
+          router.replace("/game");
+        }}
+      />
+    );
+  }
 
   if (!gameHydrated || !game || !myPlayer) {
     return <PlayLoadingScreen label={!gameHydrated ? "Loading Game..." : "Returning to Lobby..."} />;
@@ -137,68 +216,6 @@ function PlayContent() {
           if (game?.id) {
             sessionStorage.setItem(`intro_seen_${game.id}`, "true");
           }
-        }}
-      />
-    );
-  }
-
-  if (game.status === "FINISHED") {
-    const rawResult = (game.state?.result ?? game.result) as any;
-    const resolvedWinnerId =
-      rawResult?.winnerId ??
-      rawResult?.winner ??
-      (game.state as any)?.winnerId ??
-      (game as any)?.winnerId ??
-      null;
-
-    const resultType = (
-      typeof rawResult === "string"
-        ? rawResult
-        : rawResult?.result ?? (resolvedWinnerId ? "WIN" : "TIE")
-    ).toUpperCase();
-
-    const isTie = resultType === "TIE" || resultType === "DRAW";
-    const myId = user?.id || myPlayer?.id;
-    const isVictory = Boolean(
-      !isTie &&
-        resolvedWinnerId &&
-        (resolvedWinnerId === myId || (myPlayer?.id && resolvedWinnerId === myPlayer.id))
-    );
-
-    const opponentMember =
-      opponentPlayer ||
-      (myPlayer?.id ? game.players.find((p) => p.id !== myPlayer.id) : undefined) ||
-      game.players[1];
-
-    const myAgentKey =
-      secretAgentId ||
-      myPlayer?.state?.secretAgent ||
-      (typeof window !== "undefined" && game.id
-        ? sessionStorage.getItem(`secret_agent_${game.id}`)
-        : null);
-
-    const oppAgentKey =
-      opponentMember?.state?.secretAgent ||
-      (myAgentKey && game.players.length > 1
-        ? game.players.find((p) => p.state?.secretAgent && p.state.secretAgent !== myAgentKey)?.state?.secretAgent
-        : null);
-
-    return (
-      <MatchEndingOverlay
-        isVictory={isVictory}
-        isTie={isTie}
-        userName={myPlayer?.name || user?.name || "You"}
-        opponentName={opponentMember?.name || "Opponent"}
-        myAgentId={myAgentKey}
-        oppAgentId={oppAgentKey}
-        roundsPlayed={Math.max(
-          1,
-          Math.ceil((game.state?.turnNumber ?? game.turnNumber ?? 1) / 2)
-        )}
-        onComplete={() => {
-          setEliminatedIds(new Set());
-          useTempResultStore.getState().setTempResultGame(game);
-          router.replace("/game");
         }}
       />
     );

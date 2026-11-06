@@ -3,7 +3,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useGameStore } from "@/store/gameStore";
 import { useTempResultStore } from "@/store/tempResultStore";
 import { useAuthStore } from "@/store/authStore";
-import { leaveGame } from "@/socket/emitter";
 import { Agent, getAgentById, getQuestionLabel } from "@/lib/data";
 
 export interface TimelineEvent {
@@ -32,7 +31,6 @@ export function useResultData() {
   }, [activeGame, isLoading, router]);
 
   const handleClearResults = () => {
-    leaveGame();
     clearTempResultGame();
     clearGame();
   };

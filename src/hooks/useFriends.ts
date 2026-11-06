@@ -124,16 +124,34 @@ export function useFriends(user: StoreUser | null) {
 
           if (friendUser) {
             const pres = usePresenceStore.getState().presence[friendUser.id];
+            const partyMemberIds = new Set(
+              usePartyStore.getState().party?.members?.map((m) => m.id) ?? []
+            );
+            const knownFriend = useFriendStore
+              .getState()
+              .initialFriendsData?.friends.find((f) => f.id === friendUser.id);
+
             const isOnline =
               pres === "online" ||
-              pres === "ingame";
+              pres === "ingame" ||
+              partyMemberIds.has(friendUser.id) ||
+              knownFriend?.status === "online" ||
+              knownFriend?.status === "ingame";
+
             friends.push({
               id: friendUser.id,
               name: friendUser.name || "Player",
               username: sanitizeUsername(friendUser.username),
               avatar: friendUser.image || DEFAULT_AVATARS.USER,
               status: pres === "ingame" ? "ingame" : isOnline ? "online" : "offline",
-              activity: pres === "ingame" ? "In Match" : isOnline ? "In Lobby" : "Offline",
+              activity:
+                pres === "ingame"
+                  ? "In Match"
+                  : isOnline
+                  ? partyMemberIds.has(friendUser.id)
+                    ? "In Your Party"
+                    : "In Lobby"
+                  : "Offline",
             });
           }
           continue;
@@ -177,8 +195,13 @@ export function useFriends(user: StoreUser | null) {
         }
       }
 
+      const allRequests = [...receivedRequests, ...sentRequests];
       setRawFriends(friends);
-      setFriendRequests([...receivedRequests, ...sentRequests]);
+      setFriendRequests(allRequests);
+      useFriendStore.getState().setInitialFriendsData({
+        friends,
+        requests: allRequests,
+      });
     } catch (error) {
       logger.error({ error }, "Failed to fetch friends");
     }
@@ -223,6 +246,13 @@ export function useFriends(user: StoreUser | null) {
       const targetUserId = lastFriendEvent.userId;
       setFriendRequests((prev) => prev.filter((r) => r.id !== targetUserId));
       usePresenceStore.getState().setSinglePresence(targetUserId, true);
+      const currentInitial = useFriendStore.getState().initialFriendsData;
+      if (currentInitial) {
+        useFriendStore.getState().setInitialFriendsData({
+          friends: currentInitial.friends,
+          requests: currentInitial.requests.filter((r) => r.id !== targetUserId),
+        });
+      }
       fetchFriends();
 
       const wasLocallyAccepted =
@@ -270,16 +300,8 @@ export function useFriends(user: StoreUser | null) {
 
   useEffect(() => {
     if (!user || user.isAnonymous) return;
-    if (initialFriendsData) return;
-
-    const timeout = setTimeout(() => {
-      if (!useFriendStore.getState().initialFriendsData) {
-        fetchFriends();
-      }
-    }, 4000);
-
-    return () => clearTimeout(timeout);
-  }, [user, initialFriendsData, fetchFriends]);
+    fetchFriends();
+  }, [user, fetchFriends]);
 
   const handleAddFriend = async (e: React.FormEvent) => {
     e.preventDefault();

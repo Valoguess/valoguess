@@ -31,22 +31,21 @@ export function useGameLifecycle({
   const isHost = party ? party.leaderId === userId : true;
   const opponent = party?.members?.find((m) => m.id !== userId);
 
-  // Clear any finished or waiting stale game state on (home) entry
   useEffect(() => {
     if (game && (game.status === "FINISHED" || game.status === "WAITING")) {
-      leaveGame();
+      if (game.status === "WAITING") {
+        leaveGame();
+      }
       clearGame();
     }
   }, []);
 
-  // Reset starting state if party changes or opponent leaves
   useEffect(() => {
     if (!opponent?.id) {
       setIsStartingGame(false);
     }
   }, [opponent?.id]);
 
-  // Game lifecycle handling: auto-redirect all party members in (home) to /play when game starts
   useEffect(() => {
     if (!game) return;
 
@@ -67,7 +66,6 @@ export function useGameLifecycle({
     }
   }, [game?.status, game?.id, isHost, router]);
 
-  // Safety fallback: if match launch hangs for > 8s without transitioning to STARTING/PLAYING, reset
   useEffect(() => {
     if (!isStartingGame) return;
     const timer = setTimeout(() => {
@@ -78,12 +76,17 @@ export function useGameLifecycle({
     return () => clearTimeout(timer);
   }, [isStartingGame, game]);
 
-  // Socket error handler
   useEffect(() => {
     const onError = (err: any) => {
       setIsStartingGame(false);
       onSetIsCreatingOrJoining?.(false);
       startedGameRef.current = null;
+      if (
+        err?.message === "Player is not in a game" ||
+        err?.errorCode === "PLAYER_NOT_IN_GAME"
+      ) {
+        return;
+      }
       if (err?.code === "GAME_ALREADY_STARTED" && game?.id) {
         router.push("/play");
         return;
@@ -100,7 +103,6 @@ export function useGameLifecycle({
     };
   }, [game?.id, onSetErrorMsg, onSetIsCreatingOrJoining, router]);
 
-  // Start game handler (Party Leader only, 2 players required)
   const handleStartGame = useCallback(() => {
     if (!party?.id || !isHost || !opponent?.id) return;
 

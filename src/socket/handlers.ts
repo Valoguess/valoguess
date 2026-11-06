@@ -92,10 +92,18 @@ export function handleGameSync(
   context: { pathname: string; router: { push: (path: string) => void } }
 ) {
   if (!syncedGame || (typeof syncedGame === "object" && !syncedGame.id)) {
-    useGameStore.getState().clearGame();
-    if (context.pathname === "/play") {
-      toast.error("Game not found. Redirecting to lobby.");
-      context.router.push("/lobby");
+    const currentGame = useGameStore.getState().game;
+    const currentFinishedGame = useTempResultStore.getState().tempResultGame;
+    const isFinished =
+      currentGame?.status === "FINISHED" ||
+      currentFinishedGame?.status === "FINISHED";
+
+    if (!isFinished) {
+      useGameStore.getState().clearGame();
+      if (context.pathname === "/play") {
+        toast.error("Game not found. Redirecting to lobby.");
+        context.router.push("/lobby");
+      }
     }
     return;
   }
@@ -141,6 +149,12 @@ export function handleSocketError(
   err: any,
   context?: { pathname?: string }
 ) {
+  if (
+    err?.message === "Player is not in a game" ||
+    err?.errorCode === "PLAYER_NOT_IN_GAME"
+  ) {
+    return;
+  }
   if (err?.message === "Player not found") {
     socket.disconnect();
     socket.connect();
@@ -153,9 +167,14 @@ export function handleSocketError(
     toast.error(err.message);
   }
   if (err?.message === "Game not found") {
-    useGameStore.getState().clearGame();
-    if (context?.pathname === "/play") {
-      toast.error(err.message);
+    const isFinished =
+      useGameStore.getState().game?.status === "FINISHED" ||
+      useTempResultStore.getState().tempResultGame?.status === "FINISHED";
+    if (!isFinished) {
+      useGameStore.getState().clearGame();
+      if (context?.pathname === "/play") {
+        toast.error(err.message);
+      }
     }
   }
 }
@@ -247,7 +266,30 @@ export function handleFriendPresence(data: any) {
   const userId = data?.userId || data?.id || data?.friendId;
   if (userId) {
     const rawStatus = data?.status !== undefined ? data.status : data?.online;
-    usePresenceStore.getState().setSinglePresence(userId, rawStatus);
+    const normalized = normalizePresenceStatus(rawStatus);
+    usePresenceStore.getState().setSinglePresence(userId, normalized);
+
+    const initial = useFriendStore.getState().initialFriendsData;
+    if (initial && Array.isArray(initial.friends)) {
+      const updatedFriends = initial.friends.map((f) =>
+        f.id === userId
+          ? {
+              ...f,
+              status: normalized,
+              activity:
+                normalized === "ingame"
+                  ? "In Match"
+                  : normalized === "online"
+                  ? "In Lobby"
+                  : "Offline",
+            }
+          : f
+      );
+      useFriendStore.getState().setInitialFriendsData({
+        ...initial,
+        friends: updatedFriends,
+      });
+    }
   }
 }
 
@@ -284,6 +326,14 @@ export function handleFriendRequestAccepted(data: {
       userId: targetUserId,
     });
     usePresenceStore.getState().setSinglePresence(targetUserId, true);
+
+    const initial = useFriendStore.getState().initialFriendsData;
+    if (initial) {
+      useFriendStore.getState().setInitialFriendsData({
+        friends: initial.friends,
+        requests: initial.requests.filter((r) => r.id !== targetUserId),
+      });
+    }
   }
 }
 
@@ -297,6 +347,14 @@ export function handleFriendRequestDeclined(data: {
       type: "request_declined",
       userId: targetUserId,
     });
+
+    const initial = useFriendStore.getState().initialFriendsData;
+    if (initial) {
+      useFriendStore.getState().setInitialFriendsData({
+        friends: initial.friends,
+        requests: initial.requests.filter((r) => r.id !== targetUserId),
+      });
+    }
   }
 }
 

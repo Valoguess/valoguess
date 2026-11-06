@@ -62,11 +62,17 @@ export function usePlaySocket({
   useEffect(() => {
     const handleGameSync = (syncedGame: GuessAgentGameDTO | null) => {
       if (!syncedGame || (typeof syncedGame === "object" && !syncedGame.id)) {
-        if (pathname.startsWith("/play")) {
-          toast.error("Game not found. Redirecting to lobby.");
-          router.push("/lobby");
+        const isFinished =
+          useGameStore.getState().game?.status === "FINISHED" ||
+          useTempResultStore.getState().tempResultGame?.status === "FINISHED";
+
+        if (!isFinished) {
+          if (pathname.startsWith("/play")) {
+            toast.error("Game not found. Redirecting to lobby.");
+            router.push("/lobby");
+          }
+          clearGame();
         }
-        clearGame();
       }
     };
     socket.on(ServerEvents.GAME_SYNC, handleGameSync);
@@ -79,6 +85,12 @@ export function usePlaySocket({
     const onError = (err: any) => {
       setIsAsking(false);
       setIsAnswering(false);
+      if (
+        err?.message === "Player is not in a game" ||
+        err?.errorCode === "PLAYER_NOT_IN_GAME"
+      ) {
+        return;
+      }
       const msg = err?.message || "An error occurred";
       toast.error(msg);
     };
