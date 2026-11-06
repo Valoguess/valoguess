@@ -15,8 +15,10 @@ export function IncomingRequestRow({
   onAccept,
   onDecline,
 }: IncomingRequestRowProps) {
+  const cleanUsername = request.username ? request.username.replace(/^@/, "") : "";
+
   return (
-    <div className="flex items-center justify-between p-2 rounded bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 transition">
+    <div className="flex items-center justify-between p-2 rounded-xs bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 transition">
       <div className="flex items-center gap-2 min-w-0">
         <div className="relative h-7 w-7 rounded-full overflow-hidden border border-white/20 shrink-0">
           <Image
@@ -27,12 +29,12 @@ export function IncomingRequestRow({
           />
         </div>
         <div className="flex flex-col text-left min-w-0">
-          <span className="font-display text-[11px] font-bold text-white tracking-wide truncate max-w-[100px]">
+          <span className="font-display text-xs font-bold text-white tracking-wide truncate max-w-[100px] uppercase">
             {request.name}
           </span>
-          {request.username && (
+          {cleanUsername && (
             <span className="text-[8.5px] text-[#FF4655] font-mono truncate">
-              {request.username}
+              @{cleanUsername}
             </span>
           )}
         </div>
@@ -41,14 +43,14 @@ export function IncomingRequestRow({
       <div className="flex items-center gap-1 shrink-0">
         <button
           onClick={() => onAccept(request.id)}
-          className="h-6 w-6 rounded bg-mint/20 hover:bg-mint/30 border border-mint/40 text-mint flex items-center justify-center transition cursor-pointer"
+          className="h-6 w-6 rounded-xs bg-mint/20 hover:bg-mint/30 border border-mint/40 text-mint flex items-center justify-center transition cursor-pointer"
           title="Accept Friend Request"
         >
           <Check className="h-3.5 w-3.5 stroke-[3]" />
         </button>
         <button
           onClick={() => onDecline(request.id)}
-          className="h-6 w-6 rounded bg-[#FF4655]/20 hover:bg-[#FF4655]/30 border border-[#FF4655]/40 text-[#FF4655] flex items-center justify-center transition cursor-pointer"
+          className="h-6 w-6 rounded-xs bg-[#FF4655]/20 hover:bg-[#FF4655]/30 border border-[#FF4655]/40 text-[#FF4655] flex items-center justify-center transition cursor-pointer"
           title="Decline Friend Request"
         >
           <X className="h-3.5 w-3.5 stroke-[3]" />
@@ -68,7 +70,7 @@ export function OutgoingRequestRow({
   onCancel,
 }: OutgoingRequestRowProps) {
   return (
-    <div className="flex items-center justify-between p-2 rounded bg-white/[0.03] border border-white/10 transition">
+    <div className="flex items-center justify-between p-2 rounded-xs bg-white/[0.03] border border-white/10 transition">
       <div className="flex items-center gap-2 min-w-0">
         <div className="relative h-7 w-7 rounded-full overflow-hidden border border-white/15 shrink-0 opacity-80">
           <Image
@@ -79,10 +81,10 @@ export function OutgoingRequestRow({
           />
         </div>
         <div className="flex flex-col text-left min-w-0">
-          <span className="font-display text-[11px] font-bold text-white/90 tracking-wide truncate max-w-[110px]">
+          <span className="font-display text-xs font-bold text-white/90 tracking-wide truncate max-w-[110px] uppercase">
             {request.name}
           </span>
-          <span className="text-[8.5px] text-amber-400 font-display font-semibold">
+          <span className="text-[8.5px] text-amber-400 font-mono">
             Pending confirmation...
           </span>
         </div>
@@ -90,7 +92,7 @@ export function OutgoingRequestRow({
 
       <button
         onClick={() => onCancel(request.id)}
-        className="text-white/40 hover:text-[#FF4655] p-1 rounded transition cursor-pointer"
+        className="text-white/40 hover:text-[#FF4655] p-1 rounded-xs transition cursor-pointer"
         title="Cancel Request"
       >
         <X className="h-3.5 w-3.5" />

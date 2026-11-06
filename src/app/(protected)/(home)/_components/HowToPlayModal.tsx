@@ -12,88 +12,97 @@ type HowToPlayModalProps = {
 export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="bg-transparent border-none w-[calc(100vw-2rem)] max-w-lg p-0 shadow-none outline-none ring-0 focus-visible:ring-0 mx-auto" showCloseButton={false}>
-        <div className="relative w-full clip-notch-both p-[1px] bg-gradient-to-b from-white/20 to-white/5 pointer-events-auto">
-          <div className="clip-notch-both bg-base-900 p-6 md:p-8 relative overflow-hidden">
-            <div className="absolute inset-0 bg-grid opacity-[0.02] pointer-events-none" />
-            
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
-              <div className="flex items-center gap-2.5">
-                <HelpCircle className="h-5 w-5 text-accent" />
-                <h3 className="font-valorant text-lg tracking-wider text-white">
-                  HOW TO PLAY
-                </h3>
-              </div>
-              
-              <button 
-                onClick={onClose}
-                className="h-8 w-8 flex items-center justify-center rounded-full bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors duration-200"
-              >
-                <X className="h-4 w-4" />
-              </button>
+      <DialogContent
+        showCloseButton={false}
+        className="bg-[#0b0e14]/95 border border-white/10 w-[calc(100vw-2rem)] max-w-md p-6 shadow-2xl backdrop-blur-xl rounded-sm relative overflow-hidden select-none"
+        onMouseLeave={onClose}
+      >
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#FF4655]" />
+
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#FF4655] font-bold">
+              GAME RULES
+            </span>
+            <h3 className="font-valorant text-base tracking-wider text-white flex items-center gap-2 mt-0.5">
+              <HelpCircle className="h-4 w-4 text-accent" />
+              <span>HOW TO PLAY</span>
+            </h3>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="p-1 rounded-xs text-white/50 hover:text-white hover:bg-white/10 transition cursor-pointer"
+            title="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-3 py-3 text-left">
+          <div className="p-3 rounded-xs border border-white/10 bg-white/[0.02] flex items-start gap-3">
+            <span className="font-mono text-[10px] font-bold text-[#FF4655] bg-[#FF4655]/10 px-1.5 py-0.5 rounded-xs border border-[#FF4655]/30 shrink-0 mt-0.5">
+              01
+            </span>
+            <div className="space-y-0.5">
+              <h4 className="font-display font-bold text-xs uppercase tracking-wider text-white">
+                SELECT SECRET AGENT
+              </h4>
+              <p className="text-[11px] text-white/50 leading-relaxed font-sans">
+                At the start of the match, both players are assigned a hidden secret agent from the active roster.
+              </p>
             </div>
+          </div>
 
-            {/* Steps Content */}
-            <div className="space-y-5 text-left text-[13px] md:text-sm leading-relaxed text-ink-300">
-              <div className="flex items-start gap-4">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 border border-accent/20 font-display text-xs font-black text-accent shrink-0 mt-0.5">
-                  1
-                </span>
-                <div>
-                  <h4 className="font-valorant text-[14px] tracking-wide text-white mb-1">
-                    SELECT SECRET AGENT
-                  </h4>
-                  <p>At the start, you and your opponent are each assigned a secret Agent from the active roster.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 border border-accent/20 font-display text-xs font-black text-accent shrink-0 mt-0.5">
-                  2
-                </span>
-                <div>
-                  <h4 className="font-valorant text-[14px] tracking-wide text-white mb-1">
-                    ASK YES/NO QUESTIONS
-                  </h4>
-                  <p>On your turn, choose a question about their Agent's abilities, roles, or aesthetic themes (e.g. "Can Heal?", "Uses Fire?").</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 border border-accent/20 font-display text-xs font-black text-accent shrink-0 mt-0.5">
-                  3
-                </span>
-                <div>
-                  <h4 className="font-valorant text-[14px] tracking-wide text-white mb-1">
-                    ELIMINATE CANDIDATES
-                  </h4>
-                  <p>Based on their answer, eliminate agents on your grid by clicking them to narrow down the possibilities.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 border border-accent/20 font-display text-xs font-black text-accent shrink-0 mt-0.5">
-                  4
-                </span>
-                <div>
-                  <h4 className="font-valorant text-[14px] tracking-wide text-white mb-1">
-                    GUESS AND WIN
-                  </h4>
-                  <p>When you are confident, select their agent and lock in your guess. Guess correctly to win the match!</p>
-                </div>
-              </div>
+          <div className="p-3 rounded-xs border border-white/10 bg-white/[0.02] flex items-start gap-3">
+            <span className="font-mono text-[10px] font-bold text-[#FF4655] bg-[#FF4655]/10 px-1.5 py-0.5 rounded-xs border border-[#FF4655]/30 shrink-0 mt-0.5">
+              02
+            </span>
+            <div className="space-y-0.5">
+              <h4 className="font-display font-bold text-xs uppercase tracking-wider text-white">
+                ASK YES/NO QUESTIONS
+              </h4>
+              <p className="text-[11px] text-white/50 leading-relaxed font-sans">
+                Take turns asking questions about abilities, roles, or visual appearance (e.g. &quot;Can Heal?&quot;, &quot;Is Initiator?&quot;).
+              </p>
             </div>
+          </div>
 
-            {/* Close Button */}
-            <button 
-              onClick={onClose}
-              className="w-full mt-8 py-3 bg-accent text-white font-valorant text-xs tracking-widest hover:bg-accent-glow hover:shadow-[0_0_15px_rgba(255,70,85,0.4)] transition-all duration-300 rounded-sm"
-            >
-              UNDERSTOOD
-            </button>
+          <div className="p-3 rounded-xs border border-white/10 bg-white/[0.02] flex items-start gap-3">
+            <span className="font-mono text-[10px] font-bold text-[#FF4655] bg-[#FF4655]/10 px-1.5 py-0.5 rounded-xs border border-[#FF4655]/30 shrink-0 mt-0.5">
+              03
+            </span>
+            <div className="space-y-0.5">
+              <h4 className="font-display font-bold text-xs uppercase tracking-wider text-white">
+                ELIMINATE CANDIDATES
+              </h4>
+              <p className="text-[11px] text-white/50 leading-relaxed font-sans">
+                Based on your opponent&apos;s answer, eliminate agents on your grid by clicking them to narrow down the candidates.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xs border border-white/10 bg-white/[0.02] flex items-start gap-3">
+            <span className="font-mono text-[10px] font-bold text-[#FF4655] bg-[#FF4655]/10 px-1.5 py-0.5 rounded-xs border border-[#FF4655]/30 shrink-0 mt-0.5">
+              04
+            </span>
+            <div className="space-y-0.5">
+              <h4 className="font-display font-bold text-xs uppercase tracking-wider text-white">
+                GUESS &amp; WIN
+              </h4>
+              <p className="text-[11px] text-white/50 leading-relaxed font-sans">
+                When you have deducted the opponent&apos;s identity, select their agent and lock in your guess to claim victory!
+              </p>
+            </div>
           </div>
         </div>
+
+        <button
+          onClick={onClose}
+          className="w-full mt-2 py-2.5 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-display text-xs font-bold uppercase tracking-wider rounded-xs transition cursor-pointer active:scale-98"
+        >
+          UNDERSTOOD
+        </button>
       </DialogContent>
     </Dialog>
   );

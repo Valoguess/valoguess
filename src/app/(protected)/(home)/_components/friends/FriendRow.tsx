@@ -41,16 +41,15 @@ export function FriendRow({
   return (
     <div
       className={cn(
-        "flex items-center justify-between p-2 rounded transition group",
+        "flex items-center justify-between p-2 rounded-xs transition group",
         hasIncomingInvite
-          ? "bg-mint/[0.08] border border-mint/40 shadow-[0_0_12px_rgba(60,242,196,0.15)] animate-pulse"
+          ? "bg-mint/[0.08] border border-mint/40"
           : isOffline
           ? "bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 opacity-60 hover:opacity-80"
           : "bg-white/[0.02] hover:bg-white/[0.06] border border-white/5"
       )}
     >
       <div className="flex items-center gap-2.5 min-w-0">
-        {/* Avatar with status dot and hover-to-remove cross */}
         <div
           onClick={(e) => {
             e.stopPropagation();
@@ -73,31 +72,29 @@ export function FriendRow({
             className={cn(
               "absolute bottom-0 right-0 h-2 w-2 rounded-full border border-black transition-opacity duration-150 group-hover/avatar:opacity-0",
               friend.status === "online"
-                ? "bg-mint shadow-[0_0_6px_#3cf2c4]"
+                ? "bg-mint"
                 : friend.status === "ingame"
-                ? "bg-amber-400 shadow-[0_0_6px_#fbbf24]"
+                ? "bg-amber-400"
                 : "bg-zinc-600"
             )}
           />
 
-          {/* Hover Cross */}
-          <div className="absolute inset-0 bg-[#FF4655]/85 opacity-0 group-hover/avatar:opacity-100 transition-all duration-200 flex items-center justify-center text-white z-10 rounded-full shadow-[0_0_8px_rgba(255,70,85,0.7)]">
+          <div className="absolute inset-0 bg-[#FF4655]/85 opacity-0 group-hover/avatar:opacity-100 transition-all duration-200 flex items-center justify-center text-white z-10 rounded-full">
             <X className="h-3.5 w-3.5 stroke-[3] text-white" />
           </div>
         </div>
 
-        {/* Friend info */}
         <div className="flex flex-col text-left min-w-0">
-          <span className="font-display text-[11px] font-bold text-white tracking-wide truncate max-w-[110px]">
+          <span className="font-display text-xs font-bold text-white tracking-wide truncate max-w-[110px] uppercase">
             {friend.name}
           </span>
           <span
             className={cn(
-              "text-[8px] uppercase font-semibold tracking-wider font-display",
+              "text-[8px] uppercase font-bold tracking-wider font-mono",
               hasIncomingInvite
-                ? "text-mint font-bold flex items-center gap-1"
+                ? "text-mint flex items-center gap-1"
                 : isOffline
-                ? "text-zinc-500"
+                ? "text-white/40"
                 : "text-mint"
             )}
           >
@@ -117,7 +114,6 @@ export function FriendRow({
         </div>
       </div>
 
-      {/* Action buttons alongside friend: Tick (✓) & Cross (✕) for incoming invite, or repeat invite button */}
       {hasIncomingInvite ? (
         <div className="flex items-center gap-1.5 shrink-0">
           <button
@@ -125,7 +121,7 @@ export function FriendRow({
               e.stopPropagation();
               onAcceptIncomingInvite?.();
             }}
-            className="h-6.5 w-6.5 rounded bg-mint/25 hover:bg-mint/40 border border-mint/60 text-mint flex items-center justify-center transition cursor-pointer hover:scale-110 shadow-[0_0_8px_rgba(60,242,196,0.35)]"
+            className="h-6.5 w-6.5 rounded-xs bg-mint/20 hover:bg-mint/30 border border-mint/50 text-mint flex items-center justify-center transition cursor-pointer"
             title="Accept Invite (✓)"
           >
             <Check className="h-3.5 w-3.5 stroke-[3]" />
@@ -135,7 +131,7 @@ export function FriendRow({
               e.stopPropagation();
               onDeclineIncomingInvite?.();
             }}
-            className="h-6.5 w-6.5 rounded bg-[#FF4655]/25 hover:bg-[#FF4655]/40 border border-[#FF4655]/50 text-[#FF4655] flex items-center justify-center transition cursor-pointer hover:scale-110 shadow-[0_0_8px_rgba(255,70,85,0.35)]"
+            className="h-6.5 w-6.5 rounded-xs bg-[#FF4655]/20 hover:bg-[#FF4655]/30 border border-[#FF4655]/50 text-[#FF4655] flex items-center justify-center transition cursor-pointer"
             title="Decline Invite (✕)"
           >
             <X className="h-3.5 w-3.5 stroke-[3]" />
@@ -145,9 +141,9 @@ export function FriendRow({
         <button
           onClick={handleInviteClick}
           className={cn(
-            "p-1 rounded transition cursor-pointer hover:scale-110 shrink-0",
+            "p-1 rounded-xs transition cursor-pointer shrink-0",
             justInvited
-              ? "text-mint bg-mint/15 shadow-[0_0_8px_rgba(60,242,196,0.3)]"
+              ? "text-mint bg-mint/15"
               : "text-white/40 hover:text-accent hover:bg-white/5"
           )}
           title="Invite to Party"
