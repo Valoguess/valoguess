@@ -2,12 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Trophy, Shield, Swords, Sparkles, ArrowRight, Target, Zap } from "lucide-react";
+import { Trophy, Swords, ArrowRight } from "lucide-react";
 
 export default function LeaderboardPage() {
   return (
     <div className="relative min-h-full w-full text-white flex flex-col font-body selection:bg-accent selection:text-white">
-      {/* Background artwork */}
       <div className="fixed inset-0 z-0 select-none pointer-events-none">
         <Image
           src="/bg/bg1.webp"
@@ -21,42 +20,36 @@ export default function LeaderboardPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,transparent_20%,#040609_90%)]" />
       </div>
 
-      {/* Main Container */}
-      <div className="relative w-full flex-1 mx-auto px-4 py-12 flex flex-col items-center justify-between">
-        <div className="relative z-10 flex-1 max-w-5xl w-full mx-auto px-4 py-12 flex flex-col items-center justify-center text-center">
-          {/* Glow emblem */}
-          <div className="relative mb-6">
-            <div className="absolute -inset-4 bg-amber-400/20 blur-2xl rounded-full animate-pulse" />
-            <div className="relative h-24 w-24 rounded-full border-2 border-amber-400/40 bg-black/60 backdrop-blur-md flex items-center justify-center text-amber-300 shadow-[0_0_35px_rgba(251,191,36,0.35)]">
-              <Trophy className="h-12 w-12 stroke-[1.5]" />
-            </div>
+      <div className="relative z-10 flex-1 max-w-5xl w-full mx-auto px-4 py-16 flex flex-col items-center justify-center text-center my-auto">
+        <div className="flex flex-col items-center justify-center space-y-6">
+          <div className="h-16 w-16 rounded-full border border-amber-400/30 bg-amber-400/10 flex items-center justify-center text-amber-400">
+            <Trophy className="h-8 w-8" />
           </div>
 
-          {/* Header Tag */}
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/30 bg-amber-400/10 text-amber-300 font-mono text-[10px] uppercase tracking-[0.25em] mb-4">
-            <Sparkles className="h-3 w-3" />
+          <div className="flex items-center gap-2 px-3 py-1 rounded-xs border border-amber-400/20 bg-amber-400/5 text-amber-400 font-mono text-[10px] uppercase tracking-[0.25em]">
             <span>PROTOCOL // COMPETITIVE DIVISION</span>
           </div>
 
-          {/* Title */}
-          <h1 className="font-valorant text-3xl sm:text-5xl lg:text-6xl tracking-wider text-white mb-3">
-            GLOBAL <span className="text-amber-400">LEADERBOARDS</span>
-          </h1>
+          <div className="space-y-3">
+            <h1 className="font-valorant text-4xl sm:text-6xl tracking-wider text-white">
+              GLOBAL <span className="text-amber-400">LEADERBOARDS</span>
+            </h1>
+            <div className="inline-flex items-center gap-2 px-6 py-2 rounded-xs border border-amber-400/30 bg-amber-400/10 font-valorant text-base sm:text-lg text-amber-300 tracking-[0.25em] uppercase">
+              COMING SOON
+            </div>
+          </div>
 
-          {/* Coming Soon Notice */}
-          <div className="inline-flex items-center gap-2.5 px-6 py-2 rounded-sm border border-amber-400/50 bg-gradient-to-r from-amber-400/20 via-amber-400/10 to-amber-400/20 font-valorant text-lg sm:text-xl text-amber-300 tracking-[0.3em] uppercase mb-6 shadow-[0_0_20px_rgba(251,191,36,0.2)]">
-            <span>COMING SOON</span>
+          <div className="pt-6">
+            <Link
+              href="/lobby"
+              className="inline-flex items-center gap-2.5 px-7 py-3 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-display text-xs font-bold uppercase tracking-wider rounded-xs transition cursor-pointer active:scale-98"
+            >
+              <Swords className="h-4 w-4" />
+              <span>RETURN TO LOBBY</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
-
-        <Link
-          href="/lobby"
-          className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-accent hover:bg-accent-dim text-white font-valorant text-xs tracking-[0.2em] uppercase rounded-sm shadow-[0_0_25px_rgba(255,70,85,0.45)] transition cursor-pointer active:scale-98"
-        >
-          <Swords className="h-4 w-4" />
-          <span>RETURN TO LOBBY</span>
-          <ArrowRight className="h-4 w-4" />
-        </Link>
       </div>
     </div>
   );
