@@ -72,7 +72,7 @@ export function ProfileAvatarUploadCard({
       }
 
       setPreviewUrl(res.url);
-      toast.success("Avatar cropped, deployed and synced successfully!");
+      toast.success("Avatar updated successfully!");
     } catch (err: any) {
       const msg = err?.message || "Failed to upload avatar. Please try again.";
       toast.error(msg);
@@ -120,23 +120,19 @@ export function ProfileAvatarUploadCard({
   };
 
   return (
-    <div className="bg-[#080B10]/70 border border-white/10 rounded-sm p-6 text-left space-y-5 relative overflow-hidden animate-fade-in shadow-xl">
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-accent to-transparent" />
-
+    <div className="bg-[#080b10]/75 border border-white/10 rounded-sm p-5 sm:p-6 text-left space-y-5 relative overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="font-valorant text-sm tracking-wider text-white flex items-center gap-2">
-              <Camera className="h-4 w-4 text-accent" /> PROFILE AVATAR
-            </span>
-          </div>
-          <p className="text-xs text-zinc-400 leading-relaxed">
-            Upload your custom avatar. Displayed across the lobby card, party matches, and friends sidebar.
+          <span className="font-valorant text-xs sm:text-sm tracking-wider text-white flex items-center gap-2">
+            <Camera className="h-4 w-4 text-[#FF4655]" /> PROFILE AVATAR
+          </span>
+          <p className="text-xs text-white/50 leading-relaxed font-sans">
+            Upload a custom avatar shown across match lobbies, podiums, and friend lists.
           </p>
         </div>
 
         {isAnonymous && (
-          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF4655] bg-[#FF4655]/10 px-2 py-0.5 rounded border border-[#FF4655]/30 flex items-center gap-1 shrink-0 self-start sm:self-center">
+          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF4655] bg-[#FF4655]/10 px-2 py-0.5 rounded-xs border border-[#FF4655]/30 flex items-center gap-1 shrink-0 self-start sm:self-center">
             <Lock className="h-3 w-3" /> GUEST LOCKED
           </span>
         )}
@@ -144,38 +140,34 @@ export function ProfileAvatarUploadCard({
 
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pt-1">
         <div className="relative group shrink-0">
-          <div
-            className={cn(
-              "relative h-24 w-24 rounded-full bg-black shadow-[0_0_20px_rgba(0,0,0,0.8)] transition-all",
-              hasCustomAvatar ? "shadow-[0_0_20px_rgba(255,70,85,0.3)]" : "border-white/20"
-            )}
-          >
+          <div className="relative h-24 w-24 rounded-full bg-black border border-white/20 overflow-hidden shadow-md">
             <Image
               src={currentAvatar}
               alt="Avatar Preview"
               fill
+              sizes="96px"
               className="object-cover object-center rounded-full"
               unoptimized={currentAvatar.startsWith("blob:")}
             />
 
             {isUploading && (
-              <div className="absolute inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center text-white space-y-1">
-                <Loader2 className="h-6 w-6 animate-spin text-accent" />
-                <span className="text-[8px] font-mono uppercase tracking-wider text-white/80">SYNCING</span>
+              <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white space-y-1">
+                <Loader2 className="h-6 w-6 animate-spin text-[#FF4655]" />
+                <span className="text-[8px] font-mono uppercase tracking-wider text-white/80">SAVING</span>
               </div>
             )}
 
-            <div className="absolute bottom-1 right-1 h-4 w-4 z-100 bg-mint rounded-full border-t border-l border-black shadow-[0_0_8px_#3cf2c4]" />
+            <div className="absolute bottom-1 right-1 h-3.5 w-3.5 bg-mint rounded-full border border-black" />
           </div>
 
           {!isAnonymous && !isUploading && (
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-sm flex flex-col items-center justify-center text-white gap-1 cursor-pointer"
+              className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex flex-col items-center justify-center text-white gap-1 cursor-pointer"
               title="Click to change avatar"
             >
-              <Camera className="h-5 w-5 text-accent" />
+              <Camera className="h-5 w-5 text-[#FF4655]" />
               <span className="text-[8px] font-mono font-bold tracking-wider uppercase">CHANGE</span>
             </button>
           )}
@@ -193,11 +185,11 @@ export function ProfileAvatarUploadCard({
               if (!isAnonymous && !isUploading) fileInputRef.current?.click();
             }}
             className={cn(
-              "border-2 border-dashed rounded-sm p-4 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5",
+              "border border-dashed rounded-sm p-4 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5",
               isAnonymous
                 ? "border-white/10 bg-white/[0.01] opacity-50 cursor-not-allowed"
                 : isDragOver
-                ? "border-accent bg-accent/10 shadow-[0_0_20px_rgba(255,70,85,0.2)]"
+                ? "border-[#FF4655] bg-[#FF4655]/10"
                 : "border-white/15 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]"
             )}
           >
@@ -213,19 +205,18 @@ export function ProfileAvatarUploadCard({
               }}
             />
 
-            <Upload className={cn("h-5 w-5", isDragOver ? "text-accent" : "text-white/40")} />
+            <Upload className={cn("h-5 w-5", isDragOver ? "text-[#FF4655]" : "text-white/40")} />
 
             <div>
               <span className="text-xs font-display font-bold uppercase tracking-wider text-white">
-                {isUploading ? "Uploading to Cloudinary CDN..." : "Choose Image File or Drag & Drop"}
+                {isUploading ? "Uploading..." : "Click to select or drag and drop image"}
               </span>
-              <span className="text-[10px] text-zinc-500 block mt-0.5">
-                PNG, JPG, WEBP, or GIF up to 5 MB (Auto-cropped to 500x500 square)
+              <span className="text-[10px] text-white/40 font-mono block mt-0.5">
+                PNG, JPG, WEBP, or GIF up to 5 MB
               </span>
             </div>
           </div>
 
-          {/* Action Row */}
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -240,8 +231,8 @@ export function ProfileAvatarUploadCard({
                 </>
               ) : (
                 <>
-                  <Upload className="h-3.5 w-3.5 text-accent" />
-                  <span>UPLOAD NEW IMAGE</span>
+                  <Upload className="h-3.5 w-3.5 text-[#FF4655]" />
+                  <span>SELECT IMAGE</span>
                 </>
               )}
             </button>
@@ -251,7 +242,7 @@ export function ProfileAvatarUploadCard({
                 type="button"
                 disabled={isRemoving || isUploading}
                 onClick={handleRemove}
-                className="py-2 px-3.5 bg-transparent hover:bg-[#FF4655]/15 border border-white/10 hover:border-[#FF4655]/40 text-zinc-400 hover:text-[#FF4655] font-display text-xs font-bold uppercase tracking-wider rounded-sm transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                className="py-2 px-3.5 bg-transparent hover:bg-[#FF4655]/15 border border-white/10 hover:border-[#FF4655]/40 text-white/50 hover:text-[#FF4655] font-display text-xs font-bold uppercase tracking-wider rounded-sm transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                 title="Reset to default agent icon"
               >
                 {isRemoving ? (
@@ -266,7 +257,6 @@ export function ProfileAvatarUploadCard({
         </div>
       </div>
 
-      {/* Interactive Crop & Size Modal */}
       <ImageCropModal
         isOpen={showCropModal}
         onClose={() => setShowCropModal(false)}

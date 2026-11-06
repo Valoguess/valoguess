@@ -22,72 +22,70 @@ export function ProfileCardPreview({
   const displayAvatar = avatarUrl || currentBanner.iconPath;
 
   return (
-    <div className="w-full bg-[#080B10]/80 border border-white/10 rounded-sm p-6 backdrop-blur-xl relative overflow-hidden shadow-2xl">
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-accent to-transparent" />
+    <div className="w-full bg-[#080b10]/80 border border-white/10 rounded-sm p-5 sm:p-6 backdrop-blur-xl relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#FF4655] to-transparent" />
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex flex-col text-left space-y-2 max-w-md">
-          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-accent font-bold">
+          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-[#FF4655] font-bold">
             <Sparkles className="h-3 w-3" />
-            <span>LIVE PROFILE CARD PREVIEW</span>
+            <span>PLAYER CARD PREVIEW</span>
           </div>
-          <h2 className="font-valorant text-2xl tracking-wider text-white">
-            USER PROFILE
+          <h2 className="font-valorant text-xl sm:text-2xl tracking-wider text-white">
+            TACTICAL IDENTITY
           </h2>
-          <p className="text-xs text-zinc-400 leading-relaxed">
-            This is how other players see your identity in lobby slots, friens
-            list.
+          <p className="text-xs text-white/50 leading-relaxed font-sans">
+            This card represents your identity across 1v1 duels, party lobbies, and friend lists.
           </p>
         </div>
 
-        <div className="w-full max-w-md sm:w-96 rounded-sm border border-white/15 overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.8)] relative bg-black/90 group">
+        <div className="w-full max-w-md sm:w-96 rounded-sm border border-white/15 overflow-hidden relative bg-black/90 group">
           <div className="relative h-28 w-full overflow-hidden">
             <Image
               src={currentBanner.bannerPath}
               alt={currentBanner.name}
               fill
-              className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, 384px"
+              className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-linear-to-t from-[#080B10] via-[#080B10]/40 to-transparent" />
-            <div className="absolute inset-0 bg-linear-to-r from-[#080B10]/80 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#080b10] via-[#080b10]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#080b10]/80 via-transparent to-transparent" />
 
-            <span className="absolute top-2.5 right-2.5 text-[8.5px] font-display font-bold uppercase tracking-widest text-white/80 bg-black/60 px-2 py-0.5 rounded-xs border border-white/10 backdrop-blur-xs">
+            <span className="absolute top-2.5 right-2.5 text-[9px] font-display font-bold uppercase tracking-widest text-white/80 bg-black/60 px-2 py-0.5 rounded-xs border border-white/10 backdrop-blur-xs">
               {currentBanner.name} • {currentBanner.role}
             </span>
           </div>
 
           <div className="p-4 pt-0 relative flex items-start gap-3.5">
-            <div className="relative -mt-8 h-16 w-16 rounded-sm overflow-hidden border-2 border-accent shrink-0 shadow-[0_0_15px_rgba(255,70,85,0.4)] bg-black">
+            <div className="relative -mt-8 h-16 w-16 rounded-sm overflow-hidden border-2 border-[#FF4655] shrink-0 bg-black shadow-md">
               <Image
                 src={displayAvatar}
                 alt={name || "Agent"}
                 fill
+                sizes="64px"
                 className="object-cover object-center"
               />
-              <div className="absolute bottom-0 right-0 h-3 w-3 bg-mint rounded-tl-sm border-t border-l border-black shadow-[0_0_8px_#3cf2c4]" />
+              <div className="absolute bottom-0 right-0 h-3 w-3 bg-mint rounded-tl-sm border-t border-l border-black" />
             </div>
 
-            {/* Names and Tagline */}
             <div className="flex flex-col text-left min-w-0 flex-1 pt-1">
-              <div className="flex items-center gap-2">
-                <span className="font-valorant text-lg tracking-wider text-white truncate max-w-[180px]">
-                  {name || "AGENT"}
-                </span>
-              </div>
+              <span className="font-display font-black text-lg sm:text-xl uppercase tracking-wider text-white truncate max-w-[200px]">
+                {name || "AGENT"}
+              </span>
 
-              <span className="font-mono text-xs text-accent truncate">
+              <span className="font-mono text-xs text-[#FF4655] truncate">
                 @{username || "agent"}
               </span>
 
-              <span className="mt-1 text-[9px] font-display font-black tracking-[0.2em] text-amber-400 uppercase truncate">
+              <span className="mt-1 text-[9px] font-display font-bold tracking-[0.2em] text-amber-400 uppercase truncate">
                 {tagline || "CLUTCH SPECIALIST"}
               </span>
             </div>
           </div>
 
-          {/* Bottom Card Strip */}
-          <div className="px-4 py-2 border-t border-white/10 bg-white/[0.02] flex items-center justify-between text-[9px] font-mono text-zinc-500">
-            <span>STATUS: ONLINE</span>
+          <div className="px-4 py-2 border-t border-white/10 bg-white/[0.02] flex items-center justify-between text-[9px] font-mono text-white/40">
+            <span>STATUS: READY</span>
+            <span className="text-mint font-bold">1V1 DUELIST</span>
           </div>
         </div>
       </div>

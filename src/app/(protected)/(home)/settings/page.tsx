@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { User, Shield, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession, signOut, token } from "@/lib/auth-client";
@@ -28,7 +27,6 @@ function getDaysRemaining(updatedAt?: Date | string | null): number {
 }
 
 export default function SettingsPage() {
-  const router = useRouter();
   const { data: session } = useSession();
   const { user, setUser, clearUser } = useAuthStore();
 
@@ -59,7 +57,6 @@ export default function SettingsPage() {
   );
 
   const [isSaving, setIsSaving] = useState(false);
-
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -112,7 +109,7 @@ export default function SettingsPage() {
       const nextBanner = selectedBannerId;
 
       if (session?.user?.id) {
-        const { data, error } = await token();
+        const { data } = await token();
 
         if (nextName !== user?.name || nextUsername !== user?.username) {
           const res = await updateUser({
@@ -218,11 +215,11 @@ export default function SettingsPage() {
             className={cn(
               "py-2 sm:py-2.5 px-3 sm:px-5 font-display text-[11px] sm:text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
               activeTab === "identity"
-                ? "border-accent text-white bg-white/4"
+                ? "border-[#FF4655] text-white bg-white/5"
                 : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
-            <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent" />
+            <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF4655]" />
             <span>IDENTITY &amp; AVATAR</span>
           </button>
 
@@ -231,7 +228,7 @@ export default function SettingsPage() {
             className={cn(
               "py-2 sm:py-2.5 px-3 sm:px-5 font-display text-[11px] sm:text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
               activeTab === "banner"
-                ? "border-accent text-white bg-white/4"
+                ? "border-[#FF4655] text-white bg-white/5"
                 : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
@@ -244,7 +241,7 @@ export default function SettingsPage() {
             className={cn(
               "py-2 sm:py-2.5 px-3 sm:px-5 font-display text-[11px] sm:text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
               activeTab === "privacy"
-                ? "border-accent text-white bg-white/4"
+                ? "border-[#FF4655] text-white bg-white/5"
                 : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
@@ -259,15 +256,9 @@ export default function SettingsPage() {
             username={username}
             setUsername={setUsername}
             usernameCooldownDays={usernameCooldownDays}
-            toggleUsernameCooldownDemo={() =>
-              setUsernameCooldownDays((prev) => (prev > 0 ? 0 : 24))
-            }
             name={name}
             setName={setName}
             nameCooldownDays={nameCooldownDays}
-            toggleNameCooldownDemo={() =>
-              setNameCooldownDays((prev) => (prev > 0 ? 0 : 19))
-            }
             defaultIconPath={currentBanner.iconPath}
             onSave={() => handleSaveSettings()}
             isSaving={isSaving}

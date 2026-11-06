@@ -20,7 +20,7 @@ export function ImageCropModal({
 }: ImageCropModalProps) {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
-  const [rotation, setRotation] = useState(0); // in degrees: 0, 90, 180, 270
+  const [rotation, setRotation] = useState(0);
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -29,7 +29,6 @@ export function ImageCropModal({
   const imageRef = useRef<HTMLImageElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Load image when file changes
   useEffect(() => {
     if (!imageFile) {
       setImageSrc(null);
@@ -47,7 +46,6 @@ export function ImageCropModal({
     };
   }, [imageFile]);
 
-  // Handle Drag / Pan Events
   const handlePointerDown = (e: React.PointerEvent) => {
     setIsDragging(true);
     dragStartRef.current = { x: e.clientX, y: e.clientY };
@@ -70,30 +68,25 @@ export function ImageCropModal({
     try {
       (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {
-      // ignore
     }
   };
 
-  // Wheel zoom
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
     setZoom((prev) => Math.min(4, Math.max(0.5, +(prev + delta).toFixed(2))));
   };
 
-  // Rotate 90 degrees
   const handleRotate = () => {
     setRotation((r) => (r + 90) % 360);
   };
 
-  // Reset adjustments
   const handleReset = () => {
     setZoom(1);
     setRotation(0);
     setPan({ x: 0, y: 0 });
   };
 
-  // Render crop to 500x500 off-screen canvas and export file
   const handleConfirm = useCallback(() => {
     if (!imageRef.current || !containerRef.current) return;
 
@@ -108,21 +101,15 @@ export function ImageCropModal({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // The circular guide mask is drawn in viewBox="0 0 100 100" with r="46" (radius = 46% of containerSize)
-    // The diameter of the circle is 92% of containerSize
     const cropCircleDiameter = containerSize * 0.92;
-
-    // Scale factor from the on-screen crop bounding box to the 500x500 canvas
     const outputScale = 500 / cropCircleDiameter;
 
-    // Unrotated base dimensions rendered by CSS object-contain inside containerSize x containerSize
     const naturalWidth = img.naturalWidth;
     const naturalHeight = img.naturalHeight;
     const containRatio = Math.min(containerSize / naturalWidth, containerSize / naturalHeight);
     const baseWidth = naturalWidth * containRatio;
     const baseHeight = naturalHeight * containRatio;
 
-    // Fill background with black to match the modal and Valo theme
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, 500, 500);
 
@@ -130,27 +117,19 @@ export function ImageCropModal({
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
 
-    // 1. Move to the center of the image on the output canvas:
-    // On screen, the crop circle center is (containerSize / 2, containerSize / 2), which maps to (250, 250).
-    // The image was offset from that center by (pan.x, pan.y).
     const canvasCenterX = 250 + pan.x * outputScale;
     const canvasCenterY = 250 + pan.y * outputScale;
     ctx.translate(canvasCenterX, canvasCenterY);
 
-    // 2. Rotate around the image center
     ctx.rotate((rotation * Math.PI) / 180);
-
-    // 3. Scale by zoom around the image center
     ctx.scale(zoom, zoom);
 
-    // 4. Draw image centered at (0, 0)
     const drawWidth = baseWidth * outputScale;
     const drawHeight = baseHeight * outputScale;
     ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
 
     ctx.restore();
 
-    // Export high-quality image File
     const isPng = imageFile?.type === "image/png";
     const exportType = isPng ? "image/png" : "image/jpeg";
     const exportQuality = isPng ? undefined : 0.95;
@@ -176,16 +155,14 @@ export function ImageCropModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         showCloseButton={false}
-        className="bg-[#070a10]/95 border border-white/15 max-w-md p-6 shadow-[0_0_50px_rgba(0,0,0,0.95)] backdrop-blur-2xl rounded-sm select-none"
+        className="bg-[#070a10]/95 border border-white/15 max-w-md p-6 shadow-2xl backdrop-blur-2xl rounded-sm select-none"
       >
-        {/* Top Accent Stripe */}
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#FF4655]" />
 
-        {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex flex-col text-left">
             <span className="text-[10px] font-mono uppercase tracking-widest text-[#FF4655] font-bold">
-              CROP & POSITION
+              CROP &amp; POSITION
             </span>
             <h3 className="font-valorant text-base tracking-wider text-white">
               CUSTOMIZE AVATAR
@@ -193,14 +170,13 @@ export function ImageCropModal({
           </div>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-white/10 rounded text-white/50 hover:text-white transition cursor-pointer"
+            className="p-1 hover:bg-white/10 rounded-xs text-white/50 hover:text-white transition cursor-pointer"
             title="Cancel"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Viewport Area */}
         <div className="flex flex-col items-center gap-4 py-4">
           <div
             ref={containerRef}
@@ -213,7 +189,6 @@ export function ImageCropModal({
               isDragging ? "cursor-grabbing" : "cursor-grab"
             )}
           >
-            {/* The Image being transformed */}
             {imageSrc && (
               <img
                 ref={imageRef}
@@ -231,7 +206,6 @@ export function ImageCropModal({
               />
             )}
 
-            {/* Circular Crop Guide Mask */}
             <div className="absolute inset-0 pointer-events-none">
               <svg className="w-full h-full" viewBox="0 0 100 100">
                 <defs>
@@ -258,28 +232,24 @@ export function ImageCropModal({
               </svg>
             </div>
 
-            {/* Corner Bracket Accents */}
             <div className="absolute top-2 left-2 h-4 w-4 border-t-2 border-l-2 border-white/40 pointer-events-none" />
             <div className="absolute top-2 right-2 h-4 w-4 border-t-2 border-r-2 border-white/40 pointer-events-none" />
             <div className="absolute bottom-2 left-2 h-4 w-4 border-b-2 border-l-2 border-white/40 pointer-events-none" />
             <div className="absolute bottom-2 right-2 h-4 w-4 border-b-2 border-r-2 border-white/40 pointer-events-none" />
 
-            {/* Drag hint */}
             <div className="absolute bottom-2 inset-x-0 flex justify-center pointer-events-none">
-              <span className="text-[9px] font-mono bg-black/70 px-2 py-0.5 rounded text-white/60 flex items-center gap-1 border border-white/10">
+              <span className="text-[9px] font-mono bg-black/70 px-2 py-0.5 rounded-xs text-white/60 flex items-center gap-1 border border-white/10">
                 <Move className="h-2.5 w-2.5" /> Drag to pan
               </span>
             </div>
           </div>
 
-          {/* Controls Bar: Zoom Slider + Rotate + Reset */}
           <div className="w-full space-y-3 px-2">
-            {/* Zoom Slider */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.2).toFixed(2)))}
-                className="p-1 hover:bg-white/10 text-white/60 hover:text-white rounded transition cursor-pointer"
+                className="p-1 hover:bg-white/10 text-white/60 hover:text-white rounded-xs transition cursor-pointer"
                 title="Zoom Out"
               >
                 <ZoomOut className="h-4 w-4" />
@@ -298,32 +268,31 @@ export function ImageCropModal({
               <button
                 type="button"
                 onClick={() => setZoom((z) => Math.min(4, +(z + 0.2).toFixed(2)))}
-                className="p-1 hover:bg-white/10 text-white/60 hover:text-white rounded transition cursor-pointer"
+                className="p-1 hover:bg-white/10 text-white/60 hover:text-white rounded-xs transition cursor-pointer"
                 title="Zoom In"
               >
                 <ZoomIn className="h-4 w-4" />
               </button>
 
-              <span className="text-[10px] font-mono text-zinc-400 w-10 text-right">
+              <span className="text-[10px] font-mono text-white/50 w-10 text-right">
                 {zoom.toFixed(1)}x
               </span>
             </div>
 
-            {/* Action Tools: Rotate & Reset */}
-            <div className="flex items-center justify-between text-xs text-zinc-400 pt-1">
+            <div className="flex items-center justify-between text-xs text-white/50 pt-1">
               <button
                 type="button"
                 onClick={handleRotate}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 transition cursor-pointer text-[10px] font-display font-bold uppercase tracking-wider"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xs bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 transition cursor-pointer text-[10px] font-display font-bold uppercase tracking-wider"
               >
-                <RotateCw className="h-3.5 w-3.5 text-accent" />
+                <RotateCw className="h-3.5 w-3.5 text-[#FF4655]" />
                 <span>ROTATE 90°</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleReset}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 transition cursor-pointer text-[10px] font-display font-bold uppercase tracking-wider"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xs bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 transition cursor-pointer text-[10px] font-display font-bold uppercase tracking-wider"
               >
                 <RefreshCw className="h-3.5 w-3.5 text-white/50" />
                 <span>RESET</span>
@@ -332,7 +301,6 @@ export function ImageCropModal({
           </div>
         </div>
 
-        {/* Footer Actions */}
         <div className="flex items-center gap-3 pt-3 border-t border-white/10">
           <button
             type="button"
@@ -345,10 +313,10 @@ export function ImageCropModal({
           <button
             type="button"
             onClick={handleConfirm}
-            className="flex-1 py-2.5 px-4 bg-[#FF4655] hover:bg-[#FF4655]/90 text-white font-display text-xs font-bold uppercase tracking-wider rounded-sm shadow-[0_0_15px_rgba(255,70,85,0.4)] transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
+            className="flex-1 py-2.5 px-4 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-display text-xs font-bold uppercase tracking-wider rounded-sm transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
           >
             <Check className="h-4 w-4" />
-            <span>APPLY & SAVE</span>
+            <span>APPLY &amp; SAVE</span>
           </button>
         </div>
       </DialogContent>
