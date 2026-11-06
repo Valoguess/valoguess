@@ -80,7 +80,6 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
   const outcome = myPlayer?.outcome || "DRAW";
   const isVictory = outcome === "WIN";
   const isDefeat = outcome === "LOSS";
-  const isDraw = outcome === "DRAW";
 
   const myAgent = getAgentById(myPlayer?.details?.secretAgent);
   const oppAgent = getAgentById(oppPlayer?.details?.secretAgent);
@@ -91,36 +90,36 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
   return (
     <div
       className={cn(
-        "relative rounded-sm border transition-all overflow-hidden bg-[#080B10]/90 backdrop-blur-md",
+        "relative rounded-sm border transition-all overflow-hidden bg-[#080b10]/90 backdrop-blur-md",
         isVictory
-          ? "border-mint/30 hover:border-mint/60 shadow-[0_0_20px_rgba(60,242,196,0.06)]"
+          ? "border-mint/30 hover:border-mint/50"
           : isDefeat
-          ? "border-[#FF4655]/30 hover:border-[#FF4655]/60 shadow-[0_0_20px_rgba(255,70,85,0.06)]"
+          ? "border-[#FF4655]/30 hover:border-[#FF4655]/50"
           : "border-white/10 hover:border-white/20"
       )}
     >
       <div
         className={cn(
-          "absolute top-0 left-0 bottom-0 w-1.5 transition-all",
-          isVictory ? "bg-mint shadow-[0_0_12px_#3CF2C4]" : isDefeat ? "bg-accent shadow-[0_0_12px_#FF4655]" : "bg-zinc-500"
+          "absolute top-0 left-0 bottom-0 w-1",
+          isVictory ? "bg-mint" : isDefeat ? "bg-[#FF4655]" : "bg-white/20"
         )}
       />
 
       <div
         onClick={() => setIsExpanded((prev) => !prev)}
-        className="p-3.5 sm:p-5 pl-4.5 sm:pl-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none"
+        className="p-3.5 sm:p-4 pl-4.5 sm:pl-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none"
       >
         <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto justify-between md:justify-start">
           <div className="flex flex-col min-w-[80px] sm:min-w-[90px]">
             <span
               className={cn(
-                "font-valorant text-lg sm:text-2xl tracking-wider leading-none",
-                isVictory ? "text-mint" : isDefeat ? "text-accent" : "text-zinc-400"
+                "font-valorant text-lg sm:text-xl tracking-wider leading-none",
+                isVictory ? "text-mint" : isDefeat ? "text-[#FF4655]" : "text-white/60"
               )}
             >
               {isVictory ? "VICTORY" : isDefeat ? "DEFEAT" : "DRAW"}
             </span>
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">
+            <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest mt-1">
               {game.mode.replace(/_/g, " ")}
             </span>
           </div>
@@ -128,20 +127,20 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
           <div className="h-8 w-px bg-white/10 hidden sm:block" />
 
           <div className="flex flex-col text-right sm:text-left text-xs">
-            <span className="text-white/80 font-display font-medium flex items-center justify-end sm:justify-start gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-zinc-400" />
+            <span className="text-white/80 font-mono text-xs flex items-center justify-end sm:justify-start gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-white/40" />
               {durationStr}
             </span>
-            <span className="text-[10px] text-zinc-500 font-mono mt-0.5 flex items-center justify-end sm:justify-start gap-1.5">
-              <Calendar className="h-3 w-3 text-zinc-600" />
+            <span className="text-[10px] text-white/40 font-mono mt-0.5 flex items-center justify-end sm:justify-start gap-1.5">
+              <Calendar className="h-3 w-3 text-white/30" />
               {relativeTime}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-2.5 sm:gap-6 md:gap-8 self-center md:self-auto w-full md:w-auto">
+        <div className="flex items-center justify-center gap-3 sm:gap-6 md:gap-8 self-center md:self-auto w-full md:w-auto">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-sm overflow-hidden border border-white/20 bg-black shrink-0">
+            <div className="relative h-10 w-10 sm:h-11 sm:w-11 rounded-sm overflow-hidden border border-white/15 bg-black shrink-0">
               <Image
                 src={myAgent.iconPath}
                 alt={myAgent.name}
@@ -150,36 +149,35 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
               />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-zinc-400">
+              <span className="text-[9px] font-mono uppercase tracking-wider text-white/40">
                 YOU
               </span>
-              <span className="font-valorant text-xs sm:text-sm text-white tracking-wider">
+              <span className="font-display font-black text-xs sm:text-sm text-white uppercase tracking-wider">
                 {myAgent.name}
               </span>
-              <span className="text-[8px] sm:text-[9px] font-mono text-accent">
+              <span className="text-[9px] font-mono text-[#FF4655] uppercase">
                 {myAgent.role}
               </span>
             </div>
           </div>
 
-          <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center font-valorant text-[9px] sm:text-[10px] text-zinc-400 shrink-0">
+          <div className="h-6 w-6 rounded-full border border-white/10 bg-white/5 flex items-center justify-center font-valorant text-[9px] text-white/40 shrink-0">
             VS
           </div>
 
-          {/* Opponent Agent */}
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="flex flex-col text-right">
-              <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-zinc-400 truncate max-w-[80px] sm:max-w-none">
+              <span className="text-[9px] font-display font-bold uppercase tracking-wider text-white/60 truncate max-w-[90px] sm:max-w-none">
                 {oppPlayer?.name || "OPPONENT"}
               </span>
-              <span className="font-valorant text-xs sm:text-sm text-white tracking-wider">
+              <span className="font-display font-black text-xs sm:text-sm text-white uppercase tracking-wider">
                 {oppAgent.name}
               </span>
-              <span className="text-[8px] sm:text-[9px] font-mono text-zinc-400">
+              <span className="text-[9px] font-mono text-white/40 uppercase">
                 {oppAgent.role}
               </span>
             </div>
-            <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-sm overflow-hidden border border-white/20 bg-black shrink-0">
+            <div className="relative h-10 w-10 sm:h-11 sm:w-11 rounded-sm overflow-hidden border border-white/15 bg-black shrink-0">
               <Image
                 src={oppAgent.iconPath}
                 alt={oppAgent.name}
@@ -190,21 +188,21 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
           </div>
         </div>
 
-        <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-4">
-          <div className="flex items-center gap-3 text-xs font-mono">
-            <div className="px-2.5 py-1 rounded bg-white/[0.03] border border-white/10 text-zinc-300">
-              <span className="text-zinc-500 mr-1.5">NOS:</span>
+        <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-3">
+          <div className="flex items-center gap-2 text-xs font-mono">
+            <div className="px-2.5 py-1 rounded-xs bg-white/[0.03] border border-white/10 text-white/70">
+              <span className="text-white/40 mr-1.5">NOS:</span>
               <span className="text-white font-bold">{myPlayer?.details?.nosUsed ?? 0}</span>
             </div>
-            <div className="px-2.5 py-1 rounded bg-white/[0.03] border border-white/10 text-zinc-300">
-              <span className="text-zinc-500 mr-1.5">GUESSES:</span>
+            <div className="px-2.5 py-1 rounded-xs bg-white/[0.03] border border-white/10 text-white/70">
+              <span className="text-white/40 mr-1.5">GUESSES:</span>
               <span className="text-white font-bold">{myPlayer?.details?.guessesUsed ?? 0}</span>
             </div>
           </div>
 
           <div
             className={cn(
-              "p-1.5 rounded-sm bg-white/5 border border-white/10 text-zinc-400 transition-transform",
+              "p-1.5 rounded-xs bg-white/5 border border-white/10 text-white/50 transition-transform",
               isExpanded && "rotate-180 text-white"
             )}
           >
@@ -214,55 +212,54 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
       </div>
 
       {isExpanded && (
-        <div className="border-t border-white/10 bg-black/40 p-5 pl-6 animate-in fade-in duration-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-            {/* Player Breakdown */}
-            <div className="space-y-3">
-              <h4 className="font-valorant text-xs tracking-wider text-zinc-300 flex items-center gap-2">
-                <Swords className="h-3.5 w-3.5 text-accent" />
-                <span>YOUR TACTICAL PERFORMANCE</span>
-              </h4>
-              <div className="p-3 rounded border border-white/5 bg-white/[0.02] space-y-2 text-xs font-display">
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span className="text-zinc-500">Player Name:</span>
-                  <span className="text-white font-bold">{myPlayer?.name || "You"}</span>
+        <div className="border-t border-white/10 bg-black/50 p-4 sm:p-5 pl-5 sm:pl-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2">
+                <Swords className="h-3.5 w-3.5 text-[#FF4655]" />
+                <span className="font-valorant text-xs tracking-wider text-white">MATCH BREAKDOWN</span>
+              </div>
+              <div className="p-3 rounded-xs border border-white/10 bg-white/[0.02] space-y-2 text-xs font-sans">
+                <div className="flex justify-between items-center">
+                  <span className="text-white/50 font-sans">Player Name:</span>
+                  <span className="text-white font-display font-bold uppercase">{myPlayer?.name || "You"}</span>
                 </div>
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span className="text-zinc-500">Secret Agent:</span>
-                  <span className="text-mint font-bold">{myAgent.name} ({myAgent.role})</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/50 font-sans">Secret Agent:</span>
+                  <span className="text-mint font-display font-bold uppercase">{myAgent.name} ({myAgent.role})</span>
                 </div>
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span className="text-zinc-500">Guess Made:</span>
-                  <span className="text-white font-bold uppercase">{myPlayer?.details?.guess || "None"}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/50 font-sans">Final Guess:</span>
+                  <span className="text-white font-display font-bold uppercase">{myPlayer?.details?.guess || "None"}</span>
                 </div>
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span className="text-zinc-500">Tactical &quot;No&quot; Cards Consumed:</span>
-                  <span className="text-white font-bold">{myPlayer?.details?.nosUsed ?? 0}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/50 font-sans">&quot;No&quot; Cards Consumed:</span>
+                  <span className="text-white font-mono font-bold">{myPlayer?.details?.nosUsed ?? 0}</span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <h4 className="font-valorant text-xs tracking-wider text-zinc-300 flex items-center gap-2">
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2">
                 <Trophy className="h-3.5 w-3.5 text-amber-400" />
-                <span>OPPONENT INTEL</span>
-              </h4>
-              <div className="p-3 rounded border border-white/5 bg-white/[0.02] space-y-2 text-xs font-display">
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span className="text-zinc-500">Challenger:</span>
-                  <span className="text-white font-bold">{oppPlayer?.name || "Opponent"}</span>
+                <span className="font-valorant text-xs tracking-wider text-white">OPPONENT INTEL</span>
+              </div>
+              <div className="p-3 rounded-xs border border-white/10 bg-white/[0.02] space-y-2 text-xs font-sans">
+                <div className="flex justify-between items-center">
+                  <span className="text-white/50 font-sans">Challenger:</span>
+                  <span className="text-white font-display font-bold uppercase">{oppPlayer?.name || "Opponent"}</span>
                 </div>
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span className="text-zinc-500">Their Secret Agent:</span>
-                  <span className="text-accent font-bold">{oppAgent.name} ({oppAgent.role})</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/50 font-sans">Secret Agent:</span>
+                  <span className="text-[#FF4655] font-display font-bold uppercase">{oppAgent.name} ({oppAgent.role})</span>
                 </div>
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span className="text-zinc-500">Their Final Guess:</span>
-                  <span className="text-white font-bold uppercase">{oppPlayer?.details?.guess || "None"}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/50 font-sans">Final Guess:</span>
+                  <span className="text-white font-display font-bold uppercase">{oppPlayer?.details?.guess || "None"}</span>
                 </div>
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span className="text-zinc-500">Their &quot;No&quot; Cards Consumed:</span>
-                  <span className="text-white font-bold">{oppPlayer?.details?.nosUsed ?? 0}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/50 font-sans">&quot;No&quot; Cards Consumed:</span>
+                  <span className="text-white font-mono font-bold">{oppPlayer?.details?.nosUsed ?? 0}</span>
                 </div>
               </div>
             </div>

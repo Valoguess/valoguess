@@ -4,7 +4,7 @@ export function MatchHistorySkeleton() {
       {[1, 2, 3, 4].map((i) => (
         <div
           key={i}
-          className="relative rounded-sm border border-white/5 bg-[#080B10]/70 p-5 pl-6 flex items-center justify-between gap-4 animate-pulse overflow-hidden"
+          className="relative rounded-sm border border-white/10 bg-[#080b10]/80 p-5 pl-6 flex items-center justify-between gap-4 animate-pulse overflow-hidden"
         >
           <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-white/10" />
 
