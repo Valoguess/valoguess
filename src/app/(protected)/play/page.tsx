@@ -106,10 +106,21 @@ function PlayContent() {
     }
   }, [game]);
 
+  useEffect(() => {
+    if (
+      game &&
+      (game.status === "STARTING" ||
+        game.status === "PLAYING" ||
+        game.status === "WAITING")
+    ) {
+      useTempResultStore.getState().clearTempResultGame();
+    }
+  }, [game?.id, game?.status]);
+
   const finishedMatchGame =
     game?.status === "FINISHED"
       ? game
-      : tempResultGame?.status === "FINISHED"
+      : !game && tempResultGame?.status === "FINISHED"
       ? tempResultGame
       : null;
 

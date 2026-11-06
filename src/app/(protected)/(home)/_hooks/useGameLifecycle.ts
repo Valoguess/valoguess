@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { socket } from "@/socket";
 import { ServerEvents } from "@/socket/events";
 import { useGameStore } from "@/store/gameStore";
+import { useTempResultStore } from "@/store/tempResultStore";
 import { createGame, startGame, leaveGame } from "@/socket/emitter";
 import { Party } from "@/types/party";
 import { useGameSettingsStore } from "@/store/gameSettingsStore";
@@ -106,6 +107,7 @@ export function useGameLifecycle({
   const handleStartGame = useCallback(() => {
     if (!party?.id || !isHost || !opponent?.id) return;
 
+    useTempResultStore.getState().clearTempResultGame();
     setIsStartingGame(true);
 
     if (game?.id && game.status === "WAITING") {

@@ -96,7 +96,7 @@ export function handleGameSync(
     const currentFinishedGame = useTempResultStore.getState().tempResultGame;
     const isFinished =
       currentGame?.status === "FINISHED" ||
-      currentFinishedGame?.status === "FINISHED";
+      (!currentGame && currentFinishedGame?.status === "FINISHED");
 
     if (!isFinished) {
       useGameStore.getState().clearGame();
@@ -110,6 +110,12 @@ export function handleGameSync(
 
   if (syncedGame.status === "FINISHED") {
     useTempResultStore.getState().setTempResultGame(syncedGame);
+  } else if (
+    syncedGame.status === "STARTING" ||
+    syncedGame.status === "PLAYING" ||
+    syncedGame.status === "WAITING"
+  ) {
+    useTempResultStore.getState().clearTempResultGame();
   }
 
   const currentUserId = useAuthStore.getState().user?.id;

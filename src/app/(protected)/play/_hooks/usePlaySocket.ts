@@ -62,9 +62,11 @@ export function usePlaySocket({
   useEffect(() => {
     const handleGameSync = (syncedGame: GuessAgentGameDTO | null) => {
       if (!syncedGame || (typeof syncedGame === "object" && !syncedGame.id)) {
+        const currentGame = useGameStore.getState().game;
         const isFinished =
-          useGameStore.getState().game?.status === "FINISHED" ||
-          useTempResultStore.getState().tempResultGame?.status === "FINISHED";
+          currentGame?.status === "FINISHED" ||
+          (!currentGame &&
+            useTempResultStore.getState().tempResultGame?.status === "FINISHED");
 
         if (!isFinished) {
           if (pathname.startsWith("/play")) {
