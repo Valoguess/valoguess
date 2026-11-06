@@ -50,6 +50,14 @@ export function useFriends(user: StoreUser | null) {
   const lastProcessedTimestampRef = useRef<number>(0);
   const locallyAcceptedIdsRef = useRef<Set<string>>(new Set());
   const locallyDeclinedIdsRef = useRef<Set<string>>(new Set());
+  const isMountedRef = useRef<boolean>(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const friendsList = useMemo<Friend[]>(() => {
     const list =
@@ -196,13 +204,23 @@ export function useFriends(user: StoreUser | null) {
       }
 
       const allRequests = [...receivedRequests, ...sentRequests];
-      setRawFriends(friends);
-      setFriendRequests(allRequests);
+      if (isMountedRef.current) {
+        setRawFriends(friends);
+        setFriendRequests(allRequests);
+      }
       useFriendStore.getState().setInitialFriendsData({
         friends,
         requests: allRequests,
       });
-    } catch (error) {
+    } catch (error: any) {
+      if (
+        !isMountedRef.current ||
+        error?.name === "AbortError" ||
+        error?.message?.includes("NetworkError") ||
+        error?.message?.includes("Failed to fetch")
+      ) {
+        return;
+      }
       logger.error({ error }, "Failed to fetch friends");
     }
   }, [user]);
