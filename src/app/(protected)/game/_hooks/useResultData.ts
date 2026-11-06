@@ -3,7 +3,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useGameStore } from "@/store/gameStore";
 import { useTempResultStore } from "@/store/tempResultStore";
 import { useAuthStore } from "@/store/authStore";
-import { AGENTS, Agent, getAgentById, getQuestionLabel } from "@/lib/data";
+import { leaveGame } from "@/socket/emitter";
+import { Agent, getAgentById, getQuestionLabel } from "@/lib/data";
 
 export interface TimelineEvent {
   id: string;
@@ -17,19 +18,21 @@ export function useResultData() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { game, clearGame } = useGameStore();
-  const { tempResultGame, clearTempResultGame } = useTempResultStore();
+  const { tempResultGame, clearTempResultGame, hydrated } = useTempResultStore();
   const { user } = useAuthStore();
 
   const activeGame = tempResultGame || (game?.status === "FINISHED" ? game : null);
+  const isLoading = !hydrated && !activeGame;
 
-  // If user reloads page or visits result without an active finished match, redirect to lobby
   useEffect(() => {
+    if (isLoading) return;
     if (!activeGame || activeGame.status !== "FINISHED") {
       router.replace("/lobby");
     }
-  }, [activeGame, router]);
+  }, [activeGame, isLoading, router]);
 
   const handleClearResults = () => {
+    leaveGame();
     clearTempResultGame();
     clearGame();
   };
@@ -45,17 +48,17 @@ export function useResultData() {
       : null;
 
   const myPlayer =
-    (user?.id ? activeGame?.players.find((p) => p.id === user.id) : undefined) ||
+    (user?.id ? activeGame?.players?.find((p) => p.id === user.id) : undefined) ||
     (cachedPlayerId
-      ? activeGame?.players.find((p) => p.id === cachedPlayerId)
+      ? activeGame?.players?.find((p) => p.id === cachedPlayerId)
       : undefined) ||
     (cachedSecretAgent
-      ? activeGame?.players.find((p) => p.state?.secretAgent === cachedSecretAgent)
+      ? activeGame?.players?.find((p) => p.state?.secretAgent === cachedSecretAgent)
       : undefined) ||
-    activeGame?.players[0];
+    activeGame?.players?.[0];
 
   const oppPlayer =
-    activeGame?.players.find((p) => p.id !== myPlayer?.id) ||
+    activeGame?.players?.find((p) => p.id !== myPlayer?.id) ||
     (activeGame?.players && activeGame.players.length > 1 ? activeGame.players[1] : undefined);
 
   const gameState = activeGame?.state;
@@ -109,14 +112,14 @@ export function useResultData() {
   const userNosUsed =
     maxNos === -1
       ? history.filter(
-          (h) => h.askedBy !== myPlayer?.id && h.answer.toUpperCase() === "NO"
+          (h) => h.askedBy !== myPlayer?.id && String(h?.answer ?? "").toUpperCase() === "NO"
         ).length
       : Math.max(0, maxNos - (myPlayer?.state?.nosRemaining ?? maxNos));
 
   const opponentNosUsed =
     maxNos === -1
       ? history.filter(
-          (h) => h.askedBy === myPlayer?.id && h.answer.toUpperCase() === "NO"
+          (h) => h.askedBy === myPlayer?.id && String(h?.answer ?? "").toUpperCase() === "NO"
         ).length
       : Math.max(0, maxNos - (oppPlayer?.state?.nosRemaining ?? maxNos));
 
@@ -134,14 +137,17 @@ export function useResultData() {
   }
 
   const timeline: TimelineEvent[] = history.flatMap((h, i) => {
+    if (!h) return [];
     const isMyQuestion = h.askedBy === myPlayer?.id;
-    const qLabel = getQuestionLabel(h.questionId);
-    const timeStr = new Date(h.timestamp).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const qLabel = getQuestionLabel(h?.questionId || "") || "Question";
+    const timeStr = h?.timestamp
+      ? new Date(h.timestamp).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "--:--";
 
-    const isYes = h.answer.toUpperCase() === "YES";
+    const isYes = String(h?.answer ?? "").toUpperCase() === "YES";
     return [
       {
         id: `${i}-ask`,
@@ -174,13 +180,14 @@ export function useResultData() {
       kind: isVictory ? "system-win" : "system-lose",
       actor: "system",
       text: isVictory
-        ? `${userName} unmasked ${oppAgentObj.name.toUpperCase()} — VICTORY`
-        : `${oppName} unmasked ${myAgentObj.name.toUpperCase()} — DEFEAT`,
+        ? `${userName} guessed ${oppAgentObj.name.toUpperCase()} — VICTORY`
+        : `${oppName} guessed ${myAgentObj.name.toUpperCase()} — DEFEAT`,
       time: timeTaken,
     });
   }
 
   return {
+    isLoading,
     game: activeGame,
     clearGame: handleClearResults,
     myPlayer,
