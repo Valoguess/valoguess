@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { socket } from "@/socket";
 import { ServerEvents } from "@/socket/events";
 import { useGameStore } from "@/store/gameStore";
-import { createGame, startGame } from "@/socket/emitter";
+import { createGame, startGame, leaveGame } from "@/socket/emitter";
 import { Party } from "@/types/party";
 import { useGameSettingsStore } from "@/store/gameSettingsStore";
 import { toast } from "sonner";
@@ -34,6 +34,7 @@ export function useGameLifecycle({
   // Clear any finished or waiting stale game state on (home) entry
   useEffect(() => {
     if (game && (game.status === "FINISHED" || game.status === "WAITING")) {
+      leaveGame();
       clearGame();
     }
   }, []);
