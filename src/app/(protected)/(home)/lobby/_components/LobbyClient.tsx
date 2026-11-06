@@ -4,21 +4,16 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuthStore } from "@/store/authStore";
 import { useGameSettingsStore } from "@/store/gameSettingsStore";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { LobbySubheader } from "./LobbySubheader";
 import { LobbyLeftPanel } from "./LobbyLeftPanel";
 import { LobbyCenterSlots } from "./LobbyCenterSlots";
 import { PartyChatOverlay } from "@/components/chat/PartyChatOverlay";
-import { LobbySettings } from "./LobbySettings";
 import { InviteFriendsDialog } from "./InviteFriendsDialog";
 import { useHomeContext } from "../../_components/HomeContext";
 
 export function LobbyClient() {
   const { user } = useAuthStore();
-
   const [savedUsername, setSavedUsername] = useState<string>("AGENT");
-
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
 
   const {
@@ -77,14 +72,14 @@ export function LobbyClient() {
           quality={100}
           className="object-cover object-center scale-[1.01]"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-[#040609]/60 to-[#040609]/70" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,#040609_90%)]" />
+        <div className="absolute inset-0 bg-[#040609]/75 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-radial from-transparent via-[#040609]/40 to-[#040609]/90" />
       </div>
 
       <LobbySubheader party={party} />
 
-      <div className="relative z-10 flex-1 flex flex-col-reverse lg:flex-row items-center lg:items-stretch justify-between gap-3 sm:gap-4 lg:gap-5 px-3 sm:px-6 lg:pl-8 lg:pr-6 py-2 min-h-0 w-full">
-        <aside className="w-full max-w-sm sm:max-w-md lg:w-70 lg:max-w-none flex flex-col justify-center shrink-0 select-none z-20 lg:h-full lg:min-h-0 gap-2 sm:gap-2.5 pb-2 lg:pb-1">
+      <div className="relative z-10 flex-1 flex flex-col-reverse lg:flex-row items-center lg:items-stretch justify-between gap-4 lg:gap-6 px-3 sm:px-6 lg:pl-8 lg:pr-6 py-3 min-h-0 w-full">
+        <aside className="w-full max-w-sm lg:w-72 flex flex-col justify-center shrink-0 z-20 lg:h-full lg:min-h-0 pb-2 lg:pb-0">
           <LobbyLeftPanel
             questionMode={questionMode}
             setQuestionMode={setQuestionMode}
@@ -93,7 +88,6 @@ export function LobbyClient() {
             opponent={opponent}
             onStartGame={handleStartGame}
             isStartingGame={isStartingGame}
-            onOpenSettings={() => setShowSettingsModal(true)}
             onLeaveParty={handleLeaveParty}
             timer={timer}
             setTimer={setTimer}
@@ -119,7 +113,7 @@ export function LobbyClient() {
           />
         </aside>
 
-        <div className="w-full flex-1 flex items-center justify-center min-w-0 py-1 lg:py-0">
+        <div className="w-full flex-1 flex items-center justify-center min-w-0 py-2 lg:py-0">
           <LobbyCenterSlots
             party={party}
             me={me}
@@ -130,33 +124,13 @@ export function LobbyClient() {
             handleCreateParty={handleCreateParty}
             handleKickGuest={() => handleKickGuest(opponent?.id)}
             onOpenInviteDialog={() => setIsInviteDialogOpen(true)}
+            onCopyCode={handleCopyCode}
+            copied={copied}
           />
         </div>
       </div>
 
       <PartyChatOverlay className="bottom-6 left-6" />
-
-      <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
-        <DialogContent className="bg-transparent border-none max-w-xl p-0 shadow-none outline-none">
-          <div className="relative w-full h-135">
-            <LobbySettings
-              isHost={isHost}
-              timer={timer}
-              setTimer={setTimer}
-              maxNos={maxNos}
-              setMaxNos={setMaxNos}
-              maxGuesses={maxGuesses}
-              setMaxGuesses={setMaxGuesses}
-              questionCount={questionCount}
-              setQuestionCount={setQuestionCount}
-              questionMode={questionMode}
-              setQuestionMode={setQuestionMode}
-              showMoreOptions={showMoreOptions}
-              setShowMoreOptions={setShowMoreOptions}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <InviteFriendsDialog
         isOpen={isInviteDialogOpen}
