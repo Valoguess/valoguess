@@ -16,7 +16,7 @@ const getSocketServerURL = () => {
       window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1";
     if (!isLocalhost) {
-      return "https://socket.nhero.xyz";
+      return "https://socket.heyneerav.tech";
     }
   }
   return "http://localhost:5000";

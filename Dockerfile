@@ -43,7 +43,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 
 ENV NODE_ENV=production
-ENV NEXT_PUBLIC_SOCKET_SERVER_URL="https://socket.nhero.xyz"
+ENV NEXT_PUBLIC_SOCKET_SERVER_URL="https://socket.heyneerav.tech"
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
 ENV SKIP_ENV_VALIDATION=true
 # Next.js collects completely anonymous telemetry data about general usage.
