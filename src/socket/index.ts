@@ -1,9 +1,8 @@
 "use client";
 
 import { io } from "socket.io-client";
-
 import ENV from "@/env";
-import { token } from "@/lib/auth-client"
+import { token } from "@/lib/auth-client";
 
 const getSocketServerURL = () => {
   const envUrl =
@@ -30,15 +29,48 @@ export const socket = io(socketServerURL, {
   transports: ["websocket", "polling"],
 
   auth: async (cb) => {
-    const { data, error } = await token()
-
-    if (error || !data) {
+    try {
+      const { data, error } = await token();
+      if (error || !data) {
+        cb({});
+        return;
+      }
+      cb({
+        token: data.token,
+      });
+    } catch {
       cb({});
-      return;
     }
-
-    cb({
-      token: data.token,
-    });
-  }
+  },
 });
+
+let disconnectTimer: NodeJS.Timeout | null = null;
+
+export function connectSocket() {
+  if (disconnectTimer) {
+    clearTimeout(disconnectTimer);
+    disconnectTimer = null;
+  }
+  if (!socket.connected && !socket.active) {
+    socket.connect();
+  }
+}
+
+export function disconnectSocket(immediate = false) {
+  if (immediate) {
+    if (disconnectTimer) {
+      clearTimeout(disconnectTimer);
+      disconnectTimer = null;
+    }
+    socket.disconnect();
+    return;
+  }
+
+  if (disconnectTimer) {
+    clearTimeout(disconnectTimer);
+  }
+  disconnectTimer = setTimeout(() => {
+    socket.disconnect();
+    disconnectTimer = null;
+  }, 1000);
+}
