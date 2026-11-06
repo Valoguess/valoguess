@@ -38,21 +38,20 @@ export function ResultFaceOff({
 }: ResultFaceOffProps) {
   return (
     <div className="flex flex-col justify-between h-full py-1 gap-4">
-      {/* Result Main Header Title */}
       <div className="flex flex-col items-center text-center">
         <h1
           className={cn(
-            "font-valorant text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-[0.1em] text-shadow-glow leading-none select-none",
+            "font-valorant text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-[0.1em] leading-none select-none",
             isTie
               ? "text-amber-400"
               : isVictory
-                ? "text-[#3CF2C4]"
+                ? "text-mint"
                 : "text-zinc-500",
           )}
         >
           {isTie ? "DRAW" : isVictory ? "VICTORY" : "DEFEAT"}
         </h1>
-        <p className="text-ink-400 text-xs tracking-wide mt-2 font-medium">
+        <p className="text-white/50 text-xs tracking-wide mt-2 font-medium">
           {isTie
             ? "All guesses consumed without a winner. Match ended in a draw."
             : isVictory
@@ -61,20 +60,17 @@ export function ResultFaceOff({
         </p>
       </div>
 
-      {/* Agent Reveal Face-off Section */}
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4 px-1 sm:px-2 my-auto max-h-[460px]">
-        {/* User's Secret Agent Card */}
         <div
           className={cn(
-            "clip-notch-both border p-2 sm:p-3 bg-[#0d1119] flex flex-col transition-all duration-300 relative",
+            "rounded-sm border p-2 sm:p-3 bg-[#07090e] flex flex-col transition-all duration-300 relative",
             isVictory
-              ? "border-[#3CF2C4]/50 shadow-[0_0_20px_rgba(60,242,196,0.15)]"
+              ? "border-mint/50 shadow-[0_0_20px_rgba(60,242,196,0.15)]"
               : isTie
                 ? "border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.08)]"
-                : "border-white/5",
+                : "border-white/10",
           )}
         >
-          {/* Corner decor */}
           <div className="absolute left-0 top-0 h-4 w-4">
             <div className="absolute left-0 top-0 h-px w-4 bg-accent/60" />
             <div className="absolute left-0 top-0 h-4 w-px bg-accent/60" />
@@ -102,27 +98,24 @@ export function ResultFaceOff({
           </div>
         </div>
 
-        {/* Mid Crossed Swords */}
         <div className="text-zinc-700 text-lg sm:text-2xl font-light">⚔️</div>
 
-        {/* Opponent's Agent Card */}
         <div
           className={cn(
-            "clip-notch-both border p-2 sm:p-3 bg-[#0d1119] flex flex-col transition-all duration-300 relative",
+            "rounded-sm border p-2 sm:p-3 bg-[#07090e] flex flex-col transition-all duration-300 relative",
             isDefeat
               ? "border-accent/40 shadow-[0_0_20px_rgba(255,70,85,0.08)]"
               : isTie
                 ? "border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.08)]"
-                : "border-white/5",
+                : "border-white/10",
           )}
         >
-          {/* Corner decor */}
           <div className="absolute right-0 top-0 h-4 w-4">
             <div className="absolute right-0 top-0 h-px w-4 bg-accent/60" />
             <div className="absolute right-0 top-0 h-4 w-px bg-accent/60" />
           </div>
           <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold uppercase tracking-[0.2em] mb-1.5 sm:mb-2 text-center block">
-            OPPONENT'S AGENT
+            OPPONENT&apos;S AGENT
           </span>
 
           <div className="relative aspect-[4/5] w-full max-w-[140px] sm:max-w-[210px] mx-auto overflow-hidden border border-white/10 rounded-sm">
@@ -145,7 +138,6 @@ export function ResultFaceOff({
         </div>
       </div>
 
-      {/* Reveal Status Alert Banner */}
       <div
         className={cn(
           "rounded-sm border p-2.5 text-center flex items-center justify-center gap-2 font-semibold text-xs my-2 sm:my-3",
@@ -166,8 +158,7 @@ export function ResultFaceOff({
         </span>
       </div>
 
-      {/* Match Stats Table */}
-      <div className="clip-notch-both border border-white/5 bg-base-900 p-3 sm:p-4 flex flex-col shrink-0">
+      <div className="rounded-sm border border-white/10 bg-[#07090e] p-3 sm:p-4 flex flex-col shrink-0">
         <h4 className="font-display text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-2.5 block leading-none">
           MATCH STATS
         </h4>
