@@ -16,73 +16,58 @@ export function OpponentQuestionPrompt({
   onAnswer,
 }: OpponentQuestionPromptProps) {
   return (
-    <div className="clip-notch-both flex flex-col border border-accent/20 bg-base-850 p-4 sm:p-6 shadow-[0_0_24px_rgba(255,70,85,0.1)] relative min-h-[240px] sm:min-h-[300px] justify-between mb-4 sm:mb-5">
-      {/* Corner accent decorations */}
-      <div className="absolute left-0 top-0 h-4 w-4">
-        <div className="absolute left-0 top-0 h-px w-4 bg-accent/60" />
-        <div className="absolute left-0 top-0 h-4 w-px bg-accent/60" />
-      </div>
-      <div className="absolute right-0 top-0 h-4 w-4">
-        <div className="absolute right-0 top-0 h-px w-4 bg-accent/60" />
-        <div className="absolute right-0 top-0 h-4 w-px bg-accent/60" />
-      </div>
-
-      {/* Header Badge */}
-      <div className="flex justify-center items-center gap-2 mb-4 sm:mb-6">
-        <span className="text-accent font-display text-xs tracking-[0.25em] font-semibold">{`{`}</span>
-        <span className="text-accent font-display text-xs sm:text-sm tracking-[0.25em] font-bold uppercase">
+    <div className="flex flex-col border border-[#FF4655]/30 bg-[#080b10]/95 backdrop-blur-md p-4 sm:p-6 rounded-sm relative min-h-[220px] sm:min-h-[260px] justify-between mb-4">
+      <div className="flex justify-center items-center gap-2 mb-3">
+        <span className="text-[#FF4655] font-mono text-xs font-bold uppercase tracking-widest">
           OPPONENT ASKED
         </span>
-        <span className="text-accent font-display text-xs tracking-[0.25em] font-semibold">{`}`}</span>
       </div>
 
-      {/* Question text */}
-      <div className="text-center my-auto flex flex-col gap-2 px-2">
-        <h2 className="text-white font-display text-2xl sm:text-3xl md:text-5xl font-black uppercase tracking-[0.05em] leading-tight">
+      <div className="text-center my-auto flex flex-col gap-1.5 px-2">
+        <h2 className="text-white font-valorant text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-wider leading-tight">
           {question.label.toUpperCase()}?
         </h2>
-        <p className="text-ink-400 text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
+        <p className="text-white/60 text-xs sm:text-sm max-w-md mx-auto leading-relaxed font-sans">
           {question.description ||
             `Does your secret agent match the characteristic: "${question.label}"?`}
         </p>
       </div>
 
-      {/* Action Options */}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6 mt-6 sm:mt-8">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6 mt-4">
         <button
           onClick={() => onAnswer("yes")}
           disabled={isAnswering}
           className={cn(
-            "flex items-center justify-center gap-2 sm:gap-3 rounded-sm border-2 border-mint bg-mint/5 py-3 sm:py-4 px-3 sm:px-6 text-mint transition-all duration-200 hover:bg-mint/15 font-display text-base sm:text-xl font-bold uppercase tracking-widest cursor-pointer active:scale-98",
+            "flex items-center justify-center gap-2 rounded-xs border-2 border-mint bg-mint/10 py-3 px-4 text-mint transition-all font-display text-sm sm:text-base font-bold uppercase tracking-wider cursor-pointer active:scale-98",
             isAnswering && "opacity-50 cursor-not-allowed"
           )}
         >
           {isAnswering ? (
-            <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin text-mint" />
+            <Loader2 className="h-4 w-4 animate-spin text-mint" />
           ) : (
-            <Check className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3.5]" />
+            <Check className="h-4 w-4 stroke-[3]" />
           )}
-          YES
+          <span>YES</span>
         </button>
 
-        <span className="text-ink-600 font-display text-[10px] sm:text-xs tracking-widest uppercase select-none px-1">
-          — OR —
+        <span className="text-white/30 font-mono text-[10px] tracking-widest uppercase select-none px-1">
+          OR
         </span>
 
         <button
           onClick={() => onAnswer("no")}
           disabled={isAnswering}
           className={cn(
-            "flex items-center justify-center gap-2 sm:gap-3 rounded-sm border-2 border-accent bg-accent/5 py-3 sm:py-4 px-3 sm:px-6 text-accent transition-all duration-200 hover:bg-accent/15 font-display text-base sm:text-xl font-bold uppercase tracking-widest cursor-pointer active:scale-98",
+            "flex items-center justify-center gap-2 rounded-xs border-2 border-[#FF4655] bg-[#FF4655]/10 py-3 px-4 text-[#FF4655] transition-all font-display text-sm sm:text-base font-bold uppercase tracking-wider cursor-pointer active:scale-98",
             isAnswering && "opacity-50 cursor-not-allowed"
           )}
         >
           {isAnswering ? (
-            <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin text-accent" />
+            <Loader2 className="h-4 w-4 animate-spin text-[#FF4655]" />
           ) : (
-            <X className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3.5]" />
+            <X className="h-4 w-4 stroke-[3]" />
           )}
-          NO
+          <span>NO</span>
         </button>
       </div>
     </div>

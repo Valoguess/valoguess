@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Tactical Match",
-  description: "Live 1v1 tactical Valorant agent deduction duel on ValoGuess.",
+  title: "Play",
+  description: "Guess the agent 1v1 match on ValoGuess.",
   robots: {
     index: false,
     follow: false,

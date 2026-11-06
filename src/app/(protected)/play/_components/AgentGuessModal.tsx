@@ -56,7 +56,7 @@ export function AgentGuessModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[calc(100vw-1.5rem)] sm:max-w-md max-h-[90vh] flex flex-col bg-[#090d14]/98 border border-[#FF4655]/40 text-white backdrop-blur-2xl shadow-[0_0_50px_rgba(255,70,85,0.25)] p-4 sm:p-6 rounded-sm select-none">
+      <DialogContent className="w-[calc(100vw-1.5rem)] sm:max-w-md max-h-[90vh] flex flex-col bg-[#07090e]/98 border border-[#FF4655]/40 text-white backdrop-blur-2xl shadow-[0_0_50px_rgba(255,70,85,0.25)] p-4 sm:p-6 rounded-sm select-none">
         <DialogHeader className="border-b border-white/10 pb-3 sm:pb-4 text-left shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -78,9 +78,7 @@ export function AgentGuessModal({
           </div>
         </DialogHeader>
 
-        {/* Controls: Search & Role Filters */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 mt-3 shrink-0">
-          {/* Role Filter Tabs */}
           <div className="flex items-center gap-1 p-1 bg-black/50 border border-white/10 rounded-sm overflow-x-auto scrollbar-none w-full sm:w-auto">
             {(
               ["ALL", "Duelist", "Initiator", "Controller", "Sentinel"] as const
@@ -100,7 +98,6 @@ export function AgentGuessModal({
             ))}
           </div>
 
-          {/* Search Box */}
           <div className="relative w-full sm:w-auto sm:flex-1">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
             <Input
@@ -113,7 +110,6 @@ export function AgentGuessModal({
           </div>
         </div>
 
-        {/* Agents Grid */}
         <div className="mt-3 flex-1 min-h-0 max-h-[46vh] sm:max-h-85 overflow-y-auto pr-1 scrollbar-thin grid grid-cols-3 min-[400px]:grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-2.5">
           {filteredAgents.map((agent) => {
             const isEliminated = eliminatedIds.has(agent.id);
@@ -136,7 +132,6 @@ export function AgentGuessModal({
                       : "border-white/10 bg-white/[0.02] hover:bg-white/[0.07] hover:border-white/30",
                 )}
               >
-                {/* Agent Icon */}
                 <div className="relative h-14 w-14 rounded-xs overflow-hidden bg-black/60 border border-white/10 mb-1.5 shrink">
                   <Image
                     src={agent.iconPath}
@@ -152,12 +147,10 @@ export function AgentGuessModal({
                   )}
                 </div>
 
-                {/* Name */}
                 <span className="font-valorant text-[10px] tracking-wider text-white uppercase truncate w-full text-center">
                   {agent.name}
                 </span>
 
-                {/* Role badge */}
                 <span className="text-[8px] font-mono text-white/40 uppercase truncate">
                   {agent.role}
                 </span>
@@ -172,7 +165,6 @@ export function AgentGuessModal({
           })}
         </div>
 
-        {/* Confirmation Footer Bar */}
         <div className="mt-3 sm:mt-5 pt-3 sm:pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2.5 bg-black/30 p-2.5 sm:p-3 rounded-sm shrink-0">
           {selectedAgent ? (
             <div className="flex items-center gap-3">

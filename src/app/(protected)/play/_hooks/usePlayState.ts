@@ -31,19 +31,16 @@ export function usePlayState({ game, user }: UsePlayStateProps) {
   const myPlayer = useMemo(() => {
     if (!game?.players || game.players.length === 0) return undefined;
 
-    // 1. Primary: match strictly by authenticated user ID
     if (user?.id) {
       const byUserId = game.players.find((p) => p.id === user.id);
       if (byUserId) return byUserId;
     }
 
-    // 2. Secondary: match by cached player ID locked in during match session
     if (cachedPlayerId) {
       const byCachedPlayerId = game.players.find((p) => p.id === cachedPlayerId);
       if (byCachedPlayerId) return byCachedPlayerId;
     }
 
-    // 3. Match by cached secret agent assigned to this client at start
     if (cachedSecretAgent) {
       const byCachedAgent = game.players.find(
         (p) => p.state?.secretAgent === cachedSecretAgent
@@ -51,7 +48,6 @@ export function usePlayState({ game, user }: UsePlayStateProps) {
       if (byCachedAgent) return byCachedAgent;
     }
 
-    // 4. Live match discovery: before match ends, only local player has revealed secretAgent
     if (game.status !== "FINISHED") {
       const withRevealedAgent = game.players.find(
         (p) => p.state && p.state.secretAgent !== null

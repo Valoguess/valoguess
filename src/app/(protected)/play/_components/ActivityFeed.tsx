@@ -9,25 +9,25 @@ import { Input } from "@/components/ui/input";
 function EntryIcon({ kind }: { kind: ActivityEntry["kind"] }) {
   if (kind === "answered-yes")
     return (
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-mint/10">
-        <Check className="h-4 w-4 text-mint" strokeWidth={3} />
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-mint/10 border border-mint/30">
+        <Check className="h-3.5 w-3.5 text-mint" strokeWidth={3} />
       </span>
     );
   if (kind === "answered-no")
     return (
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-accent/10">
-        <X className="h-4 w-4 text-accent" strokeWidth={3} />
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-accent/10 border border-accent/30">
+        <X className="h-3.5 w-3.5 text-accent" strokeWidth={3} />
       </span>
     );
   if (kind === "prompt")
     return (
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-accent/10">
-        <ArrowRight className="h-4 w-4 text-accent" strokeWidth={2.5} />
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-accent/10 border border-accent/30">
+        <ArrowRight className="h-3.5 w-3.5 text-accent" strokeWidth={2.5} />
       </span>
     );
   return (
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-violet/10">
-      <HelpCircle className="h-4 w-4 text-violet" strokeWidth={2.5} />
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-violet/10 border border-violet/30">
+      <HelpCircle className="h-3.5 w-3.5 text-violet" strokeWidth={2.5} />
     </span>
   );
 }
@@ -87,38 +87,43 @@ export function ActivityFeed({
   };
 
   return (
-    <div className="clip-notch-both flex h-full flex-col border border-white/5 bg-base-850 shadow-panel">
-      <div className="border-b border-white/5 p-4">
-        <span className="font-display text-sm font-bold uppercase tracking-widest text-accent">
-          Game Activity
+    <div className="flex h-full flex-col rounded-sm border border-white/10 bg-[#07090e] shadow-lg">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+        <span className="font-valorant text-xs uppercase tracking-widest text-[#FF4655]">
+          MATCH LOG
+        </span>
+        <span className="font-mono text-[10px] text-white/40 uppercase">
+          LIVE LOG
         </span>
       </div>
 
-      <div ref={listRef} className="flex-1 space-y-2 overflow-y-auto p-3">
+      <div ref={listRef} className="flex-1 space-y-2 overflow-y-auto p-3 scrollbar-thin">
         {entries.map((e) => (
           <div
             key={e.id}
             className={cn(
-              "flex items-start gap-3 rounded-sm p-2.5",
+              "flex items-start gap-2.5 rounded-sm p-2.5 transition-colors",
               e.kind === "prompt"
-                ? "border border-accent/30 bg-accent/5"
-                : "bg-base-800/60",
+                ? "border border-accent/40 bg-accent/5"
+                : "border border-white/5 bg-white/[0.02] hover:bg-white/[0.04]",
             )}
           >
             <EntryIcon kind={e.kind} />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-ink-500">{actorLabel(e, userName, opponentName)}</span>
-                <span className="text-[11px] tabular-nums text-ink-600">
+                <span className="text-[11px] font-medium text-white/50 truncate">
+                  {actorLabel(e, userName, opponentName)}
+                </span>
+                <span className="text-[10px] font-mono tabular-nums text-white/40 shrink-0">
                   {e.time}
                 </span>
               </div>
               <span
                 className={cn(
-                  "text-sm font-medium",
+                  "text-xs font-medium leading-relaxed block mt-0.5",
                   e.kind === "answered-yes" && "text-mint",
                   e.kind === "answered-no" && "text-accent",
-                  e.kind !== "answered-yes" && e.kind !== "answered-no" && "text-ink-100"
+                  e.kind !== "answered-yes" && e.kind !== "answered-no" && "text-white/90"
                 )}
               >
                 {e.text}
@@ -128,29 +133,33 @@ export function ActivityFeed({
         ))}
       </div>
 
-      <div className="border-t border-white/5 p-3">
-        <div className="mb-2 flex items-center gap-2 rounded-sm border border-white/10 bg-base-800 px-3 py-2">
+      <div className="border-t border-white/10 p-3">
+        <div className="mb-2 flex items-center gap-2 rounded-sm border border-white/10 bg-black/40 px-3 py-1.5 focus-within:border-white/30 transition-colors">
           <Input
             value={message}
             onChange={(ev) => setMessage(ev.target.value)}
             onKeyDown={handleKeyDown}
             disabled={!yourTurn}
-            placeholder={yourTurn ? "Type a custom question..." : `${opponentName} active. Wait...`}
-            className="flex-1 bg-transparent border-none rounded-none text-sm text-ink-100 outline-none placeholder:text-ink-600 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-0 focus-visible:border-none focus-visible:ring-offset-0 ring-0 ring-offset-0"
+            placeholder={yourTurn ? "Ask a question..." : `Waiting for ${opponentName}...`}
+            className="flex-1 bg-transparent border-none rounded-none text-xs text-white placeholder-white/30 outline-none p-0 h-7 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-0 focus-visible:border-none focus-visible:ring-offset-0 ring-0 ring-offset-0"
           />
-          <Send
+          <button
             onClick={handleSend}
+            disabled={!yourTurn || !message.trim()}
             className={cn(
-              "h-4 w-4 cursor-pointer transition",
-              yourTurn
-                ? "text-ink-500 hover:text-accent"
-                : "text-ink-600 cursor-not-allowed opacity-30"
+              "p-1 rounded transition cursor-pointer",
+              yourTurn && message.trim()
+                ? "text-accent hover:text-white"
+                : "text-white/20 cursor-not-allowed"
             )}
-          />
+          >
+            <Send className="h-3.5 w-3.5" />
+          </button>
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] text-ink-500">
-          <Wifi className="h-3.5 w-3.5 text-mint" />
-          Good Connection
+
+        <div className="flex items-center gap-1.5 text-[10px] font-mono text-white/40">
+          <Wifi className="h-3 w-3 text-mint" />
+          <span>CONNECTED</span>
           <span className="ml-auto tabular-nums">24ms</span>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { socket } from "@/socket";
 import { ServerEvents } from "@/socket/events";
 import { useGameStore } from "@/store/gameStore";
+import { useTempResultStore } from "@/store/tempResultStore";
 import {
   askQuestion as sendAskQuestion,
   answerQuestion as sendAnswerQuestion,
@@ -40,17 +41,16 @@ export function usePlaySocket({
 
   const pathname = usePathname();
 
-  // Reset asking/answering flags when game turns progress
   useEffect(() => {
     setIsAsking(false);
     setIsAnswering(false);
   }, [game?.state?.turnNumber, game?.state?.pendingQuestion]);
 
-  // Listen to ServerEvents.GAME_END
   useEffect(() => {
     const handleGameEnd = (endedGame: GuessAgentGameDTO) => {
       if (endedGame) {
         useGameStore.getState().setGame(endedGame);
+        useTempResultStore.getState().setTempResultGame(endedGame);
       }
     };
     socket.on(ServerEvents.GAME_END, handleGameEnd);
@@ -59,7 +59,6 @@ export function usePlaySocket({
     };
   }, []);
 
-  // Listen to ServerEvents.GAME_SYNC for server cleanup to lobby
   useEffect(() => {
     const handleGameSync = (syncedGame: GuessAgentGameDTO | null) => {
       if (!syncedGame || (typeof syncedGame === "object" && !syncedGame.id)) {
@@ -74,9 +73,8 @@ export function usePlaySocket({
     return () => {
       socket.off(ServerEvents.GAME_SYNC, handleGameSync);
     };
-  }, [router]);
+  }, [router, pathname, clearGame]);
 
-  // Listen to ServerEvents.ERROR
   useEffect(() => {
     const onError = (err: any) => {
       setIsAsking(false);

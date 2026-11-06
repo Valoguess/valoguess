@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Filter,
-  Loader2,
-  Check,
-  X,
-} from "lucide-react";
+import { Filter, Loader2, Check, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -50,13 +45,12 @@ export function QuestionPanel({
       : questions.filter((q) => q.category === category);
 
   return (
-    <div className="clip-notch-both flex flex-col border border-white/10 bg-[#07090e]/85 backdrop-blur-md p-3 sm:p-5 shadow-panel min-h-[300px] sm:min-h-[340px] relative overflow-hidden">
-      {/* Header bar */}
-      <div className="mb-3 sm:mb-4 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 shrink-0 border-b border-white/5 pb-2.5 sm:pb-3">
+    <div className="flex flex-col border border-white/10 bg-[#080b10]/90 backdrop-blur-md p-3 sm:p-4 rounded-sm min-h-[280px] relative overflow-hidden">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5 shrink-0 border-b border-white/10 pb-2.5">
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <div className="flex items-center gap-1.5 sm:gap-2">
             <span className="h-2 w-2 rotate-45 bg-[#FF4655]" />
-            <span className="font-valorant text-xs tracking-widest text-[#FF4655] drop-shadow-[0_0_8px_rgba(255,70,85,0.3)]">
+            <span className="font-valorant text-xs tracking-wider text-[#FF4655]">
               ASK A QUESTION
             </span>
           </div>
@@ -66,14 +60,15 @@ export function QuestionPanel({
           </span>
 
           {disabled && (
-            <div className="flex items-center gap-1.5 text-xs text-white/50 bg-white/5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-sm border border-white/5">
-              <Loader2 className="h-3 w-3 animate-spin text-accent" />
-              <span className="truncate max-w-[140px] sm:max-w-none">{disabledReason || "Thinking..."}</span>
+            <div className="flex items-center gap-1.5 text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded-xs border border-white/10">
+              <Loader2 className="h-3 w-3 animate-spin text-[#FF4655]" />
+              <span className="truncate max-w-[140px] sm:max-w-none text-[11px] font-mono">
+                {disabledReason || "Waiting..."}
+              </span>
             </div>
           )}
         </div>
 
-        {/* Category Select Dropdown */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Select
             value={category}
@@ -82,7 +77,7 @@ export function QuestionPanel({
             }}
             disabled={disabled}
           >
-            <SelectTrigger className="w-full sm:w-40 bg-black/60 border-white/10 text-white hover:border-white/20 text-xs h-8">
+            <SelectTrigger className="w-full sm:w-40 bg-black/60 border-white/10 text-white hover:border-white/20 text-xs h-8 rounded-xs font-display font-medium">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent className="bg-[#090d14] border-white/15 text-white">
@@ -99,7 +94,7 @@ export function QuestionPanel({
                   "unique",
                 ] as const
               ).map((c) => (
-                <SelectItem key={c} value={c} className="hover:bg-white/10 focus:bg-white/10 text-xs">
+                <SelectItem key={c} value={c} className="hover:bg-white/10 focus:bg-white/10 text-xs font-display">
                   {CATEGORY_LABEL[c]}
                 </SelectItem>
               ))}
@@ -108,15 +103,14 @@ export function QuestionPanel({
         </div>
       </div>
 
-      {/* Questions Grid */}
-      <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin max-h-[360px]">
+      <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin max-h-[340px]">
         {visible.length === 0 ? (
-          <div className="flex h-full min-h-[180px] flex-col items-center justify-center text-white/40 text-xs">
-            <Filter className="h-6 w-6 mb-2 text-white/20" />
+          <div className="flex h-full min-h-[160px] flex-col items-center justify-center text-white/40 text-xs font-sans">
+            <Filter className="h-5 w-5 mb-2 text-white/20" />
             <span>No questions found in this category.</span>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
             {visible.map((q) => {
               const answer = askedQuestions[q.id];
               const isYes = answer === "yes";
@@ -130,39 +124,34 @@ export function QuestionPanel({
                   disabled={disabled || isAsked}
                   title={q.description || q.label}
                   className={cn(
-                    "flex flex-col justify-between rounded-sm border p-2 sm:p-3 text-left transition-all relative group overflow-hidden min-h-[70px] sm:min-h-[78px]",
-                    disabled || isAsked ? "cursor-not-allowed" : "cursor-pointer hover:scale-[1.02] active:scale-98",
-                    isYes && "border-mint bg-mint/10 text-mint shadow-[0_0_12px_rgba(60,242,196,0.15)] opacity-85",
-                    isNo && "border-accent bg-accent/10 text-accent shadow-[0_0_12px_rgba(255,70,85,0.15)] opacity-85",
-                    !isAsked && "border-white/10 bg-[#090d14]/90 text-white/90 hover:border-accent/60 hover:bg-[#101622]"
+                    "flex flex-col justify-between rounded-xs border p-2.5 text-left transition-all relative group overflow-hidden min-h-[68px]",
+                    disabled || isAsked ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-[#FF4655]/60 hover:bg-white/[0.03]",
+                    isYes && "border-mint/50 bg-mint/5 text-mint",
+                    isNo && "border-[#FF4655]/50 bg-[#FF4655]/5 text-[#FF4655]",
+                    !isAsked && "border-white/10 bg-black/40 text-white/90",
                   )}
                 >
-                  {/* Top Bar: Category tag */}
-                  <div className="flex items-center justify-between w-full mb-1 text-[8.5px] uppercase tracking-wider font-display">
-                    <span className="text-white/40 font-mono">
-                      {q.category}
-                    </span>
+                  <div className="flex items-center justify-between w-full mb-1 text-[8.5px] uppercase tracking-wider font-mono text-white/40">
+                    <span>{q.category}</span>
                   </div>
 
-                  {/* Question Label */}
                   <div className="flex items-center gap-1.5 my-auto">
-                    <span className="text-xs font-bold leading-tight line-clamp-2">
+                    <span className="text-xs font-display font-bold leading-tight line-clamp-2">
                       {q.label}
                     </span>
                   </div>
 
-                  {/* Answered State Indicator */}
                   {isAsked && (
-                    <div className="mt-1 flex items-center gap-1 text-[9px] font-black uppercase tracking-wider">
+                    <div className="mt-1 flex items-center gap-1 text-[9px] font-mono font-bold uppercase tracking-wider">
                       {isYes ? (
                         <>
                           <Check className="h-3 w-3 text-mint" />
-                          <span>ANSWER: YES</span>
+                          <span>YES</span>
                         </>
                       ) : (
                         <>
-                          <X className="h-3 w-3 text-accent" />
-                          <span>ANSWER: NO</span>
+                          <X className="h-3 w-3 text-[#FF4655]" />
+                          <span>NO</span>
                         </>
                       )}
                     </div>

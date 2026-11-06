@@ -36,10 +36,8 @@ function PlayContent() {
   const [showMobileActivity, setShowMobileActivity] = useState(false);
   const [eliminatedIds, setEliminatedIds] = useState<Set<string>>(new Set());
 
-  // Room timer hook
   const { timeLeft, formattedTime, isInfinite } = useRoomTimer({ game });
 
-  // Game state derivation hook
   const {
     myPlayer,
     opponentPlayer,
@@ -61,7 +59,6 @@ function PlayContent() {
     opponentNosUsed,
   } = usePlayState({ game, user });
 
-  // Socket actions & listeners hook
   const {
     isAsking,
     isAnswering,
@@ -80,7 +77,6 @@ function PlayContent() {
     isFreeform,
   });
 
-  // Restore intro state from session if already seen
   useEffect(() => {
     if (typeof window !== "undefined" && game?.id) {
       const seen = sessionStorage.getItem(`intro_seen_${game.id}`) === "true";
@@ -90,7 +86,6 @@ function PlayContent() {
     }
   }, [game?.id, game?.status]);
 
-  // Reset eliminated agents and intro overlay on new match or game ID change
   useEffect(() => {
     if (game?.id) {
       setEliminatedIds(new Set());
@@ -104,7 +99,6 @@ function PlayContent() {
     }
   }, [game?.status]);
 
-  // Navigate to lobby if no active match
   useEffect(() => {
     if (!gameHydrated) return;
     if (!game) {
@@ -112,7 +106,6 @@ function PlayContent() {
     }
   }, [game, gameHydrated, router]);
 
-  // Handle elimination card toggling
   const handleToggleEliminated = (id: string) => {
     setEliminatedIds((prev) => {
       const next = new Set(prev);
@@ -122,17 +115,14 @@ function PlayContent() {
     });
   };
 
-  // Handle resetting all eliminations
   const handleResetEliminated = () => {
     setEliminatedIds(new Set());
   };
 
-  // 1. Loading screen
   if (!gameHydrated || !game || !myPlayer) {
     return <PlayLoadingScreen label={!gameHydrated ? "Loading Game..." : "Returning to Lobby..."} />;
   }
 
-  // 2. Match Intro Overlay
   if (!hasCompletedIntro || game.status === "STARTING") {
     return (
       <MatchIntroOverlay
@@ -152,7 +142,6 @@ function PlayContent() {
     );
   }
 
-  // 3. Match Ending Sequence Overlay
   if (game.status === "FINISHED") {
     const rawResult = (game.state?.result ?? game.result) as any;
     const resolvedWinnerId =
@@ -209,17 +198,14 @@ function PlayContent() {
         onComplete={() => {
           setEliminatedIds(new Set());
           useTempResultStore.getState().setTempResultGame(game);
-          useGameStore.getState().clearGame();
           router.replace("/game");
         }}
       />
     );
   }
 
-  // 4. Main Tactical Match Screen
   return (
-    <main className="min-h-screen bg-base-950">
-      {/* Top Match Header */}
+    <main className="min-h-screen bg-[#040609]">
       <GameHeader
         turnOwner={turnOwner}
         userNosUsed={userNosUsed}
@@ -232,9 +218,7 @@ function PlayContent() {
         onLeave={() => setShowLeaveModal(true)}
       />
 
-      {/* Tactical Layout: Single column on mobile/tablet, 3-column on desktop (xl:) */}
       <div className="flex flex-col xl:grid xl:grid-cols-[300px_1fr_320px] gap-4 sm:gap-5 p-3 sm:p-5 md:p-6 font-body max-w-[1800px] mx-auto">
-        {/* Mobile / Tablet Secret Agent Bar (< xl) */}
         <div className="xl:hidden">
           <MobileSecretAgentBar
             agent={activeSecretAgent}
@@ -247,7 +231,6 @@ function PlayContent() {
           />
         </div>
 
-        {/* Left Column: Your Secret Agent & Leave Game Action (xl only) */}
         <div className="hidden xl:flex flex-col gap-4">
           <SecretAgentCard
             agent={activeSecretAgent}
@@ -266,7 +249,6 @@ function PlayContent() {
           </button>
         </div>
 
-        {/* Center Column: Questions Panel or Opponent Prompt + Agent Elimination Grid */}
         <div className="flex flex-col min-w-0">
           {isFreeform ? (
             <FreeformTurnPanel
@@ -283,7 +265,6 @@ function PlayContent() {
             <>
               {!isOpponentAskingMe && (
                 <>
-                  {/* On Mobile (< md): when NOT your turn, show compact turn indicator banner so AgentGrid stays visible */}
                   {!isMyTurn && (
                     <div className="md:hidden flex items-center justify-between p-3 rounded-sm border border-white/10 bg-[#07090e]/95 backdrop-blur-md mb-3 shadow-md">
                       <div className="flex items-center gap-2.5 min-w-0">
@@ -305,7 +286,6 @@ function PlayContent() {
                     </div>
                   )}
 
-                  {/* On Desktop always show QuestionPanel; on Mobile only show when it IS your turn */}
                   <div className={cn(!isMyTurn && "hidden md:block")}>
                     <QuestionPanel
                       onAsk={handleAskQuestion}
@@ -344,7 +324,6 @@ function PlayContent() {
           />
         </div>
 
-        {/* Right Column: Live Match Activity Feed (xl only) */}
         <div className="hidden xl:block h-[calc(100vh-220px)]">
           <ActivityFeed
             entries={activity}
@@ -355,11 +334,10 @@ function PlayContent() {
         </div>
       </div>
 
-      {/* Mobile Floating Activity Log Button (< xl) */}
       <div className="xl:hidden fixed bottom-6 right-6 z-40">
         <button
           onClick={() => setShowMobileActivity(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-base-900/95 border border-white/20 hover:border-accent text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#07090e]/95 border border-white/20 hover:border-accent text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] backdrop-blur-md transition-all active:scale-95 cursor-pointer"
         >
           <Activity className="h-4 w-4 text-accent" />
           <span className="font-valorant text-xs uppercase tracking-wider">Log</span>
@@ -371,17 +349,16 @@ function PlayContent() {
         </button>
       </div>
 
-      {/* Mobile Activity Drawer Backdrop & Sheet */}
       {showMobileActivity && (
         <div className="fixed inset-0 z-50 xl:hidden">
           <div
             className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
             onClick={() => setShowMobileActivity(false)}
           />
-          <div className="fixed inset-y-0 right-0 w-full sm:w-96 max-w-[90vw] z-50 bg-base-950 border-l border-white/10 flex flex-col shadow-2xl p-3 sm:p-4">
+          <div className="fixed inset-y-0 right-0 w-full sm:w-96 max-w-[90vw] z-50 bg-[#040609] border-l border-white/10 flex flex-col shadow-2xl p-3 sm:p-4">
             <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-2">
               <span className="font-valorant text-sm uppercase tracking-widest text-white">
-                TACTICAL LOGS
+                MATCH LOG
               </span>
               <button
                 onClick={() => setShowMobileActivity(false)}
@@ -402,7 +379,6 @@ function PlayContent() {
         </div>
       )}
 
-      {/* Agent Final Guess Modal */}
       <AgentGuessModal
         isOpen={showGuessModal}
         onClose={() => setShowGuessModal(false)}
@@ -414,14 +390,12 @@ function PlayContent() {
         guessesRemaining={myPlayer?.state?.guessesRemaining ?? 0}
       />
 
-      {/* Leave Game Confirmation Modal */}
       <LeaveGameDialog
         isOpen={showLeaveModal}
         onOpenChange={setShowLeaveModal}
         onConfirmLeave={handleLeaveGame}
       />
 
-      {/* Floating Party Chat Overlay */}
       <PartyChatOverlay className="bottom-6 left-6" />
     </main>
   );
