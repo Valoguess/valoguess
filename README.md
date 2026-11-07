@@ -29,6 +29,12 @@ their opponent's secret agent.
 
 ![Guess the Agent match](public/showcase/game.webp)
 
+### Match Result
+
+After a match, see who won, review the match events, and check your stats.
+
+![Match result](public/showcase/match-result.webp)
+
 ### Match history
 
 Check previous matches and review your stats.
