@@ -57,7 +57,7 @@ function formatRelativeTime(dateString: string | null): string {
 }
 
 function formatDuration(startedAt: string | null, endedAt: string | null): string {
-  if (!startedAt || !endedAt) return "1v1 Duel";
+  if (!startedAt || !endedAt) return "—";
   const start = new Date(startedAt).getTime();
   const end = new Date(endedAt).getTime();
   const diffSec = Math.max(0, Math.floor((end - start) / 1000));
@@ -90,7 +90,7 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
   return (
     <div
       className={cn(
-        "relative rounded-sm border transition-all overflow-hidden bg-[#080b10]/90 backdrop-blur-md",
+        "relative rounded-sm border transition-all duration-150 overflow-hidden bg-[#080b10]/90 backdrop-blur-md",
         isVictory
           ? "border-mint/30 hover:border-mint/50"
           : isDefeat
@@ -106,8 +106,17 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
       />
 
       <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
         onClick={() => setIsExpanded((prev) => !prev)}
-        className="p-3.5 sm:p-4 pl-4.5 sm:pl-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setIsExpanded((prev) => !prev);
+          }
+        }}
+        className="p-3.5 sm:p-4 pl-4.5 sm:pl-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
       >
         <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto justify-between md:justify-start">
           <div className="flex flex-col min-w-[80px] sm:min-w-[90px]">
@@ -119,7 +128,7 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
             >
               {isVictory ? "VICTORY" : isDefeat ? "DEFEAT" : "DRAW"}
             </span>
-            <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest mt-1">
+            <span className="text-xs font-mono text-white/40 uppercase tracking-widest mt-1">
               {game.mode.replace(/_/g, " ")}
             </span>
           </div>
@@ -131,7 +140,7 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
               <Clock className="h-3.5 w-3.5 text-white/40" />
               {durationStr}
             </span>
-            <span className="text-[10px] text-white/40 font-mono mt-0.5 flex items-center justify-end sm:justify-start gap-1.5">
+            <span className="text-xs text-white/40 font-mono mt-0.5 flex items-center justify-end sm:justify-start gap-1.5">
               <Calendar className="h-3 w-3 text-white/30" />
               {relativeTime}
             </span>
@@ -149,31 +158,33 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
               />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-[9px] font-mono uppercase tracking-wider text-white/40">
+              <span className="text-xs font-mono uppercase tracking-wider text-white/40">
                 YOU
               </span>
               <span className="font-display font-black text-xs sm:text-sm text-white uppercase tracking-wider">
                 {myAgent.name}
               </span>
-              <span className="text-[9px] font-mono text-[#FF4655] uppercase">
+              <span className="text-xs font-mono text-[#FF4655] uppercase">
                 {myAgent.role}
               </span>
             </div>
           </div>
 
-          <div className="h-6 w-6 rounded-full border border-white/10 bg-white/5 flex items-center justify-center font-valorant text-[9px] text-white/40 shrink-0">
-            VS
+          <div className="w-6 h-6 rotate-45 border border-white/15 bg-white/5 flex items-center justify-center shrink-0">
+            <span className="-rotate-45 font-valorant text-[10px] text-white/50 tracking-tighter">
+              VS
+            </span>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="flex flex-col text-right">
-              <span className="text-[9px] font-display font-bold uppercase tracking-wider text-white/60 truncate max-w-[90px] sm:max-w-none">
+              <span className="text-xs font-display font-bold uppercase tracking-wider text-white/60 truncate max-w-[90px] sm:max-w-none">
                 {oppPlayer?.name || "OPPONENT"}
               </span>
               <span className="font-display font-black text-xs sm:text-sm text-white uppercase tracking-wider">
                 {oppAgent.name}
               </span>
-              <span className="text-[9px] font-mono text-white/40 uppercase">
+              <span className="text-xs font-mono text-white/40 uppercase">
                 {oppAgent.role}
               </span>
             </div>
@@ -190,19 +201,19 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
 
         <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-3">
           <div className="flex items-center gap-2 text-xs font-mono">
-            <div className="px-2.5 py-1 rounded-xs bg-white/[0.03] border border-white/10 text-white/70">
-              <span className="text-white/40 mr-1.5">NOS:</span>
+            <div className="px-2.5 py-1 rounded-sm bg-white/[0.03] border border-white/10 text-white/70">
+              <span className="text-white/40 mr-1.5 text-xs font-mono uppercase tracking-wider">&quot;NO&quot; CARDS</span>
               <span className="text-white font-bold">{myPlayer?.details?.nosUsed ?? 0}</span>
             </div>
-            <div className="px-2.5 py-1 rounded-xs bg-white/[0.03] border border-white/10 text-white/70">
-              <span className="text-white/40 mr-1.5">GUESSES:</span>
+            <div className="px-2.5 py-1 rounded-sm bg-white/[0.03] border border-white/10 text-white/70">
+              <span className="text-white/40 mr-1.5 text-xs font-mono uppercase tracking-wider">GUESSES</span>
               <span className="text-white font-bold">{myPlayer?.details?.guessesUsed ?? 0}</span>
             </div>
           </div>
 
           <div
             className={cn(
-              "p-1.5 rounded-xs bg-white/5 border border-white/10 text-white/50 transition-transform",
+              "p-1.5 rounded-sm bg-white/5 border border-white/10 text-white/50 transition-transform duration-150",
               isExpanded && "rotate-180 text-white"
             )}
           >
@@ -217,11 +228,11 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
             <div className="space-y-2.5">
               <div className="flex items-center gap-2">
                 <Swords className="h-3.5 w-3.5 text-[#FF4655]" />
-                <span className="font-valorant text-xs tracking-wider text-white">MATCH BREAKDOWN</span>
+                <span className="font-valorant text-xs tracking-wider text-white">YOUR MATCH</span>
               </div>
-              <div className="p-3 rounded-xs border border-white/10 bg-white/[0.02] space-y-2 text-xs font-sans">
+              <div className="p-3 rounded-sm border border-white/10 bg-white/[0.02] space-y-2 text-xs font-sans">
                 <div className="flex justify-between items-center">
-                  <span className="text-white/50 font-sans">Player Name:</span>
+                  <span className="text-white/50 font-sans">Player:</span>
                   <span className="text-white font-display font-bold uppercase">{myPlayer?.name || "You"}</span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -233,7 +244,7 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
                   <span className="text-white font-display font-bold uppercase">{myPlayer?.details?.guess || "None"}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-white/50 font-sans">&quot;No&quot; Cards Consumed:</span>
+                  <span className="text-white/50 font-sans">&quot;No&quot; Cards Used:</span>
                   <span className="text-white font-mono font-bold">{myPlayer?.details?.nosUsed ?? 0}</span>
                 </div>
               </div>
@@ -242,11 +253,11 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
             <div className="space-y-2.5">
               <div className="flex items-center gap-2">
                 <Trophy className="h-3.5 w-3.5 text-amber-400" />
-                <span className="font-valorant text-xs tracking-wider text-white">OPPONENT INTEL</span>
+                <span className="font-valorant text-xs tracking-wider text-white">OPPONENT</span>
               </div>
-              <div className="p-3 rounded-xs border border-white/10 bg-white/[0.02] space-y-2 text-xs font-sans">
+              <div className="p-3 rounded-sm border border-white/10 bg-white/[0.02] space-y-2 text-xs font-sans">
                 <div className="flex justify-between items-center">
-                  <span className="text-white/50 font-sans">Challenger:</span>
+                  <span className="text-white/50 font-sans">Player:</span>
                   <span className="text-white font-display font-bold uppercase">{oppPlayer?.name || "Opponent"}</span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -258,7 +269,7 @@ export function MatchHistoryCard({ game, currentUserId }: MatchHistoryCardProps)
                   <span className="text-white font-display font-bold uppercase">{oppPlayer?.details?.guess || "None"}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-white/50 font-sans">&quot;No&quot; Cards Consumed:</span>
+                  <span className="text-white/50 font-sans">&quot;No&quot; Cards Used:</span>
                   <span className="text-white font-mono font-bold">{oppPlayer?.details?.nosUsed ?? 0}</span>
                 </div>
               </div>

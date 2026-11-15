@@ -113,10 +113,10 @@ export default function HistoryPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="px-3.5 py-2 rounded-xs border border-white/10 bg-[#080b10]/80 backdrop-blur-md flex items-center gap-2.5">
+            <div className="px-3.5 py-2 rounded-sm border border-white/10 bg-[#080b10]/80 backdrop-blur-md flex items-center gap-2.5">
               <Flame className="h-4 w-4 text-[#FF4655]" />
               <div className="flex flex-col text-left">
-                <span className="text-[9px] font-mono uppercase tracking-wider text-white/50">
+                <span className="text-xs font-mono uppercase tracking-wider text-white/50">
                   WIN RATE
                 </span>
                 <span className="font-display font-bold text-sm text-white">
@@ -125,14 +125,14 @@ export default function HistoryPage() {
               </div>
             </div>
 
-            <div className="px-3.5 py-2 rounded-xs border border-white/10 bg-[#080b10]/80 backdrop-blur-md flex items-center gap-2.5">
+            <div className="px-3.5 py-2 rounded-sm border border-white/10 bg-[#080b10]/80 backdrop-blur-md flex items-center gap-2.5">
               <Trophy className="h-4 w-4 text-mint" />
               <div className="flex flex-col text-left">
-                <span className="text-[9px] font-mono uppercase tracking-wider text-white/50">
+                <span className="text-xs font-mono uppercase tracking-wider text-white/50">
                   VICTORIES
                 </span>
                 <span className="font-display font-bold text-sm text-mint">
-                  {wins} <span className="text-[10px] text-white/40 font-mono">/ {totalMatches}</span>
+                  {wins} <span className="text-xs text-white/40 font-mono">/ {totalMatches}</span>
                 </span>
               </div>
             </div>
@@ -143,7 +143,8 @@ export default function HistoryPage() {
                 fetchInitialGames();
               }}
               disabled={isLoadingInitial}
-              className="p-2.5 rounded-xs border border-white/10 bg-[#080b10]/80 hover:bg-white/10 text-white/60 hover:text-white transition cursor-pointer disabled:opacity-50"
+              aria-label="Refresh match history"
+              className="p-2.5 rounded-sm border border-white/10 bg-[#080b10]/80 hover:bg-white/10 text-white/60 hover:text-white transition cursor-pointer disabled:opacity-50 active:scale-98 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
               title="Refresh match history"
             >
               <RefreshCw className={cn("h-4 w-4", isLoadingInitial && "animate-spin text-[#FF4655]")} />
@@ -157,32 +158,32 @@ export default function HistoryPage() {
           <div className="p-8 rounded-sm border border-[#FF4655]/30 bg-[#FF4655]/5 text-center space-y-3">
             <Shield className="h-8 w-8 text-[#FF4655] mx-auto" />
             <h3 className="font-valorant text-lg text-white tracking-wider">
-              FAILED TO LOAD MATCH ARCHIVES
+              FAILED TO LOAD MATCH HISTORY
             </h3>
             <p className="text-xs text-white/50 font-mono max-w-md mx-auto">
               {error}
             </p>
             <button
               onClick={() => fetchInitialGames()}
-              className="px-5 py-2 rounded-xs bg-[#FF4655] text-white font-display text-xs font-bold uppercase tracking-wider hover:bg-[#ff5a67] transition cursor-pointer"
+              className="px-5 py-2 rounded-sm bg-[#FF4655] text-white font-display text-xs font-bold uppercase tracking-wider hover:bg-[#ff5a67] transition cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
             >
-              RETRY CONNECTION
+              RETRY
             </button>
           </div>
         ) : games.length === 0 ? (
           <div className="p-12 sm:p-16 rounded-sm border border-white/10 bg-[#080b10]/70 backdrop-blur-md text-center flex flex-col items-center justify-center">
-            <div className="h-16 w-16 rounded-full border border-white/15 bg-white/[0.02] flex items-center justify-center text-white/40 mb-4">
-              <Target className="h-8 w-8" />
+            <div className="w-14 h-14 rounded-sm border border-white/15 bg-white/[0.02] flex items-center justify-center text-white/40 mb-4">
+              <Target className="h-7 w-7" />
             </div>
             <h2 className="font-valorant text-xl sm:text-2xl tracking-wider text-white mb-2">
-              NO MATCH RECORDS FOUND
+              NO MATCHES PLAYED YET
             </h2>
             <p className="text-xs text-white/50 max-w-md leading-relaxed mb-6 font-sans">
               No matches played yet. Head to the lobby and start a game to build your match history.
             </p>
             <Link
               href="/lobby"
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-display text-xs font-bold uppercase tracking-wider rounded-xs transition cursor-pointer active:scale-98"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-display text-xs font-bold uppercase tracking-wider rounded-sm transition cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
             >
               <Swords className="h-4 w-4" />
               <span>RETURN TO LOBBY</span>
@@ -204,13 +205,13 @@ export default function HistoryPage() {
             {isLoadingMore && (
               <div className="py-6 flex items-center justify-center gap-2 text-white/50 font-mono text-xs tracking-widest uppercase">
                 <Loader2 className="h-4 w-4 animate-spin text-[#FF4655]" />
-                <span>DECRYPTING OLDER RECORDS...</span>
+                <span>LOADING MORE MATCHES...</span>
               </div>
             )}
 
             {!hasMore && games.length > 0 && (
-              <div className="py-8 text-center text-white/30 font-mono text-[10px] uppercase tracking-[0.25em]">
-                END OF MATCH ARCHIVES
+              <div className="py-8 text-center text-white/30 font-mono text-xs uppercase tracking-[0.2em]">
+                ALL RECENT MATCHES LOADED
               </div>
             )}
           </div>
