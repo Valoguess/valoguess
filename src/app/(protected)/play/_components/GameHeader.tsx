@@ -1,4 +1,6 @@
-import { LogOut } from "lucide-react";
+"use client";
+
+import { LogOut, Clock } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useGameStore } from "@/store/gameStore";
@@ -28,45 +30,51 @@ export function GameHeader({
   maxRounds = 10,
   onLeave,
 }: GameHeaderProps) {
+  const isMyTurn = turnOwner === "you";
+  const isOpponentTurn = turnOwner === "opponent" || turnOwner === "opponent-thinking";
+
   return (
-    <header className="border-b border-white/10 bg-[#080b10]/95 backdrop-blur-md relative select-none">
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-6 md:gap-8 px-2.5 sm:px-6 py-2 sm:py-3">
-        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+    <header className="border-b border-white/10 bg-[#06080e]/95 backdrop-blur-md relative select-none">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-6 md:gap-8 px-3 sm:px-6 py-2.5 sm:py-3.5 max-w-[1800px] mx-auto">
+        <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
           {onLeave && (
             <button
               onClick={onLeave}
-              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xs border border-white/10 bg-white/[0.02] hover:bg-[#FF4655]/15 hover:border-[#FF4655]/60 text-white/50 hover:text-white transition-all text-[8.5px] sm:text-[9.5px] font-display font-bold uppercase tracking-widest cursor-pointer shrink-0"
-              title="Leave Game"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm border border-white/10 bg-white/[0.02] hover:bg-[#FF4655]/15 hover:border-[#FF4655]/50 text-white/50 hover:text-[#FF4655] transition-all text-xs font-display font-bold uppercase tracking-wider cursor-pointer shrink-0"
+              title="Leave Match"
+              aria-label="Leave Match"
             >
-              <LogOut className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white/40 hover:text-[#FF4655] transition-colors" />
+              <LogOut className="h-3.5 w-3.5 text-white/40 group-hover:text-[#FF4655]" />
               <span className="hidden md:inline">LEAVE</span>
             </button>
           )}
 
-          <PlayerSide
+          <PlayerDuelSide
             align="left"
             name={userName}
-            rank="You"
-            rankColor="#3CF2C4"
+            badge="YOU"
+            badgeClass="border-mint/40 bg-mint/10 text-mint"
             avatar={DEFAULT_AVATARS.USER}
             nosUsed={userNosUsed}
             nosMax={nosMax}
-            turn={turnOwner === "you"}
+            isTurn={isMyTurn}
+            turnLabel="YOUR TURN"
           />
         </div>
 
-        <CenterHUD round={round} maxRounds={maxRounds} />
+        <DuelScoreboard round={round} maxRounds={maxRounds} turnOwner={turnOwner} />
 
-        <div className="flex items-center justify-end gap-2 sm:gap-4 min-w-0">
-          <PlayerSide
+        <div className="flex items-center justify-end gap-2.5 sm:gap-4 min-w-0">
+          <PlayerDuelSide
             align="right"
             name={opponentName}
-            rank="Enemy"
-            rankColor="#8C7BFF"
+            badge="ENEMY"
+            badgeClass="border-[#8C7BFF]/40 bg-[#8C7BFF]/10 text-[#8C7BFF]"
             avatar={DEFAULT_AVATARS.OPPONENT}
             nosUsed={opponentNosUsed}
             nosMax={nosMax}
-            turn={turnOwner === "opponent" || turnOwner === "opponent-thinking"}
+            isTurn={isOpponentTurn}
+            turnLabel={turnOwner === "opponent-thinking" ? "THINKING" : "THEIR TURN"}
           />
         </div>
       </div>
@@ -74,12 +82,14 @@ export function GameHeader({
   );
 }
 
-function CenterHUD({
+function DuelScoreboard({
   round,
   maxRounds,
+  turnOwner,
 }: {
   round: number;
   maxRounds: number;
+  turnOwner: "you" | "opponent" | "opponent-thinking" | "freeform";
 }) {
   const maxRoundsDisplay = maxRounds === -1 || maxRounds <= 0 ? "∞" : maxRounds;
   const { game } = useGameStore();
@@ -94,67 +104,81 @@ function CenterHUD({
 
   return (
     <div className="flex flex-col items-center shrink-0">
-      <span className="font-valorant text-base md:text-xl tracking-[0.15em] text-white hidden sm:block">
-        GUESS THE AGENT
-      </span>
-      <div className="text-[9px] font-mono uppercase tracking-[0.25em] text-white/40 mt-0.5 hidden sm:block">
-        1V1 DUEL
+      <div className="flex items-center gap-2">
+        <span className="font-valorant text-xs uppercase tracking-[0.2em] text-[#FF4655]">
+          ROUND {round}
+        </span>
+        <span className="text-white/20 text-xs">•</span>
+        <span className="text-xs font-mono text-white/40 uppercase">
+          OF {maxRoundsDisplay}
+        </span>
       </div>
 
-      <div className="flex sm:hidden items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10">
-        <span className="font-valorant text-[10px] text-white/50">R{round}</span>
-        <span className="text-white/20 text-xs">/</span>
-        <span className="font-mono text-xs font-bold tabular-nums text-white">{timerText}</span>
-      </div>
-
-      <div className="mt-1 hidden sm:flex items-center gap-3">
-        <div className="h-px w-6 sm:w-8 bg-white/10" />
-        <div className="flex flex-col items-center">
-          <div className="text-[8px] sm:text-[9px] font-mono uppercase tracking-[0.2em] text-white/40">
-            ROUND {round} / {maxRoundsDisplay}
-          </div>
-          <div className="font-display text-2xl md:text-3xl font-black tabular-nums text-white leading-none mt-0.5">
-            {timerText}
-          </div>
+      <div className="flex items-center gap-2 mt-0.5">
+        <div className="font-mono text-xl sm:text-2xl md:text-3xl font-bold tabular-nums text-white leading-none tracking-tight">
+          {timerText}
         </div>
-        <div className="h-px w-6 sm:w-8 bg-white/10" />
+      </div>
+
+      <div className="mt-1">
+        {turnOwner === "you" ? (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs bg-mint/15 border border-mint/40 text-mint text-xs font-mono font-bold tracking-wider uppercase">
+            <span className="h-1.5 w-1.5 rounded-full bg-mint animate-pulse" />
+            YOUR TURN
+          </span>
+        ) : turnOwner === "opponent-thinking" || turnOwner === "opponent" ? (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs bg-amber-400/15 border border-amber-400/40 text-amber-300 text-xs font-mono font-bold tracking-wider uppercase">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+            ENEMY TURN
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs bg-[#FF4655]/15 border border-[#FF4655]/40 text-[#FF4655] text-xs font-mono font-bold tracking-wider uppercase">
+            FREEFORM DUEL
+          </span>
+        )}
       </div>
     </div>
   );
 }
 
-function PlayerSide({
+function PlayerDuelSide({
   name,
-  rank,
-  rankColor,
+  badge,
+  badgeClass,
   avatar,
   nosUsed,
   nosMax,
   align,
-  turn,
+  isTurn,
+  turnLabel,
 }: {
   name: string;
-  rank: string;
-  rankColor: string;
+  badge: string;
+  badgeClass: string;
   avatar: string;
   nosUsed: number;
   nosMax: number;
   align: "left" | "right";
-  turn?: boolean;
+  isTurn?: boolean;
+  turnLabel: string;
 }) {
+  const isRight = align === "right";
+
   return (
     <div
       className={cn(
-        "flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0",
-        align === "right" && "flex-row-reverse",
+        "flex items-center gap-2.5 sm:gap-3.5 min-w-0",
+        isRight && "flex-row-reverse",
       )}
     >
       <div className="relative shrink-0">
         <div
           className={cn(
-            "relative flex h-10 w-10 sm:h-12 sm:w-12 md:h-13 md:w-13 items-center justify-center rounded-full p-[1.5px] transition-all duration-200",
-            turn
-              ? "border-2 border-accent bg-accent/10"
+            "relative flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full p-[2px] transition-all duration-300",
+            isTurn
+              ? isRight
+                ? "ring-2 ring-[#8C7BFF] shadow-[0_0_12px_rgba(140,123,255,0.4)]"
+                : "ring-2 ring-mint shadow-[0_0_12px_rgba(60,242,196,0.4)]"
               : "border border-white/10 bg-white/[0.02]",
           )}
         >
@@ -167,115 +191,60 @@ function PlayerSide({
       <div
         className={cn(
           "flex flex-col justify-center min-w-0",
-          align === "right" ? "items-end" : "items-start",
+          isRight ? "items-end text-right" : "items-start text-left",
         )}
       >
         <div
           className={cn(
-            "flex items-center gap-1.5 sm:gap-2",
-            align === "right" && "flex-row-reverse",
+            "flex items-center gap-2",
+            isRight && "flex-row-reverse",
           )}
         >
-          <span className="font-display text-xs sm:text-base md:text-lg font-bold uppercase tracking-wide text-white truncate max-w-[65px] sm:max-w-[120px] md:max-w-none">
+          <span className="font-display text-sm sm:text-base font-bold uppercase tracking-wider text-white truncate max-w-[90px] sm:max-w-[140px] md:max-w-none">
             {name}
           </span>
 
-          <div
-            className="hidden sm:flex items-center gap-1 rounded-xs border px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider"
-            style={{
-              borderColor: `${rankColor}44`,
-              backgroundColor: `${rankColor}10`,
-              color: rankColor,
-            }}
+          <span
+            className={cn(
+              "hidden sm:inline-flex px-1.5 py-0.5 rounded-xs border text-xs font-mono font-bold uppercase tracking-wider",
+              badgeClass,
+            )}
           >
-            {rank}
-          </div>
-
-          {turn && (
-            <div
-              className={cn(
-                "rounded-xs border px-1.5 py-0.5 shrink-0",
-                align === "left"
-                  ? "border-accent bg-accent text-white"
-                  : "border-[#8C7BFF]/50 bg-[#8C7BFF]/20 text-[#8C7BFF]",
-              )}
-            >
-              <span className="font-display text-[7.5px] sm:text-[9px] font-bold uppercase tracking-wider">
-                {align === "left" ? "YOUR TURN" : "THINKING"}
-              </span>
-            </div>
-          )}
+            {badge}
+          </span>
         </div>
 
         <div
           className={cn(
-            "mt-1 flex items-center gap-1.5 sm:gap-2.5",
-            align === "right" && "flex-row-reverse",
+            "mt-1 flex items-center gap-2",
+            isRight && "flex-row-reverse",
           )}
         >
-          <span className="text-[9px] font-mono uppercase tracking-wider text-white/40 hidden sm:inline">
-            NO&apos;S USED
-          </span>
-          <span className="text-[8.5px] font-mono text-white/40 sm:hidden">
+          <span className="text-xs font-mono uppercase text-white/50 tracking-wider">
             NOs:
           </span>
-          <span className="font-display text-xs sm:text-sm font-bold text-accent">
+          <span className="font-mono text-xs font-bold text-[#FF4655]">
             {nosUsed} / {nosMax === -1 ? "∞" : nosMax}
           </span>
 
-          {nosMax === -1 ? (
-            <span className="font-display text-base font-bold text-accent">
-              ∞
-            </span>
-          ) : (
+          {nosMax > 0 && nosMax <= 10 && (
             <div
               className={cn(
-                "flex flex-col gap-1",
-                align === "right" && "items-end",
+                "hidden sm:flex gap-1 items-center",
+                isRight && "flex-row-reverse",
               )}
             >
-              <div
-                className={cn(
-                  "flex gap-1 sm:gap-1.5",
-                  align === "right" && "flex-row-reverse",
-                )}
-              >
-                {Array.from({ length: Math.min(5, nosMax) }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full transition-all duration-200 border",
-                      i < nosUsed
-                        ? "bg-accent border-accent"
-                        : "bg-white/[0.05] border-white/10",
-                    )}
-                  />
-                ))}
-              </div>
-
-              {nosMax > 5 && (
-                <div
+              {Array.from({ length: nosMax }).map((_, i) => (
+                <span
+                  key={i}
                   className={cn(
-                    "flex gap-1 sm:gap-1.5",
-                    align === "right" && "flex-row-reverse",
+                    "h-1.5 w-1.5 rounded-full transition-colors",
+                    i < nosUsed
+                      ? "bg-[#FF4655] shadow-[0_0_4px_rgba(255,70,85,0.6)]"
+                      : "bg-white/15",
                   )}
-                >
-                  {Array.from({ length: nosMax - 5 }).map((_, i) => {
-                    const actualIdx = 5 + i;
-                    return (
-                      <div
-                        key={actualIdx}
-                        className={cn(
-                          "h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full transition-all duration-200 border",
-                          actualIdx < nosUsed
-                            ? "bg-accent border-accent"
-                            : "bg-white/[0.05] border-white/10",
-                        )}
-                      />
-                    );
-                  })}
-                </div>
-              )}
+                />
+              ))}
             </div>
           )}
         </div>

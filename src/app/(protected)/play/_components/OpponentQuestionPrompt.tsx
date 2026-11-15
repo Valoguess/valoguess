@@ -50,7 +50,7 @@ export function OpponentQuestionPrompt({
           <span>YES</span>
         </button>
 
-        <span className="text-white/30 font-mono text-[10px] tracking-widest uppercase select-none px-1">
+        <span className="text-white/30 font-mono text-xs tracking-widest uppercase select-none px-1">
           OR
         </span>
 

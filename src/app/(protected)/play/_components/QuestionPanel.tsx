@@ -45,24 +45,24 @@ export function QuestionPanel({
       : questions.filter((q) => q.category === category);
 
   return (
-    <div className="flex flex-col border border-white/10 bg-[#080b10]/90 backdrop-blur-md p-3 sm:p-4 rounded-sm min-h-[280px] relative overflow-hidden">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5 shrink-0 border-b border-white/10 pb-2.5">
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="h-2 w-2 rotate-45 bg-[#FF4655]" />
-            <span className="font-valorant text-xs tracking-wider text-[#FF4655]">
-              ASK A QUESTION
+    <div className="flex flex-col border border-white/10 bg-[#080b10]/90 backdrop-blur-md p-3.5 sm:p-5 rounded-sm min-h-[280px] relative overflow-hidden select-none">
+      <div className="mb-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0 border-b border-white/10 pb-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-[#FF4655]" />
+            <span className="font-valorant text-xs sm:text-sm tracking-wider text-white">
+              INTERROGATION DECK
             </span>
           </div>
 
-          <span className="text-[10px] text-white/40 font-mono">
-            ({visible.length} available)
+          <span className="text-xs text-white/50 font-mono">
+            ({visible.length} questions)
           </span>
 
           {disabled && (
-            <div className="flex items-center gap-1.5 text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded-xs border border-white/10">
+            <div className="flex items-center gap-2 text-xs text-white/60 bg-white/5 px-2.5 py-1 rounded-sm border border-white/10">
               <Loader2 className="h-3 w-3 animate-spin text-[#FF4655]" />
-              <span className="truncate max-w-[140px] sm:max-w-none text-[11px] font-mono">
+              <span className="truncate max-w-[160px] sm:max-w-none text-xs font-mono">
                 {disabledReason || "Waiting..."}
               </span>
             </div>
@@ -77,7 +77,7 @@ export function QuestionPanel({
             }}
             disabled={disabled}
           >
-            <SelectTrigger className="w-full sm:w-40 bg-black/60 border-white/10 text-white hover:border-white/20 text-xs h-8 rounded-xs font-display font-medium">
+            <SelectTrigger className="w-full sm:w-44 bg-black/60 border-white/15 text-white hover:border-white/30 text-xs h-8.5 rounded-sm font-display font-medium">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent className="bg-[#090d14] border-white/15 text-white">
@@ -124,33 +124,35 @@ export function QuestionPanel({
                   disabled={disabled || isAsked}
                   title={q.description || q.label}
                   className={cn(
-                    "flex flex-col justify-between rounded-xs border p-2.5 text-left transition-all relative group overflow-hidden min-h-[68px]",
-                    disabled || isAsked ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-[#FF4655]/60 hover:bg-white/[0.03]",
+                    "flex flex-col justify-between rounded-sm border p-3 text-left transition-all relative group overflow-hidden min-h-[76px]",
+                    disabled || isAsked
+                      ? "cursor-not-allowed opacity-60"
+                      : "cursor-pointer hover:border-[#FF4655]/60 hover:bg-white/[0.04] active:scale-[0.98]",
                     isYes && "border-mint/50 bg-mint/5 text-mint",
                     isNo && "border-[#FF4655]/50 bg-[#FF4655]/5 text-[#FF4655]",
                     !isAsked && "border-white/10 bg-black/40 text-white/90",
                   )}
                 >
-                  <div className="flex items-center justify-between w-full mb-1 text-[8.5px] uppercase tracking-wider font-mono text-white/40">
+                  <div className="flex items-center justify-between w-full mb-1 text-xs uppercase tracking-wider font-mono text-white/40">
                     <span>{q.category}</span>
                   </div>
 
                   <div className="flex items-center gap-1.5 my-auto">
-                    <span className="text-xs font-display font-bold leading-tight line-clamp-2">
+                    <span className="text-xs font-display font-bold leading-snug line-clamp-2">
                       {q.label}
                     </span>
                   </div>
 
                   {isAsked && (
-                    <div className="mt-1 flex items-center gap-1 text-[9px] font-mono font-bold uppercase tracking-wider">
+                    <div className="mt-1.5 flex items-center gap-1 text-xs font-mono font-bold uppercase tracking-wider">
                       {isYes ? (
                         <>
-                          <Check className="h-3 w-3 text-mint" />
+                          <Check className="h-3.5 w-3.5 text-mint" />
                           <span>YES</span>
                         </>
                       ) : (
                         <>
-                          <X className="h-3 w-3 text-[#FF4655]" />
+                          <X className="h-3.5 w-3.5 text-[#FF4655]" />
                           <span>NO</span>
                         </>
                       )}

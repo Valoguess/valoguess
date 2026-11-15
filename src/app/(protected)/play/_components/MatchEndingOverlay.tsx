@@ -8,14 +8,12 @@ import {
   Skull,
   Shield,
   ArrowRight,
-  Unlock,
   Swords,
   Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Agent, getAgentById } from "@/lib/data";
 import { useGameStore } from "@/store/gameStore";
-import { leaveGame } from "@/socket/emitter";
 
 interface MatchEndingOverlayProps {
   isVictory: boolean;
@@ -40,23 +38,12 @@ export function MatchEndingOverlay({
   onComplete,
   durationMs = 5000,
 }: MatchEndingOverlayProps) {
-  const { clearGame } = useGameStore();
-
-  const [hasUnmasked, setHasUnmasked] = useState(false);
   const [secondsRemaining, setSecondsRemaining] = useState(
     Math.ceil(durationMs / 1000),
   );
 
   const myAgentObj: Agent = getAgentById(myAgentId);
   const oppAgentObj: Agent = getAgentById(oppAgentId);
-
-  useEffect(() => {
-    const unmaskTimer = setTimeout(() => {
-      setHasUnmasked(true);
-    }, 500);
-
-    return () => clearTimeout(unmaskTimer);
-  }, []);
 
   useEffect(() => {
     let completed = false;
@@ -89,14 +76,14 @@ export function MatchEndingOverlay({
     : isVictory
       ? {
           title: "VICTORY",
-          subtitle: "AGENT GUESSED • YOU WON",
+          subtitle: "OPPONENT'S AGENT DEDUCED",
           textColor: "text-mint",
           borderColor: "border-mint/50",
           icon: Trophy,
         }
       : {
           title: "DEFEAT",
-          subtitle: "YOUR AGENT WAS GUESSED",
+          subtitle: "YOUR AGENT WAS DEDUCED",
           textColor: "text-[#FF4655]",
           borderColor: "border-[#FF4655]/50",
           icon: Skull,
@@ -115,52 +102,47 @@ export function MatchEndingOverlay({
           quality={90}
           className="object-cover opacity-20 scale-105"
         />
-        <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#040609]/80 to-[#040609]" />
+        <div className="absolute inset-0 bg-radial from-transparent via-[#040609]/80 to-[#040609]" />
       </div>
 
       <div className="relative z-10 w-full pt-8 pb-3 flex flex-col items-center text-center">
         <div className="flex items-center gap-2 mb-1.5">
-          <span className={cn("h-1.5 w-1.5 rounded-full animate-ping", theme.textColor)} />
-          <span className="text-[10px] font-mono font-bold uppercase tracking-[0.25em] text-[#FF4655]">
-            VALORANT // MATCH FINISHED
+          <span className={cn("h-2 w-2 rounded-full animate-ping", theme.textColor)} />
+          <span className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-[#FF4655]">
+            MATCH CONCLUDED
           </span>
         </div>
 
         <h1
           className={cn(
-            "font-valorant text-4xl sm:text-6xl md:text-7xl tracking-wider uppercase select-none",
+            "font-valorant text-5xl sm:text-7xl md:text-8xl tracking-wider uppercase select-none leading-none",
             theme.textColor,
           )}
         >
           {theme.title}
         </h1>
 
-        <p className="text-xs font-mono text-white/50 tracking-wider uppercase mt-1">
+        <p className="text-xs font-mono text-white/50 tracking-wider uppercase mt-2">
           {theme.subtitle} • {roundsPlayed} {roundsPlayed === 1 ? "ROUND" : "ROUNDS"}
         </p>
       </div>
 
-      <div className="relative z-10 w-full max-w-5xl px-3 sm:px-6 flex items-center justify-center gap-3 sm:gap-8 md:gap-14 my-auto">
+      <div className="relative z-10 w-full max-w-5xl px-4 sm:px-6 flex items-center justify-center gap-4 sm:gap-8 md:gap-14 my-auto">
         <div className="flex flex-col items-center">
-          <div className="flex items-center gap-2 mb-2 sm:mb-3">
-            <span className="text-[10px] sm:text-xs font-display font-bold uppercase tracking-wider text-mint">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs font-display font-bold uppercase tracking-wider text-mint">
               [YOU]
             </span>
-            <span className="font-display font-bold text-sm sm:text-base text-white tracking-wider max-w-[110px] sm:max-w-[180px] truncate uppercase">
+            <span className="font-display font-bold text-sm sm:text-base text-white tracking-wider max-w-[140px] truncate uppercase">
               {userName}
             </span>
           </div>
 
-          <div className="relative w-36 sm:w-56 md:w-64 aspect-[4/6] rounded-sm border-2 border-white/20 overflow-hidden flex flex-col justify-between bg-[#080c14] shadow-2xl">
-            <div className="absolute top-2 left-2 z-20 h-2.5 w-2.5 border-t-2 border-l-2 border-mint/80" />
-            <div className="absolute top-2 right-2 z-20 h-2.5 w-2.5 border-t-2 border-r-2 border-mint/80" />
-            <div className="absolute bottom-2 left-2 z-20 h-2.5 w-2.5 border-b-2 border-l-2 border-mint/80" />
-            <div className="absolute bottom-2 right-2 z-20 h-2.5 w-2.5 border-b-2 border-r-2 border-mint/80" />
-
-            <div className="relative z-10 flex items-center justify-between p-2.5 sm:p-3 bg-gradient-to-b from-black/80 to-transparent">
+          <div className="relative w-40 sm:w-56 md:w-64 aspect-[4/6] rounded-sm border-2 border-white/20 overflow-hidden flex flex-col justify-between bg-[#080c14] shadow-2xl">
+            <div className="relative z-10 flex items-center justify-between p-3 bg-gradient-to-b from-black/80 to-transparent">
               <div className="flex items-center gap-1.5">
-                <Shield className="h-3 w-3 text-mint" />
-                <span className="text-[8px] sm:text-[9px] font-mono font-bold tracking-widest uppercase text-mint">
+                <Shield className="h-3.5 w-3.5 text-mint" />
+                <span className="text-xs font-mono font-bold tracking-wider uppercase text-mint">
                   YOUR AGENT
                 </span>
               </div>
@@ -176,12 +158,12 @@ export function MatchEndingOverlay({
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none" />
             </div>
 
-            <div className="relative z-10 p-3 sm:p-4 pt-6 bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col items-center text-center">
-              <div className="h-0.5 w-8 sm:w-12 bg-mint/60 mb-1.5" />
-              <h2 className="font-valorant text-lg sm:text-2xl font-black uppercase text-white tracking-wider">
+            <div className="relative z-10 p-4 pt-6 bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col items-center text-center">
+              <div className="h-0.5 w-10 sm:w-12 bg-mint/60 mb-2" />
+              <h2 className="font-valorant text-xl sm:text-2xl font-black uppercase text-white tracking-wider">
                 {myAgentObj.name}
               </h2>
-              <span className="text-[8px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-mint mt-0.5">
+              <span className="text-xs font-mono font-bold uppercase tracking-widest text-mint mt-1">
                 {myAgentObj.role}
               </span>
             </div>
@@ -189,132 +171,75 @@ export function MatchEndingOverlay({
         </div>
 
         <div className="flex flex-col items-center justify-center shrink-0">
-          <div className="h-6 sm:h-8 w-px bg-white/10 mb-2 sm:mb-3" />
+          <div className="h-8 w-px bg-white/10 mb-3" />
 
           <div
             className={cn(
-              "relative h-12 w-12 sm:h-16 sm:w-16 rounded-full border-2 bg-[#080c14] flex items-center justify-center shadow-lg transition-all",
+              "relative h-14 w-14 sm:h-18 sm:w-18 rounded-full border-2 bg-[#080c14] flex items-center justify-center shadow-lg transition-all",
               theme.borderColor,
             )}
           >
-            <OutcomeIcon className={cn("h-6 w-6 sm:h-8 sm:w-8", theme.textColor)} />
+            <OutcomeIcon className={cn("h-7 w-7 sm:h-9 sm:w-9", theme.textColor)} />
           </div>
 
-          <div className="h-6 sm:h-8 w-px bg-white/10 mt-2 sm:mt-3" />
-
-          <div className="mt-2 sm:mt-3 flex flex-col items-center">
-            <div className="px-2.5 py-1 rounded-xs bg-white/5 border border-white/10">
-              <span className="font-mono text-xs font-bold text-white tracking-widest uppercase">
-                {roundsPlayed} {roundsPlayed === 1 ? "ROUND" : "ROUNDS"}
-              </span>
-            </div>
-          </div>
+          <div className="h-8 w-px bg-white/10 mt-3" />
         </div>
 
         <div className="flex flex-col items-center">
-          <div className="flex items-center gap-2 mb-2 sm:mb-3">
-            <span className="text-[10px] sm:text-xs font-display font-bold uppercase tracking-wider text-[#8C7BFF]">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs font-display font-bold uppercase tracking-wider text-[#8C7BFF]">
               [OPPONENT]
             </span>
-            <span className="font-display font-bold text-sm sm:text-base text-white tracking-wider max-w-[110px] sm:max-w-[180px] truncate uppercase">
+            <span className="font-display font-bold text-sm sm:text-base text-white tracking-wider max-w-[140px] truncate uppercase">
               {opponentName}
             </span>
           </div>
 
-          <div
-            className={cn(
-              "relative w-36 sm:w-56 md:w-64 aspect-[4/6] rounded-sm border-2 overflow-hidden flex flex-col justify-between bg-[#080c14] shadow-2xl transition-all duration-300",
-              hasUnmasked ? "border-[#8C7BFF]/70" : "border-white/15",
-            )}
-          >
-            <div className="absolute top-2 left-2 z-20 h-2.5 w-2.5 border-t-2 border-l-2 border-[#8C7BFF]/80" />
-            <div className="absolute top-2 right-2 z-20 h-2.5 w-2.5 border-t-2 border-r-2 border-[#8C7BFF]/80" />
-            <div className="absolute bottom-2 left-2 z-20 h-2.5 w-2.5 border-b-2 border-l-2 border-[#8C7BFF]/80" />
-            <div className="absolute bottom-2 right-2 z-20 h-2.5 w-2.5 border-b-2 border-r-2 border-[#8C7BFF]/80" />
-
-            <div className="relative z-10 flex items-center justify-between p-2.5 sm:p-3 bg-gradient-to-b from-black/80 to-transparent">
+          <div className="relative w-40 sm:w-56 md:w-64 aspect-[4/6] rounded-sm border-2 border-white/20 overflow-hidden flex flex-col justify-between bg-[#080c14] shadow-2xl">
+            <div className="relative z-10 flex items-center justify-between p-3 bg-gradient-to-b from-black/80 to-transparent">
               <div className="flex items-center gap-1.5">
-                <Unlock className="h-3 w-3 text-[#8C7BFF]" />
-                <span className="text-[8px] sm:text-[9px] font-mono font-bold tracking-widest uppercase text-[#8C7BFF]">
-                  OPPONENT&apos;S AGENT
+                <Shield className="h-3.5 w-3.5 text-[#FF4655]" />
+                <span className="text-xs font-mono font-bold tracking-wider uppercase text-[#FF4655]">
+                  THEIR AGENT
                 </span>
               </div>
-              <span className="px-1.5 py-0.5 rounded-xs bg-[#8C7BFF]/20 text-[#8C7BFF] text-[7px] sm:text-[8px] font-mono font-bold uppercase tracking-wider border border-[#8C7BFF]/40">
-                {hasUnmasked ? "REVEALED" : "HIDDEN"}
-              </span>
             </div>
 
             <div className="absolute inset-0 z-0 overflow-hidden">
-              {hasUnmasked ? (
-                <img
-                  src={oppAgentObj.bannerPath || `/agents/banner/${oppAgentObj.id}.webp`}
-                  alt={oppAgentObj.name}
-                  decoding="async"
-                  className="w-full h-full object-cover object-top transition-opacity duration-300"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-valorant text-5xl sm:text-7xl font-black text-white/10 select-none">
-                    ?
-                  </span>
-                </div>
-              )}
+              <img
+                src={oppAgentObj.bannerPath || `/agents/banner/${oppAgentObj.id}.webp`}
+                alt={oppAgentObj.name}
+                decoding="async"
+                className="w-full h-full object-cover object-top"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none" />
             </div>
 
-            <div className="relative z-10 p-3 sm:p-4 pt-6 bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col items-center text-center">
-              <div className="h-0.5 w-8 sm:w-12 bg-[#8C7BFF]/60 mb-1.5" />
-              <h2 className="font-valorant text-lg sm:text-2xl font-black uppercase text-white tracking-wider">
-                {hasUnmasked ? oppAgentObj.name : "REVEALING..."}
+            <div className="relative z-10 p-4 pt-6 bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col items-center text-center">
+              <div className="h-0.5 w-10 sm:w-12 bg-[#FF4655]/60 mb-2" />
+              <h2 className="font-valorant text-xl sm:text-2xl font-black uppercase text-white tracking-wider">
+                {oppAgentObj.name}
               </h2>
-              <span className="text-[8px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-[#8C7BFF] mt-0.5">
-                {hasUnmasked ? oppAgentObj.role : "AGENT"}
+              <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#FF4655] mt-1">
+                {oppAgentObj.role}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="relative z-10 w-full max-w-xl px-6 pb-8 flex flex-col items-center gap-3">
-        <div className="w-full flex flex-col items-center gap-1.5">
-          <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-            <div
-              style={{
-                width: `${(secondsRemaining / (durationMs / 1000)) * 100}%`,
-              }}
-              className={cn(
-                "h-full transition-all duration-1000 ease-linear",
-                isVictory ? "bg-mint" : isTie ? "bg-amber-400" : "bg-[#FF4655]",
-              )}
-            />
-          </div>
-          <div className="flex items-center gap-1.5 text-[9px] font-mono tracking-widest text-white/50 uppercase">
-            <Clock className="h-3 w-3" />
-            VIEWING STATS IN 00:0{secondsRemaining}
-          </div>
-        </div>
+      <div className="relative z-10 pb-8 flex flex-col items-center gap-3">
+        <button
+          onClick={onComplete}
+          className="inline-flex items-center gap-2 px-8 py-3 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-valorant text-xs uppercase tracking-widest rounded-sm transition cursor-pointer shadow-[0_0_20px_rgba(255,70,85,0.4)] active:scale-98"
+        >
+          <span>VIEW MATCH SUMMARY</span>
+          <ArrowRight className="h-4 w-4" />
+        </button>
 
-        <div className="flex items-center justify-center gap-3 w-full">
-          <button
-            type="button"
-            onClick={onComplete}
-            className="flex-1 py-2.5 px-6 bg-[#FF4655] hover:bg-[#ff5a67] text-white text-xs font-display font-bold uppercase tracking-wider rounded-xs flex items-center justify-center gap-2 cursor-pointer transition active:scale-98"
-          >
-            <span>VIEW MATCH STATS</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </button>
-
-          <Link
-            href="/lobby"
-            onClick={() => {
-              leaveGame();
-              clearGame();
-            }}
-            className="py-2.5 px-5 rounded-xs border border-white/15 bg-white/5 hover:bg-white/10 text-white font-display text-xs font-bold uppercase tracking-wider transition"
-          >
-            RETURN TO LOBBY
-          </Link>
-        </div>
+        <span className="text-xs font-mono text-white/40 tracking-wider">
+          Auto-continuing in {secondsRemaining}s...
+        </span>
       </div>
     </div>
   );

@@ -92,7 +92,7 @@ export function ActivityFeed({
         <span className="font-valorant text-xs uppercase tracking-widest text-[#FF4655]">
           MATCH LOG
         </span>
-        <span className="font-mono text-[10px] text-white/40 uppercase">
+        <span className="font-mono text-xs text-white/40 uppercase">
           LIVE LOG
         </span>
       </div>
@@ -111,10 +111,10 @@ export function ActivityFeed({
             <EntryIcon kind={e.kind} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-medium text-white/50 truncate">
+                <span className="text-xs font-medium text-white/50 truncate">
                   {actorLabel(e, userName, opponentName)}
                 </span>
-                <span className="text-[10px] font-mono tabular-nums text-white/40 shrink-0">
+                <span className="text-xs font-mono tabular-nums text-white/40 shrink-0">
                   {e.time}
                 </span>
               </div>
@@ -157,7 +157,7 @@ export function ActivityFeed({
           </button>
         </div>
 
-        <div className="flex items-center gap-1.5 text-[10px] font-mono text-white/40">
+        <div className="flex items-center gap-1.5 text-xs font-mono text-white/40">
           <Wifi className="h-3 w-3 text-mint" />
           <span>CONNECTED</span>
           <span className="ml-auto tabular-nums">24ms</span>

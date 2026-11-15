@@ -67,7 +67,7 @@ export function AgentGuessModal({
                 <DialogTitle className="font-valorant text-lg sm:text-xl tracking-wider text-white">
                   MAKE FINAL GUESS
                 </DialogTitle>
-                <p className="text-[11px] sm:text-xs text-white/50 font-sans mt-0.5">
+                <p className="text-xs text-white/50 font-sans mt-0.5">
                   Select opponent&apos;s agent. Remaining guesses:{" "}
                   <span className="font-bold text-accent">
                     {guessesRemaining}
@@ -87,7 +87,7 @@ export function AgentGuessModal({
                 key={r}
                 onClick={() => setRoleFilter(r)}
                 className={cn(
-                  "px-2 py-1 text-[10px] font-display font-bold uppercase tracking-wider rounded-xs transition-all cursor-pointer whitespace-nowrap shrink-0",
+                  "px-2.5 py-1 text-xs font-display font-bold uppercase tracking-wider rounded-xs transition-all cursor-pointer whitespace-nowrap shrink-0",
                   roleFilter === r
                     ? "bg-[#FF4655] text-white shadow-[0_0_10px_rgba(255,70,85,0.3)]"
                     : "text-white/50 hover:text-white hover:bg-white/5",
@@ -147,16 +147,16 @@ export function AgentGuessModal({
                   )}
                 </div>
 
-                <span className="font-valorant text-[10px] tracking-wider text-white uppercase truncate w-full text-center">
+                <span className="font-valorant text-xs tracking-wider text-white uppercase truncate w-full text-center">
                   {agent.name}
                 </span>
 
-                <span className="text-[8px] font-mono text-white/40 uppercase truncate">
+                <span className="text-xs font-mono text-white/50 uppercase truncate">
                   {agent.role}
                 </span>
 
                 {isEliminated && !isSelected && (
-                  <span className="absolute top-1 right-1 text-[7px] font-bold text-accent bg-black/80 px-1 py-0.2 rounded border border-accent/40">
+                  <span className="absolute top-1 right-1 text-xs font-bold text-accent bg-black/90 px-1.5 py-0.5 rounded border border-accent/40 font-mono">
                     OUT
                   </span>
                 )}
@@ -177,7 +177,7 @@ export function AgentGuessModal({
                 />
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-[9px] font-mono text-accent uppercase font-bold tracking-widest">
+                <span className="text-xs font-mono text-accent uppercase font-bold tracking-widest">
                   TARGET LOCKED:
                 </span>
                 <span className="font-valorant text-base text-white tracking-wider">

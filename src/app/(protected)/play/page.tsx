@@ -308,7 +308,7 @@ function PlayContent() {
                               : `${opponentPlayer?.name || "Opponent"} is thinking...`}
                         </span>
                       </div>
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20 shrink-0">
+                      <span className="text-xs font-mono uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20 shrink-0">
                         WAITING
                       </span>
                     </div>
@@ -370,7 +370,7 @@ function PlayContent() {
           <Activity className="h-4 w-4 text-accent" />
           <span className="font-valorant text-xs uppercase tracking-wider">Log</span>
           {activity.length > 0 && (
-            <span className="h-5 w-5 rounded-full bg-accent text-[10px] font-mono font-bold flex items-center justify-center text-white">
+            <span className="h-5 w-5 rounded-full bg-accent text-xs font-mono font-bold flex items-center justify-center text-white">
               {activity.length}
             </span>
           )}
