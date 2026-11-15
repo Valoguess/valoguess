@@ -26,17 +26,17 @@ export function PrivacyAccountTab({
     <div className="space-y-6 text-left">
       <div className="bg-[#080b10]/75 border border-white/10 rounded-sm p-5 sm:p-6 space-y-4">
         <span className="font-valorant text-xs sm:text-sm tracking-wider text-white flex items-center gap-2">
-          <Link2 className="h-4 w-4 text-[#FF4655]" /> ACCOUNT AUTHENTICATION
+          <Link2 className="h-4 w-4 text-[#FF4655]" /> ACCOUNT STATUS
         </span>
 
         {isAnonymous ? (
           <div className="p-4 rounded-sm bg-[#FF4655]/10 border border-[#FF4655]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 text-[9px] font-mono font-bold uppercase text-[#FF4655]">
-                <AlertTriangle className="h-3.5 w-3.5" /> GUEST ACCOUNT
+              <div className="inline-flex items-center gap-1.5 text-xs font-sans font-medium text-[#FF4655]">
+                <AlertTriangle className="h-3.5 w-3.5" /> Guest Account
               </div>
               <p className="text-xs text-white/70 font-sans leading-relaxed">
-                You are playing on an anonymous guest session. Link your Google account to secure duel statistics and unlock custom usernames.
+                You are on a guest account. Sign in with Google to save your match history and customize your username.
               </p>
             </div>
 
@@ -45,42 +45,42 @@ export function PrivacyAccountTab({
                 <button
                   type="button"
                   onClick={onRequestLogout}
-                  className="py-2.5 px-4 bg-white/5 hover:bg-[#FF4655]/20 border border-white/15 hover:border-[#FF4655]/40 text-white/80 hover:text-[#FF4655] font-display text-xs font-bold uppercase tracking-wider rounded-sm transition cursor-pointer flex items-center gap-1.5"
+                  className="py-2.5 px-4 bg-white/5 hover:bg-[#FF4655]/20 border border-white/15 hover:border-[#FF4655]/40 text-white/80 hover:text-[#FF4655] font-valorant text-xs tracking-wider uppercase rounded-sm transition cursor-pointer flex items-center gap-1.5"
                 >
                   <LogOut className="h-3.5 w-3.5" />
-                  <span>EXIT GUEST</span>
+                  <span>LOG OUT</span>
                 </button>
               )}
 
               <Link
                 href="/login"
-                className="py-2.5 px-4 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-display text-xs font-bold uppercase tracking-wider rounded-sm transition cursor-pointer"
+                className="py-2.5 px-4 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-valorant text-xs tracking-wider uppercase rounded-sm transition cursor-pointer"
               >
-                LINK GOOGLE
+                SIGN IN
               </Link>
             </div>
           </div>
         ) : (
           <div className="p-4 rounded-sm bg-mint/10 border border-mint/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="space-y-0.5">
-              <span className="text-xs font-display font-bold text-mint uppercase tracking-wider block">
-                ✓ ACCOUNT VERIFIED
+              <span className="text-xs font-sans font-medium text-mint block">
+                Signed In
               </span>
-              <span className="text-[11px] text-white/60 font-mono">
-                Signed in as <strong className="text-white">{userEmail || "Google User"}</strong>
+              <span className="text-xs text-white/60 font-sans">
+                {userEmail || "Google Account"}
               </span>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-[9px] font-mono text-mint border border-mint/40 bg-mint/10 px-2.5 py-1 rounded-xs uppercase font-bold">
-                ACTIVE
+              <span className="text-xs font-sans text-mint border border-mint/40 bg-mint/10 px-2.5 py-0.5 rounded-xs font-medium">
+                Active
               </span>
 
               {onRequestLogout && (
                 <button
                   type="button"
                   onClick={onRequestLogout}
-                  className="py-1.5 px-3 bg-white/5 hover:bg-[#FF4655]/20 border border-white/15 hover:border-[#FF4655]/40 text-white/70 hover:text-[#FF4655] font-display text-xs font-bold uppercase tracking-wider rounded-sm transition cursor-pointer flex items-center gap-1.5"
+                  className="py-1.5 px-3 bg-white/5 hover:bg-[#FF4655]/20 border border-white/15 hover:border-[#FF4655]/40 text-white/70 hover:text-[#FF4655] font-valorant text-xs tracking-wider uppercase rounded-sm transition cursor-pointer flex items-center gap-1.5"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                   <span>LOG OUT</span>
@@ -95,20 +95,20 @@ export function PrivacyAccountTab({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <span className="font-valorant text-xs sm:text-sm tracking-wider text-white flex items-center gap-2">
-              <LogOut className="h-4 w-4 text-[#FF4655]" /> SESSION TERMINATION
+              <LogOut className="h-4 w-4 text-[#FF4655]" /> SIGN OUT
             </span>
             <p className="text-xs text-white/50 max-w-xl leading-relaxed font-sans">
-              Terminate your active protocol session and return to the sign-in screen.
+              Sign out of your account on this device.
             </p>
           </div>
 
           <button
             type="button"
             onClick={onRequestLogout}
-            className="py-2.5 px-5 bg-[#FF4655]/10 hover:bg-[#FF4655]/20 border border-[#FF4655]/40 hover:border-[#FF4655] text-[#FF4655] font-display text-xs font-bold uppercase tracking-wider rounded-sm transition cursor-pointer flex items-center justify-center gap-2 shrink-0"
+            className="py-2.5 px-5 bg-[#FF4655]/10 hover:bg-[#FF4655]/20 border border-[#FF4655]/40 hover:border-[#FF4655] text-[#FF4655] font-valorant text-xs tracking-wider uppercase rounded-sm transition cursor-pointer flex items-center justify-center gap-2 shrink-0"
           >
             <LogOut className="h-3.5 w-3.5" />
-            <span>LOG OUT OF ACCOUNT</span>
+            <span>SIGN OUT</span>
           </button>
         </div>
       </div>

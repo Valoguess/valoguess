@@ -132,8 +132,8 @@ export function ProfileAvatarUploadCard({
         </div>
 
         {isAnonymous && (
-          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF4655] bg-[#FF4655]/10 px-2 py-0.5 rounded-xs border border-[#FF4655]/30 flex items-center gap-1 shrink-0 self-start sm:self-center">
-            <Lock className="h-3 w-3" /> GUEST LOCKED
+          <span className="text-xs font-sans text-[#FF4655] bg-[#FF4655]/10 px-2.5 py-0.5 rounded-xs border border-[#FF4655]/30 flex items-center gap-1 shrink-0 self-start sm:self-center">
+            <Lock className="h-3 w-3" /> Guest account
           </span>
         )}
       </div>
@@ -153,7 +153,7 @@ export function ProfileAvatarUploadCard({
             {isUploading && (
               <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white space-y-1">
                 <Loader2 className="h-6 w-6 animate-spin text-[#FF4655]" />
-                <span className="text-[8px] font-mono uppercase tracking-wider text-white/80">SAVING</span>
+                <span className="text-xs font-sans text-white/80">Saving...</span>
               </div>
             )}
 
@@ -168,7 +168,7 @@ export function ProfileAvatarUploadCard({
               title="Click to change avatar"
             >
               <Camera className="h-5 w-5 text-[#FF4655]" />
-              <span className="text-[8px] font-mono font-bold tracking-wider uppercase">CHANGE</span>
+              <span className="text-xs font-sans font-medium uppercase tracking-wider">CHANGE</span>
             </button>
           )}
         </div>
@@ -208,10 +208,10 @@ export function ProfileAvatarUploadCard({
             <Upload className={cn("h-5 w-5", isDragOver ? "text-[#FF4655]" : "text-white/40")} />
 
             <div>
-              <span className="text-xs font-display font-bold uppercase tracking-wider text-white">
-                {isUploading ? "Uploading..." : "Click to select or drag and drop image"}
+              <span className="text-xs font-sans font-medium text-white block">
+                {isUploading ? "Uploading..." : "Click to select or drag and drop an image"}
               </span>
-              <span className="text-[10px] text-white/40 font-mono block mt-0.5">
+              <span className="text-xs text-white/40 font-sans block mt-0.5">
                 PNG, JPG, WEBP, or GIF up to 5 MB
               </span>
             </div>
@@ -222,7 +222,7 @@ export function ProfileAvatarUploadCard({
               type="button"
               disabled={isAnonymous || isUploading}
               onClick={() => fileInputRef.current?.click()}
-              className="py-2 px-4 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-white/30 text-white font-display text-xs font-bold uppercase tracking-wider rounded-sm transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className="py-2 px-4 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-white/30 text-white font-valorant text-xs uppercase tracking-wider rounded-sm transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isUploading ? (
                 <>
@@ -242,7 +242,7 @@ export function ProfileAvatarUploadCard({
                 type="button"
                 disabled={isRemoving || isUploading}
                 onClick={handleRemove}
-                className="py-2 px-3.5 bg-transparent hover:bg-[#FF4655]/15 border border-white/10 hover:border-[#FF4655]/40 text-white/50 hover:text-[#FF4655] font-display text-xs font-bold uppercase tracking-wider rounded-sm transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                className="py-2 px-3.5 bg-transparent hover:bg-[#FF4655]/15 border border-white/10 hover:border-[#FF4655]/40 text-white/50 hover:text-[#FF4655] font-valorant text-xs uppercase tracking-wider rounded-sm transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                 title="Reset to default agent icon"
               >
                 {isRemoving ? (

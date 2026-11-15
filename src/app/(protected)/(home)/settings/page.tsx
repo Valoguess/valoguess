@@ -213,40 +213,40 @@ export default function SettingsPage() {
           <button
             onClick={() => setActiveTab("identity")}
             className={cn(
-              "py-2 sm:py-2.5 px-3 sm:px-5 font-display text-[11px] sm:text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
+              "py-2 sm:py-2.5 px-3 sm:px-5 font-valorant text-xs uppercase tracking-wider transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
               activeTab === "identity"
                 ? "border-[#FF4655] text-white bg-white/5"
                 : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
             <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF4655]" />
-            <span>IDENTITY &amp; AVATAR</span>
+            <span>PROFILE</span>
           </button>
 
           <button
             onClick={() => setActiveTab("banner")}
             className={cn(
-              "py-2 sm:py-2.5 px-3 sm:px-5 font-display text-[11px] sm:text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
+              "py-2 sm:py-2.5 px-3 sm:px-5 font-valorant text-xs uppercase tracking-wider transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
               activeTab === "banner"
                 ? "border-[#FF4655] text-white bg-white/5"
                 : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
             <ImageIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" />
-            <span>BANNER &amp; TAGLINE</span>
+            <span>BANNER &amp; TITLE</span>
           </button>
 
           <button
             onClick={() => setActiveTab("privacy")}
             className={cn(
-              "py-2 sm:py-2.5 px-3 sm:px-5 font-display text-[11px] sm:text-xs font-bold uppercase tracking-widest transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
+              "py-2 sm:py-2.5 px-3 sm:px-5 font-valorant text-xs uppercase tracking-wider transition-all rounded-xs border-b-2 cursor-pointer flex items-center gap-2 shrink-0 whitespace-nowrap",
               activeTab === "privacy"
                 ? "border-[#FF4655] text-white bg-white/5"
                 : "border-transparent text-white/50 hover:text-white hover:bg-white/2",
             )}
           >
             <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-mint" />
-            <span>PRIVACY &amp; ACCOUNT</span>
+            <span>ACCOUNT</span>
           </button>
         </div>
 

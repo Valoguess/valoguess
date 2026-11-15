@@ -26,16 +26,16 @@ export function ProfileCardPreview({
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#FF4655] to-transparent" />
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex flex-col text-left space-y-2 max-w-md">
-          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-[#FF4655] font-bold">
+        <div className="flex flex-col text-left space-y-1.5 max-w-md">
+          <div className="flex items-center gap-2 text-xs font-sans uppercase tracking-wider text-[#FF4655] font-semibold">
             <Sparkles className="h-3 w-3" />
-            <span>PLAYER CARD PREVIEW</span>
+            <span>CARD PREVIEW</span>
           </div>
           <h2 className="font-valorant text-xl sm:text-2xl tracking-wider text-white">
-            TACTICAL IDENTITY
+            PLAYER CARD
           </h2>
           <p className="text-xs text-white/50 leading-relaxed font-sans">
-            This card represents your identity across 1v1 duels, party lobbies, and friend lists.
+            This is how your profile appears to other players in match lobbies and friends lists.
           </p>
         </div>
 
@@ -51,7 +51,7 @@ export function ProfileCardPreview({
             <div className="absolute inset-0 bg-gradient-to-t from-[#080b10] via-[#080b10]/40 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#080b10]/80 via-transparent to-transparent" />
 
-            <span className="absolute top-2.5 right-2.5 text-[9px] font-display font-bold uppercase tracking-widest text-white/80 bg-black/60 px-2 py-0.5 rounded-xs border border-white/10 backdrop-blur-xs">
+            <span className="absolute top-2.5 right-2.5 text-xs font-sans font-medium uppercase tracking-wider text-white/80 bg-black/60 px-2 py-0.5 rounded-xs border border-white/10 backdrop-blur-xs">
               {currentBanner.name} • {currentBanner.role}
             </span>
           </div>
@@ -69,23 +69,23 @@ export function ProfileCardPreview({
             </div>
 
             <div className="flex flex-col text-left min-w-0 flex-1 pt-1">
-              <span className="font-display font-black text-lg sm:text-xl uppercase tracking-wider text-white truncate max-w-[200px]">
+              <span className="font-display font-bold text-lg sm:text-xl uppercase tracking-wider text-white truncate max-w-[200px]">
                 {name || "AGENT"}
               </span>
 
-              <span className="font-mono text-xs text-[#FF4655] truncate">
+              <span className="font-sans text-xs text-[#FF4655] truncate">
                 @{username || "agent"}
               </span>
 
-              <span className="mt-1 text-[9px] font-display font-bold tracking-[0.2em] text-amber-400 uppercase truncate">
+              <span className="mt-1 text-xs font-sans font-medium tracking-wide text-amber-400 uppercase truncate">
                 {tagline || "CLUTCH SPECIALIST"}
               </span>
             </div>
           </div>
 
-          <div className="px-4 py-2 border-t border-white/10 bg-white/[0.02] flex items-center justify-between text-[9px] font-mono text-white/40">
-            <span>STATUS: READY</span>
-            <span className="text-mint font-bold">1V1 DUELIST</span>
+          <div className="px-4 py-2 border-t border-white/10 bg-white/[0.02] flex items-center justify-between text-xs font-sans text-white/40">
+            <span>Profile Preview</span>
+            <span className="text-mint font-medium">Ready</span>
           </div>
         </div>
       </div>

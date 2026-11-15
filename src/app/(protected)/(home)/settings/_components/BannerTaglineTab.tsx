@@ -38,10 +38,10 @@ export function BannerTaglineTab({
       <div className="bg-[#080b10]/75 border border-white/10 rounded-sm p-5 sm:p-6 space-y-4">
         <div className="space-y-1">
           <span className="font-valorant text-xs sm:text-sm tracking-wider text-white flex items-center gap-2">
-            <Tag className="h-4 w-4 text-amber-400" /> PLAYER TAGLINE / TITLE
+            <Tag className="h-4 w-4 text-amber-400" /> PLAYER TITLE
           </span>
           <p className="text-xs text-white/50 leading-relaxed font-sans">
-            A tactical motto or specialization displayed under your name on your player card.
+            A title displayed on your player card under your display name.
           </p>
         </div>
 
@@ -51,12 +51,12 @@ export function BannerTaglineTab({
             value={tagline}
             onChange={(e) => setTagline(e.target.value.toUpperCase().slice(0, 36))}
             placeholder="E.G. CLUTCH SPECIALIST"
-            className="bg-black/60 border-white/15 text-amber-400 font-display text-sm tracking-wider uppercase h-11 focus:border-amber-400"
+            className="bg-black/60 border-white/15 text-amber-400 font-sans text-sm tracking-wide uppercase h-11 focus:border-amber-400"
           />
 
           <div className="space-y-1.5">
-            <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider block">
-              RECOMMENDED PRESETS:
+            <span className="text-xs font-sans text-white/40 block">
+              Preset Titles:
             </span>
             <div className="flex flex-wrap gap-1.5">
               {PRESET_TAGLINES.map((preset) => (
@@ -65,7 +65,7 @@ export function BannerTaglineTab({
                   type="button"
                   onClick={() => setTagline(preset)}
                   className={cn(
-                    "px-2.5 py-1 rounded-xs text-[10px] font-display font-bold tracking-wider uppercase transition border cursor-pointer",
+                    "px-2.5 py-1 rounded-xs text-xs font-sans font-medium uppercase tracking-wider transition border cursor-pointer",
                     tagline === preset
                       ? "bg-amber-400/20 border-amber-400 text-amber-300"
                       : "bg-white/[0.02] border-white/10 text-white/60 hover:text-white hover:bg-white/[0.06]"
@@ -83,10 +83,10 @@ export function BannerTaglineTab({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
             <span className="font-valorant text-xs sm:text-sm tracking-wider text-white flex items-center gap-2">
-              <ImageIcon className="h-4 w-4 text-[#FF4655]" /> SELECT SIGNATURE BANNER
+              <ImageIcon className="h-4 w-4 text-[#FF4655]" /> AGENT BANNER
             </span>
             <p className="text-xs text-white/50 font-sans">
-              Choose your agent banner art to frame your player podium card.
+              Choose the agent banner art shown on your card.
             </p>
           </div>
 
@@ -96,8 +96,8 @@ export function BannerTaglineTab({
               type="text"
               value={bannerSearch}
               onChange={(e) => setBannerSearch(e.target.value)}
-              placeholder="SEARCH AGENT..."
-              className="pl-8 bg-black/60 border-white/15 text-xs font-display uppercase tracking-wider h-9 text-white placeholder-white/30"
+              placeholder="Search agent..."
+              className="pl-8 bg-black/60 border-white/15 text-xs font-sans h-9 text-white placeholder-white/30"
             />
           </div>
         </div>
@@ -109,7 +109,7 @@ export function BannerTaglineTab({
               type="button"
               onClick={() => setSelectedRole(role)}
               className={cn(
-                "py-1 px-3 rounded-xs text-[10px] font-display font-bold uppercase tracking-wider transition border cursor-pointer",
+                "py-1 px-3 rounded-xs text-xs font-display font-bold uppercase tracking-wider transition border cursor-pointer",
                 selectedRole === role
                   ? "bg-[#FF4655] border-[#FF4655] text-white"
                   : "bg-white/[0.02] border-white/10 text-white/60 hover:text-white hover:bg-white/[0.05]"
@@ -153,7 +153,7 @@ export function BannerTaglineTab({
                   <span className="font-valorant text-xs text-white tracking-wider leading-none">
                     {banner.name}
                   </span>
-                  <span className="text-[8px] font-mono text-white/50 tracking-wide mt-0.5 uppercase">
+                  <span className="text-xs font-mono text-white/50 tracking-wide mt-0.5 uppercase">
                     {banner.role}
                   </span>
                 </div>
@@ -165,15 +165,15 @@ export function BannerTaglineTab({
 
       {onSave && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#080b10]/60 border border-white/10 rounded-sm p-4">
-          <span className="text-xs text-white/40 font-mono">
-            Save banner and tagline customizations.
+          <span className="text-xs text-white/40 font-sans">
+            Unsaved changes will apply immediately to your card.
           </span>
 
           <button
             type="button"
             onClick={onSave}
             disabled={isSaving}
-            className="w-full sm:w-auto py-2.5 px-6 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-display text-xs font-bold uppercase tracking-wider rounded-sm transition cursor-pointer disabled:opacity-50 active:scale-98 flex items-center justify-center gap-2"
+            className="w-full sm:w-auto py-2.5 px-6 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-valorant text-xs uppercase tracking-wider rounded-sm transition cursor-pointer disabled:opacity-50 active:scale-98 flex items-center justify-center gap-2"
           >
             {isSaving ? (
               <>
@@ -183,7 +183,7 @@ export function BannerTaglineTab({
             ) : (
               <>
                 <Save className="h-3.5 w-3.5" />
-                <span>SAVE BANNER &amp; TAGLINE</span>
+                <span>SAVE CHANGES</span>
               </>
             )}
           </button>
