@@ -81,7 +81,7 @@ export function InviteFriendsDialog({
               <div className="text-xs font-valorant text-white/70 tracking-wider">
                 NO FRIENDS FOUND
               </div>
-              <p className="text-[11px] text-white/40 font-mono">
+              <p className="text-xs text-white/40 font-mono">
                 Add friends via your sidebar to invite them directly.
               </p>
             </div>
@@ -91,7 +91,7 @@ export function InviteFriendsDialog({
                 <button
                   type="button"
                   onClick={() => setShowOnline(!showOnline)}
-                  className="w-full flex items-center justify-between text-[10px] font-mono font-bold uppercase tracking-wider text-white/60 mb-1.5 px-1 hover:text-white transition cursor-pointer"
+                  className="w-full flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-white/60 mb-1.5 px-1 hover:text-white transition cursor-pointer"
                 >
                   <span className="flex items-center gap-1.5 text-mint">
                     <Circle className="h-2 w-2 fill-mint" /> ONLINE ({onlineFriends.length})
@@ -107,7 +107,7 @@ export function InviteFriendsDialog({
                 {showOnline && (
                   <div className="space-y-1.5">
                     {onlineFriends.length === 0 ? (
-                      <div className="p-2.5 text-center rounded-sm bg-white/[0.02] border border-white/5 text-[10px] text-zinc-500 font-mono">
+                      <div className="p-2.5 text-center rounded-sm bg-white/[0.02] border border-white/5 text-xs text-zinc-500 font-mono">
                         No friends currently online
                       </div>
                     ) : (
@@ -134,7 +134,7 @@ export function InviteFriendsDialog({
                                 <span className="font-display text-xs font-bold text-white tracking-wide truncate max-w-[140px]">
                                   {friend.name}
                                 </span>
-                                <span className="text-[9px] uppercase font-mono tracking-wider text-mint">
+                                <span className="text-xs uppercase font-mono tracking-wider text-mint">
                                   {friend.activity || "Online"}
                                 </span>
                               </div>
@@ -145,7 +145,7 @@ export function InviteFriendsDialog({
                               onClick={() => handleInvite(friend)}
                               disabled={isInvited}
                               className={cn(
-                                "px-2 py-1 rounded-sm text-[10px] font-mono font-bold tracking-wider uppercase transition cursor-pointer flex items-center gap-1 shrink-0",
+                                "px-2.5 py-1 rounded-sm text-xs font-mono font-bold tracking-wider uppercase transition cursor-pointer flex items-center gap-1 shrink-0",
                                 isInvited
                                   ? "text-mint bg-mint/15 border border-mint/30"
                                   : "text-white bg-[#FF4655] hover:bg-[#ff5a67]"
@@ -176,7 +176,7 @@ export function InviteFriendsDialog({
                 <button
                   type="button"
                   onClick={() => setShowOffline(!showOffline)}
-                  className="w-full flex items-center justify-between text-[10px] font-mono font-bold uppercase tracking-wider text-white/50 mb-1.5 px-1 hover:text-white transition cursor-pointer"
+                  className="w-full flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-white/50 mb-1.5 px-1 hover:text-white transition cursor-pointer"
                 >
                   <span className="flex items-center gap-1.5 text-zinc-500">
                     <Circle className="h-2 w-2 fill-zinc-600 text-zinc-600" /> OFFLINE ({offlineFriends.length})
@@ -192,7 +192,7 @@ export function InviteFriendsDialog({
                 {showOffline && (
                   <div className="space-y-1.5">
                     {offlineFriends.length === 0 ? (
-                      <div className="p-2.5 text-center rounded-sm bg-white/[0.02] border border-white/5 text-[10px] text-zinc-500 font-mono">
+                      <div className="p-2.5 text-center rounded-sm bg-white/[0.02] border border-white/5 text-xs text-zinc-500 font-mono">
                         No friends offline
                       </div>
                     ) : (
@@ -215,7 +215,7 @@ export function InviteFriendsDialog({
                               <span className="font-display text-xs font-bold text-white tracking-wide truncate max-w-[140px]">
                                 {friend.name}
                               </span>
-                              <span className="text-[9px] uppercase font-mono tracking-wider text-zinc-500">
+                              <span className="text-xs uppercase font-mono tracking-wider text-zinc-500">
                                 Offline
                               </span>
                             </div>

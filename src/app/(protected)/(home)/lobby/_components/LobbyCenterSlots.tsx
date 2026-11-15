@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Swords } from "lucide-react";
 import { Party, PartyMember } from "@/types/party";
 import { useAuthStore } from "@/store/authStore";
 import { getAgentBannerPath } from "@/consts";
@@ -13,12 +12,13 @@ interface LobbyCenterSlotsProps {
   opponent?: PartyMember | null;
   isHost: boolean;
   savedUsername: string;
-  isCreatingOrJoining?: boolean;
-  handleCreateParty?: () => void;
   handleKickGuest: () => void;
   onOpenInviteDialog: () => void;
   onCopyCode?: () => void;
   copied?: boolean;
+  onOpenJoinDialog?: () => void;
+  showPartyCode?: boolean;
+  onToggleRevealCode?: () => void;
 }
 
 export function LobbyCenterSlots({
@@ -31,21 +31,24 @@ export function LobbyCenterSlots({
   onOpenInviteDialog,
   onCopyCode,
   copied = false,
+  onOpenJoinDialog,
+  showPartyCode = false,
+  onToggleRevealCode,
 }: LobbyCenterSlotsProps) {
   const { user } = useAuthStore();
   const myBanner = getAgentBannerPath(user?.banner || "chamber");
   const oppBanner = getAgentBannerPath((opponent as any)?.banner || "jett");
 
   const myName = me?.name || savedUsername || user?.name || "AGENT";
-  const myRole = isHost ? "LEADER" : "MEMBER";
-  const mySubtitle = isHost ? "HOST • 1V1 DUELIST" : "CHALLENGER • 1V1 DUELIST";
+  const myRole = isHost ? "HOST" : "PLAYER";
+  const mySubtitle = isHost ? "Party Leader" : "Member";
 
-  const oppName = opponent?.name || "CHALLENGER";
-  const oppRole = !isHost ? "LEADER" : "CHALLENGER";
-  const oppSubtitle = !isHost ? "HOST • 1V1 DUELIST" : "READY FOR MATCH";
+  const oppName = opponent?.name || "PLAYER 2";
+  const oppRole = !isHost ? "HOST" : "PLAYER";
+  const oppSubtitle = !isHost ? "Party Leader" : "Challenger";
 
   return (
-    <div className="flex-1 w-full flex items-center justify-center gap-3 sm:gap-6 h-[340px] sm:h-full max-h-[500px] max-w-3xl px-2">
+    <div className="flex-1 w-full flex items-center justify-center gap-3 sm:gap-6 h-[400px] sm:h-full max-h-[540px] max-w-3xl px-2">
       <PlayerPodiumCard
         name={myName}
         role={myRole}
@@ -53,15 +56,10 @@ export function LobbyCenterSlots({
         bannerPath={myBanner}
       />
 
-      <div className="flex flex-col items-center justify-center shrink-0 gap-2">
-        <div className="h-8 sm:h-16 w-px bg-gradient-to-b from-transparent via-white/20 to-white/5" />
-        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-white/15 bg-[#0b0e14] flex items-center justify-center text-white/60 shadow-sm">
-          <Swords className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF4655]" />
-        </div>
-        <span className="font-valorant text-[10px] sm:text-xs text-white/40 tracking-widest">
+      <div className="flex flex-col items-center justify-center shrink-0 px-2 sm:px-4">
+        <span className="font-valorant text-base sm:text-xl text-white/30 tracking-widest select-none">
           VS
         </span>
-        <div className="h-8 sm:h-16 w-px bg-gradient-to-t from-transparent via-white/20 to-white/5" />
       </div>
 
       {opponent ? (
@@ -76,9 +74,13 @@ export function LobbyCenterSlots({
       ) : (
         <PlayerPodiumCard
           isVacant
+          partyCode={party?.id}
+          showPartyCode={showPartyCode}
+          onToggleRevealCode={onToggleRevealCode}
           onOpenInvite={onOpenInviteDialog}
           onCopyCode={onCopyCode}
           copied={copied}
+          onOpenJoinDialog={onOpenJoinDialog}
         />
       )}
     </div>

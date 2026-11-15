@@ -63,10 +63,10 @@ export function GamemodeDrawer({
             </div>
             <div>
               <h2 className="font-valorant text-base tracking-[0.1em] text-white">
-                MATCH CONFIGURATION
+                GAME RULES
               </h2>
-              <p className="text-[10px] font-mono uppercase tracking-widest text-white/40">
-                MODE &amp; GAME RULES
+              <p className="text-xs text-white/40 font-sans">
+                Configure your match settings
               </p>
             </div>
           </div>
@@ -83,11 +83,11 @@ export function GamemodeDrawer({
         <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-thin">
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-white/60">
-                1. SELECT QUESTION MODE
+              <span className="text-xs font-sans font-medium text-white/70">
+                Question Mode
               </span>
-              <span className="text-[9px] font-mono text-[#FF4655] uppercase font-bold">
-                {questionMode === "FREEFORM" ? "OPEN DIALOGUE" : "CURATED CARDS"}
+              <span className="text-xs font-sans text-[#FF4655] font-semibold">
+                {questionMode === "FREEFORM" ? "Freeform" : "Preset"}
               </span>
             </div>
 
@@ -108,8 +108,8 @@ export function GamemodeDrawer({
                   <HelpCircle className={cn("h-4 w-4", questionMode === "PRESET" ? "text-[#FF4655]" : "text-white/40")} />
                   <span className="font-valorant text-xs tracking-wider">PRESET</span>
                 </div>
-                <p className="text-[10px] text-white/50 leading-relaxed font-sans">
-                  Pick from curated questions with fixed round turns.
+                <p className="text-xs text-white/50 leading-relaxed font-sans">
+                  Choose from a list of predefined yes/no questions.
                 </p>
               </button>
 
@@ -129,16 +129,16 @@ export function GamemodeDrawer({
                   <MessageSquare className={cn("h-4 w-4", questionMode === "FREEFORM" ? "text-[#FF4655]" : "text-white/40")} />
                   <span className="font-valorant text-xs tracking-wider">FREEFORM</span>
                 </div>
-                <p className="text-[10px] text-white/50 leading-relaxed font-sans">
-                  Ask anything in chat or voice. Deduce anytime!
+                <p className="text-xs text-white/50 leading-relaxed font-sans">
+                  Type any question freely in chat with no turn limits.
                 </p>
               </button>
             </div>
           </div>
 
           <div className="space-y-3.5 pt-2 border-t border-white/10">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-[#FF4655] block">
-              2. {questionMode === "FREEFORM" ? "FREEFORM RULES" : "PRESET RULES"}
+            <span className="text-xs font-sans font-semibold text-[#FF4655] block">
+              Match Limits
             </span>
 
             {questionMode === "FREEFORM" ? (

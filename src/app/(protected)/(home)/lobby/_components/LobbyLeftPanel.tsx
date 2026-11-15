@@ -2,19 +2,16 @@
 
 import { useState } from "react";
 import {
-  Swords,
   Play,
   LogOut,
-  Hash,
-  ChevronRight,
-  Loader2,
   SlidersHorizontal,
+  Loader2,
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Party } from "@/types/party";
-import { PartyDrawer } from "./PartyDrawer";
 import { GamemodeDrawer } from "./GamemodeDrawer";
+import { PartyDrawer } from "./PartyDrawer";
 
 interface LobbyLeftPanelProps {
   questionMode: "PRESET" | "FREEFORM";
@@ -35,12 +32,12 @@ interface LobbyLeftPanelProps {
   setQuestionCount: (val: number | ((prev: number) => number)) => void;
   showMoreOptions?: boolean;
   setShowMoreOptions?: (val: boolean) => void;
-  isCreatingOrJoining: boolean;
-  handleCreateParty: () => void;
-  handleJoinPartyWithCode: (code: string) => void;
-  handleKickGuest?: () => void;
   myId?: string;
   userName?: string;
+  handleCreateParty: () => void;
+  handleJoinPartyWithCode: (code: string) => void;
+  handleKickGuest?: (playerId?: string) => void;
+  isCreatingOrJoining?: boolean;
   showPartyCode: boolean;
   onToggleRevealCode: () => void;
   handleCopyCode: () => void;
@@ -67,137 +64,93 @@ export function LobbyLeftPanel({
   setQuestionCount,
   showMoreOptions = false,
   setShowMoreOptions,
-  isCreatingOrJoining,
+  myId,
+  userName = "AGENT",
   handleCreateParty,
   handleJoinPartyWithCode,
   handleKickGuest,
-  myId,
-  userName,
+  isCreatingOrJoining = false,
   showPartyCode,
   onToggleRevealCode,
   handleCopyCode,
   copied,
   onOpenInviteDialog,
 }: LobbyLeftPanelProps) {
-  const [isPartyDrawerOpen, setIsPartyDrawerOpen] = useState(false);
   const [isGamemodeDrawerOpen, setIsGamemodeDrawerOpen] = useState(false);
+  const [isPartyDrawerOpen, setIsPartyDrawerOpen] = useState(false);
 
   const hasOpponent = Boolean(opponent);
-  const canStart = Boolean(party && isHost && hasOpponent);
+  const canStart = Boolean(isHost && hasOpponent);
   const isLaunching = Boolean(isStartingGame);
-
-  const rulesSummary =
-    questionMode === "FREEFORM"
-      ? `Open Inquiries • ${maxNos === -1 ? "∞" : maxNos} NOs • ${maxGuesses === -1 ? "∞" : maxGuesses} Guess`
-      : `${timer === -1 ? "∞" : `${timer}s`} • ${maxNos === -1 ? "∞" : maxNos} NOs • ${maxGuesses === -1 ? "∞" : maxGuesses} Guess`;
+  const memberCount = party?.members?.length || 1;
 
   return (
     <>
-      <div className="w-full max-w-sm lg:w-72 shrink-0 flex flex-col gap-2.5 select-none">
-        <div className="flex flex-col gap-2">
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => !isLaunching && setIsGamemodeDrawerOpen(true)}
-            onKeyDown={(e) => !isLaunching && e.key === "Enter" && setIsGamemodeDrawerOpen(true)}
-            className={cn(
-              "group relative flex flex-col p-3 rounded-sm border bg-[#080c14]/85 backdrop-blur-md transition-all text-left",
-              isLaunching
-                ? "opacity-50 cursor-not-allowed border-white/10"
-                : "border-white/10 hover:border-white/25 hover:bg-[#0c121d]/90 cursor-pointer"
-            )}
-            title="Configure Game Mode & Rules"
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-xs bg-[#FF4655]/15 border border-[#FF4655]/40 flex items-center justify-center text-[#FF4655]">
-                  <Swords className="h-3.5 w-3.5" />
-                </div>
-                <span className="font-valorant text-sm tracking-wider text-white">
-                  GUESS AGENT
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1 text-[9px] font-mono text-[#FF4655] font-bold bg-[#FF4655]/10 border border-[#FF4655]/30 px-2 py-0.5 rounded-xs">
-                <span>{questionMode}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-[10px] text-white/50 font-mono pl-8">
-              <span className="truncate">{rulesSummary}</span>
-              <ChevronRight className="h-3.5 w-3.5 text-white/40 group-hover:text-white transition-transform group-hover:translate-x-0.5 shrink-0 ml-1" />
-            </div>
-          </div>
-
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => !isLaunching && setIsPartyDrawerOpen(true)}
-            onKeyDown={(e) => !isLaunching && e.key === "Enter" && setIsPartyDrawerOpen(true)}
-            className={cn(
-              "group relative flex flex-col p-3 rounded-sm border bg-[#080c14]/85 backdrop-blur-md transition-all text-left",
-              isLaunching
-                ? "opacity-50 cursor-not-allowed border-white/10"
-                : "border-white/10 hover:border-white/25 hover:bg-[#0c121d]/90 cursor-pointer"
-            )}
-            title="Manage Squad & Codes"
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-xs bg-mint/15 border border-mint/40 flex items-center justify-center text-mint">
-                  <Hash className="h-3.5 w-3.5" />
-                </div>
-                <span className="font-valorant text-sm tracking-wider text-white">
-                  SQUAD
-                </span>
-              </div>
-
-              <span className="text-[10px] font-mono font-bold text-mint bg-mint/10 border border-mint/20 px-2 py-0.5 rounded-xs">
-                {party?.members?.length || 1}/2 PLAYERS
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between text-[10px] text-white/50 font-mono pl-8">
-              <span className="truncate">
-                {party ? (party.members.length > 1 ? "Duel Squad Ready" : "Waiting for Challenger") : "Solo Lobby"}
-              </span>
-              <ChevronRight className="h-3.5 w-3.5 text-white/40 group-hover:text-white transition-transform group-hover:translate-x-0.5 shrink-0 ml-1" />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-1.5 pt-1">
+      <div className="w-full max-w-xl mx-auto flex flex-col items-center gap-2.5 select-none">
+        <div className="flex items-center justify-center flex-wrap gap-2 text-xs">
           <button
             type="button"
-            onClick={party ? onStartGame : handleCreateParty}
-            disabled={isLaunching || (party ? !canStart : isCreatingOrJoining)}
+            onClick={() => setIsGamemodeDrawerOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-sm border border-white/10 bg-[#07090e]/80 hover:bg-white/[0.06] hover:border-white/20 text-white/80 hover:text-white transition cursor-pointer backdrop-blur-md"
+            title="Configure match mode & rules"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5 text-white/40" />
+            <span className="font-valorant tracking-wider text-xs text-white">
+              {questionMode === "FREEFORM" ? "FREEFORM" : "PRESET"}
+            </span>
+            <span className="text-white/25">•</span>
+            <span className="text-white/50 font-sans text-xs">
+              {questionMode === "FREEFORM"
+                ? `${maxNos === -1 ? "Unlimited" : maxNos} No's`
+                : `${timer === -1 ? "No timer" : `${timer}s`}`}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsPartyDrawerOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-sm border border-white/10 bg-[#07090e]/80 hover:bg-white/[0.06] hover:border-white/20 text-white/80 hover:text-white transition cursor-pointer backdrop-blur-md"
+            title="Open party management & settings"
+          >
+            <Users className="h-3.5 w-3.5 text-mint" />
+            <span className="font-valorant tracking-wider text-xs text-white">
+              PARTY
+            </span>
+            <span className="text-white/25">•</span>
+            <span className="text-mint font-sans text-xs font-medium">
+              {memberCount}/2
+            </span>
+          </button>
+        </div>
+
+        <div className="flex items-center justify-center gap-2.5 w-full max-w-sm">
+          <button
+            type="button"
+            onClick={onStartGame}
+            disabled={isLaunching || !canStart}
             className={cn(
-              "w-full h-11 font-valorant text-sm tracking-widest uppercase text-white flex items-center justify-center gap-2 rounded-sm transition-all duration-200 border",
+              "flex-1 h-12 font-valorant text-sm tracking-widest uppercase text-white flex items-center justify-center gap-2.5 rounded-sm transition-all duration-200 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4655]/80",
               isLaunching
                 ? "bg-[#FF4655]/80 border-[#FF4655] cursor-wait animate-pulse"
-                : canStart || !party
-                  ? "bg-[#FF4655] hover:bg-[#ff5a67] border-[#FF4655] shadow-sm cursor-pointer active:scale-98"
+                : canStart
+                  ? "bg-[#FF4655] hover:bg-[#ff5a67] border-[#FF4655] shadow-[0_0_20px_rgba(255,70,85,0.35)] hover:shadow-[0_0_30px_rgba(255,70,85,0.55)] cursor-pointer active:scale-98"
                   : "bg-white/5 border-white/10 text-white/30 cursor-not-allowed"
             )}
           >
             {isLaunching ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin text-white" />
-                <span>LAUNCHING MATCH...</span>
+                <span>STARTING MATCH...</span>
               </>
             ) : (
               <>
-                <Play className="h-3.5 w-3.5 fill-current" />
+                <Play className="h-4 w-4 fill-current" />
                 <span>
-                  {!party
-                    ? isCreatingOrJoining
-                      ? "CREATING PARTY..."
-                      : "CREATE PARTY"
-                    : isHost
-                      ? hasOpponent
-                        ? "START MATCH"
-                        : "WAITING FOR OPPONENT"
-                      : "WAITING FOR LEADER"}
+                  {hasOpponent
+                    ? isHost
+                      ? "START MATCH"
+                      : "WAITING FOR HOST"
+                    : "WAITING FOR OPPONENT"}
                 </span>
               </>
             )}
@@ -208,17 +161,32 @@ export function LobbyLeftPanel({
               type="button"
               disabled={isLaunching}
               onClick={onLeaveParty}
-              className={cn(
-                "w-full py-1.5 rounded-sm tracking-widest uppercase text-white/70 text-xs sm:text-sm font-display font-bold flex items-center justify-center gap-1.5 transition-all duration-300 border bg-white/[0.02] hover:bg-[#FF4655]/10 border-white/10 hover:border-[#FF4655]/40 hover:text-[#FF4655]",
-                isLaunching ? "opacity-30 cursor-not-allowed" : "cursor-pointer active:scale-98"
-              )}
+              className="h-12 px-3.5 rounded-sm border border-white/10 bg-[#07090e]/80 hover:bg-[#FF4655]/10 hover:border-[#FF4655]/40 text-white/50 hover:text-[#FF4655] transition flex items-center justify-center cursor-pointer active:scale-98"
+              title="Leave Party"
             >
-              <LogOut className="h-3 w-3" />
-              <span>LEAVE PARTY</span>
+              <LogOut className="h-4 w-4" />
             </button>
           )}
         </div>
       </div>
+
+      <GamemodeDrawer
+        isOpen={isGamemodeDrawerOpen}
+        onOpenChange={setIsGamemodeDrawerOpen}
+        isHost={isHost}
+        questionMode={questionMode}
+        setQuestionMode={setQuestionMode}
+        timer={timer}
+        setTimer={setTimer}
+        maxNos={maxNos}
+        setMaxNos={setMaxNos}
+        maxGuesses={maxGuesses}
+        setMaxGuesses={setMaxGuesses}
+        questionCount={questionCount}
+        setQuestionCount={setQuestionCount}
+        showMoreOptions={showMoreOptions}
+        setShowMoreOptions={setShowMoreOptions}
+      />
 
       <PartyDrawer
         isOpen={isPartyDrawerOpen}
@@ -237,24 +205,6 @@ export function LobbyLeftPanel({
         handleCopyCode={handleCopyCode}
         copied={copied}
         onOpenInviteDialog={onOpenInviteDialog}
-      />
-
-      <GamemodeDrawer
-        isOpen={isGamemodeDrawerOpen}
-        onOpenChange={setIsGamemodeDrawerOpen}
-        isHost={isHost}
-        questionMode={questionMode}
-        setQuestionMode={setQuestionMode}
-        timer={timer}
-        setTimer={setTimer}
-        maxNos={maxNos}
-        setMaxNos={setMaxNos}
-        maxGuesses={maxGuesses}
-        setMaxGuesses={setMaxGuesses}
-        questionCount={questionCount}
-        setQuestionCount={setQuestionCount}
-        showMoreOptions={showMoreOptions}
-        setShowMoreOptions={setShowMoreOptions}
       />
     </>
   );

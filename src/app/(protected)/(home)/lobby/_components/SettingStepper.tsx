@@ -76,7 +76,7 @@ export function SettingStepper({
           <span className="font-valorant text-xs tracking-wider text-white">
             {label}
           </span>
-          <span className="text-[10px] text-white/50 font-mono">
+          <span className="text-xs text-white/50 font-sans">
             {description}
           </span>
         </div>
@@ -87,7 +87,7 @@ export function SettingStepper({
           type="button"
           onClick={handleDecrement}
           disabled={!canDecrement}
-          className="h-8 w-8 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-base cursor-pointer disabled:cursor-not-allowed"
+          className="h-8 w-8 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-base cursor-pointer disabled:cursor-not-allowed active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
           aria-label={`Decrease ${label}`}
         >
           -
@@ -98,7 +98,7 @@ export function SettingStepper({
             {formatValue(value)}
           </span>
           {unitLabel && (
-            <span className="text-[8px] text-white/40 font-mono tracking-widest uppercase mt-0.5">
+            <span className="text-xs text-white/40 font-mono tracking-widest uppercase mt-0.5">
               {value === -1 ? "INFINITE" : unitLabel}
             </span>
           )}
@@ -108,7 +108,7 @@ export function SettingStepper({
           type="button"
           onClick={handleIncrement}
           disabled={!canIncrement}
-          className="h-8 w-8 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-base cursor-pointer disabled:cursor-not-allowed"
+          className="h-8 w-8 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition disabled:opacity-20 flex items-center justify-center font-bold text-base cursor-pointer disabled:cursor-not-allowed active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
           aria-label={`Increase ${label}`}
         >
           +
@@ -125,7 +125,7 @@ export function SettingStepper({
               onClick={() => !disabled && onChange(preset)}
               disabled={disabled}
               className={cn(
-                "py-1 rounded-sm text-[10px] font-mono tracking-wider transition border cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
+                "py-1 rounded-sm text-xs font-mono tracking-wider transition border cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
                 isActive
                   ? presetActiveStyles
                   : "bg-white/[0.02] border-white/10 text-white/60 hover:text-white hover:bg-white/5"

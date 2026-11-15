@@ -83,10 +83,10 @@ export function PartyDrawer({
             </div>
             <div>
               <h2 className="font-valorant text-base tracking-[0.1em] text-white">
-                SQUAD MANAGEMENT
+                PARTY
               </h2>
-              <p className="text-[10px] font-mono uppercase tracking-widest text-white/40">
-                PARTY CODES &amp; MEMBERS
+              <p className="text-xs text-white/40 font-sans">
+                Invite friends or join with a code
               </p>
             </div>
           </div>
@@ -105,19 +105,19 @@ export function PartyDrawer({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <Shield className="h-3.5 w-3.5 text-[#FF4655]" />
-                <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-white/60">
-                  PARTY CODE
+                <span className="text-xs font-sans font-medium text-white/70">
+                  Party Code
                 </span>
               </div>
-              <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest">
-                STREAM SAFE
+              <span className="text-xs font-sans text-white/40">
+                Hidden by default
               </span>
             </div>
 
             <div className="flex items-center justify-between gap-3 bg-black/60 border border-white/10 rounded-sm py-2 px-3">
               <div className="flex flex-col min-w-0">
-                <span className="text-[8px] font-mono uppercase text-white/40 tracking-widest">
-                  INVITE CODE
+                <span className="text-xs font-sans text-white/40">
+                  Code
                 </span>
                 <div className="font-valorant text-base tracking-[0.15em] text-white truncate flex items-center gap-2">
                   {showPartyCode && party?.id ? (
@@ -143,7 +143,7 @@ export function PartyDrawer({
                   onClick={onToggleRevealCode}
                   disabled={isCreatingOrJoining}
                   className={cn(
-                    "p-2 rounded-xs border transition flex items-center gap-1 cursor-pointer text-xs font-mono uppercase tracking-wider",
+                    "p-2 rounded-xs border transition flex items-center gap-1 cursor-pointer text-xs font-sans",
                     showPartyCode
                       ? "bg-[#FF4655]/20 border-[#FF4655]/50 text-white"
                       : "bg-white/5 border-white/15 text-white/70 hover:text-white hover:bg-white/10",
@@ -163,7 +163,7 @@ export function PartyDrawer({
                   onClick={handleCopyCode}
                   disabled={isCreatingOrJoining}
                   className={cn(
-                    "p-2 rounded-xs border font-mono text-xs uppercase tracking-wider transition flex items-center gap-1 cursor-pointer",
+                    "p-2 rounded-xs border font-sans text-xs transition flex items-center gap-1 cursor-pointer",
                     copied
                       ? "bg-mint/20 border-mint/50 text-mint"
                       : "bg-white/5 border-white/15 text-white/70 hover:text-white hover:bg-white/10",
@@ -174,12 +174,12 @@ export function PartyDrawer({
                   {copied ? (
                     <>
                       <Check className="h-3.5 w-3.5 text-mint" />
-                      <span className="text-[9px]">COPIED</span>
+                      <span className="text-xs">Copied</span>
                     </>
                   ) : (
                     <>
                       <Copy className="h-3.5 w-3.5 text-[#FF4655]" />
-                      <span className="text-[9px]">COPY</span>
+                      <span className="text-xs">Copy</span>
                     </>
                   )}
                 </button>
@@ -191,12 +191,12 @@ export function PartyDrawer({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="h-3.5 w-3.5 text-mint" />
-                <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-white/70">
-                  SQUAD MEMBERS
+                <span className="text-xs font-sans font-medium text-white/70">
+                  Players
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-mint font-bold bg-mint/10 border border-mint/20 px-2 py-0.5 rounded-xs">
-                {members.length || 1}/2 PLAYERS
+              <span className="text-xs font-sans text-mint font-medium bg-mint/10 border border-mint/20 px-2 py-0.5 rounded-xs">
+                {members.length || 1}/2 Players
               </span>
             </div>
 
@@ -216,20 +216,20 @@ export function PartyDrawer({
                           {member.name?.slice(0, 2).toUpperCase() || "AG"}
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-display font-bold text-sm text-white tracking-wide">
+                          <span className="font-sans font-medium text-sm text-white">
                             {member.name}{" "}
-                            {isMe && <span className="text-white/40 font-normal text-xs">(YOU)</span>}
+                            {isMe && <span className="text-white/40 font-normal text-xs">(You)</span>}
                           </span>
-                          <span className="text-[9px] font-mono text-white/40 uppercase">
-                            {isLeader ? "PARTY LEADER" : "CHALLENGER"}
+                          <span className="text-xs font-sans text-white/40">
+                            {isLeader ? "Party Leader" : "Member"}
                           </span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2">
                         {isLeader && (
-                          <span className="text-[8.5px] font-mono uppercase tracking-wider px-2 py-0.5 bg-[#FF4655]/15 border border-[#FF4655]/40 text-[#FF4655] rounded-xs font-bold">
-                            LEADER
+                          <span className="text-xs font-sans px-2 py-0.5 bg-[#FF4655]/15 border border-[#FF4655]/40 text-[#FF4655] rounded-xs font-semibold">
+                            HOST
                           </span>
                         )}
 
@@ -238,7 +238,7 @@ export function PartyDrawer({
                             type="button"
                             onClick={() => onKickPlayer(member.id)}
                             className="p-1.5 rounded-xs border border-white/10 bg-white/5 hover:bg-[#FF4655]/20 hover:border-[#FF4655]/40 text-white/50 hover:text-[#FF4655] transition cursor-pointer"
-                            title="Kick member"
+                            title="Kick player"
                           >
                             <UserX className="h-3.5 w-3.5" />
                           </button>
@@ -254,17 +254,17 @@ export function PartyDrawer({
                       {userName.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-display font-bold text-sm text-white tracking-wide">
-                        {userName} <span className="text-white/40 font-normal text-xs">(YOU)</span>
+                      <span className="font-sans font-medium text-sm text-white">
+                        {userName} <span className="text-white/40 font-normal text-xs">(You)</span>
                       </span>
-                      <span className="text-[9px] font-mono text-white/40 uppercase">
-                        PARTY LEADER
+                      <span className="text-xs font-sans text-white/40">
+                        Party Leader
                       </span>
                     </div>
                   </div>
 
-                  <span className="text-[8.5px] font-mono uppercase tracking-wider px-2 py-0.5 bg-[#FF4655]/15 border border-[#FF4655]/40 text-[#FF4655] rounded-xs font-bold">
-                    LEADER
+                  <span className="text-xs font-sans px-2 py-0.5 bg-[#FF4655]/15 border border-[#FF4655]/40 text-[#FF4655] rounded-xs font-semibold">
+                    HOST
                   </span>
                 </div>
               )}
@@ -284,18 +284,18 @@ export function PartyDrawer({
                       <UserPlus className="h-4 w-4" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-display font-bold text-sm text-white/60 group-hover:text-white tracking-wide transition">
-                        OPEN SLOT
+                      <span className="font-sans font-medium text-sm text-white/70 group-hover:text-white transition">
+                        Open Slot
                       </span>
-                      <span className="text-[9px] font-mono text-white/30 uppercase">
-                        WAITING FOR OPPONENT
+                      <span className="text-xs font-sans text-white/30">
+                        Waiting for player...
                       </span>
                     </div>
                   </div>
 
                   {onOpenInviteDialog && (
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 bg-white/5 group-hover:bg-[#FF4655] text-white/70 group-hover:text-white rounded-xs transition">
-                      INVITE
+                    <span className="text-xs font-sans font-semibold px-2.5 py-1 bg-white/5 group-hover:bg-[#FF4655] text-white/70 group-hover:text-white rounded-xs transition">
+                      Invite
                     </span>
                   )}
                 </div>
@@ -310,16 +310,16 @@ export function PartyDrawer({
                 onLeaveParty();
                 onOpenChange(false);
               }}
-              className="w-full py-2.5 rounded-sm border border-white/15 bg-white/[0.02] hover:bg-[#FF4655]/15 hover:border-[#FF4655]/60 text-white/60 hover:text-[#FF4655] font-valorant text-xs tracking-widest uppercase transition flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-2.5 rounded-sm border border-white/15 bg-white/[0.02] hover:bg-[#FF4655]/15 hover:border-[#FF4655]/60 text-white/60 hover:text-[#FF4655] font-valorant text-xs tracking-widest uppercase transition flex items-center justify-center gap-2 cursor-pointer active:scale-98"
             >
               <LogOut className="h-3.5 w-3.5" />
-              <span>LEAVE SQUAD</span>
+              <span>LEAVE PARTY</span>
             </button>
           )}
 
           <div className="border-t border-white/10 pt-5 space-y-3">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-white/50 block">
-              JOIN VIA PARTY CODE
+            <span className="text-xs font-sans font-semibold text-white/70 block">
+              Join with Party Code
             </span>
 
             <form onSubmit={handleJoinSubmit} className="flex gap-2">
@@ -327,8 +327,8 @@ export function PartyDrawer({
                 type="text"
                 value={joinCodeInput}
                 onChange={(e) => setJoinCodeInput(e.target.value)}
-                placeholder="ENTER PARTY CODE #"
-                className="flex-1 h-9 bg-black/60 border border-white/15 px-3 rounded-sm font-mono text-xs tracking-wider text-white placeholder-white/30 focus:outline-none focus:border-[#FF4655]"
+                placeholder="Enter party code..."
+                className="flex-1 h-9 bg-black/60 border border-white/15 px-3 rounded-sm font-sans text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#FF4655]"
               />
               <button
                 type="submit"

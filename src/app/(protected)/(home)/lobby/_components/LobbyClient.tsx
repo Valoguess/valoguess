@@ -9,12 +9,14 @@ import { LobbyLeftPanel } from "./LobbyLeftPanel";
 import { LobbyCenterSlots } from "./LobbyCenterSlots";
 import { PartyChatOverlay } from "@/components/chat/PartyChatOverlay";
 import { InviteFriendsDialog } from "./InviteFriendsDialog";
+import { JoinPartyDialog } from "./JoinPartyDialog";
 import { useHomeContext } from "../../_components/HomeContext";
 
 export function LobbyClient() {
   const { user } = useAuthStore();
   const [savedUsername, setSavedUsername] = useState<string>("AGENT");
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
 
   const {
     questionMode,
@@ -78,8 +80,25 @@ export function LobbyClient() {
 
       <LobbySubheader party={party} />
 
-      <div className="relative z-10 flex-1 flex flex-col-reverse lg:flex-row items-center lg:items-stretch justify-between gap-4 lg:gap-6 px-3 sm:px-6 lg:pl-8 lg:pr-6 py-3 min-h-0 w-full">
-        <aside className="w-full max-w-sm lg:w-72 flex flex-col justify-center shrink-0 z-20 lg:h-full lg:min-h-0 pb-2 lg:pb-0">
+      <div className="relative z-10 flex-1 flex flex-col justify-between items-center w-full min-h-0 px-3 sm:px-6 lg:px-8 py-2 sm:py-3 gap-3 overflow-y-auto lg:overflow-hidden">
+        <div className="w-full flex-1 flex items-center justify-center min-w-0 min-h-0 my-auto py-1 sm:py-2">
+          <LobbyCenterSlots
+            party={party}
+            me={me}
+            opponent={opponent}
+            isHost={isHost}
+            savedUsername={savedUsername}
+            handleKickGuest={() => handleKickGuest(opponent?.id)}
+            onOpenInviteDialog={() => setIsInviteDialogOpen(true)}
+            onCopyCode={handleCopyCode}
+            copied={copied}
+            onOpenJoinDialog={() => setIsJoinDialogOpen(true)}
+            showPartyCode={showPartyCode}
+            onToggleRevealCode={handleToggleRevealCode}
+          />
+        </div>
+
+        <div className="w-full max-w-xl shrink-0 z-20 pb-2 sm:pb-4">
           <LobbyLeftPanel
             questionMode={questionMode}
             setQuestionMode={setQuestionMode}
@@ -99,33 +118,17 @@ export function LobbyClient() {
             setQuestionCount={setQuestionCount}
             showMoreOptions={showMoreOptions}
             setShowMoreOptions={setShowMoreOptions}
-            isCreatingOrJoining={isCreatingOrJoining}
+            myId={myId}
+            userName={user?.name || savedUsername || "AGENT"}
             handleCreateParty={handleCreateParty}
             handleJoinPartyWithCode={handleJoinPartyWithCode}
             handleKickGuest={() => handleKickGuest(opponent?.id)}
-            myId={myId}
-            userName={user?.name || savedUsername || "AGENT"}
+            isCreatingOrJoining={isCreatingOrJoining}
             showPartyCode={showPartyCode}
             onToggleRevealCode={handleToggleRevealCode}
             handleCopyCode={handleCopyCode}
             copied={copied}
             onOpenInviteDialog={() => setIsInviteDialogOpen(true)}
-          />
-        </aside>
-
-        <div className="w-full flex-1 flex items-center justify-center min-w-0 py-2 lg:py-0">
-          <LobbyCenterSlots
-            party={party}
-            me={me}
-            opponent={opponent}
-            isHost={isHost}
-            savedUsername={savedUsername}
-            isCreatingOrJoining={isCreatingOrJoining}
-            handleCreateParty={handleCreateParty}
-            handleKickGuest={() => handleKickGuest(opponent?.id)}
-            onOpenInviteDialog={() => setIsInviteDialogOpen(true)}
-            onCopyCode={handleCopyCode}
-            copied={copied}
           />
         </div>
       </div>
@@ -137,6 +140,13 @@ export function LobbyClient() {
         onOpenChange={setIsInviteDialogOpen}
         friendsList={friendsList}
         onInviteFriend={onInviteFriendToParty}
+      />
+
+      <JoinPartyDialog
+        isOpen={isJoinDialogOpen}
+        onOpenChange={setIsJoinDialogOpen}
+        onJoinParty={handleJoinPartyWithCode}
+        isJoining={isCreatingOrJoining}
       />
     </div>
   );
