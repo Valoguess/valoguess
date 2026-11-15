@@ -97,82 +97,14 @@ export function HomeFriendsSidebar({
   };
 
   const asideRef = useRef<HTMLElement | null>(null);
-  const openTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const justClosedRef = useRef(false);
-
-  const isHoverSupported = () => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-  };
-
-  const handleMouseEnter = () => {
-    if (!isHoverSupported()) return;
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current);
-      closeTimeoutRef.current = null;
-    }
-    if (justClosedRef.current) return;
-    if (isFriendsCollapsed) {
-      if (openTimeoutRef.current) {
-        clearTimeout(openTimeoutRef.current);
-      }
-      openTimeoutRef.current = setTimeout(() => {
-        setIsFriendsCollapsed(false);
-        openTimeoutRef.current = null;
-      }, 100);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (!isHoverSupported()) return;
-    if (openTimeoutRef.current) {
-      clearTimeout(openTimeoutRef.current);
-      openTimeoutRef.current = null;
-    }
-    justClosedRef.current = false;
-    if (isFriendsCollapsed || friendToRemove || isAddingFriend) return;
-
-    if (asideRef.current && asideRef.current.contains(document.activeElement)) {
-      const activeEl = document.activeElement as HTMLElement | null;
-      if (activeEl?.tagName === "INPUT" || activeEl?.tagName === "TEXTAREA") {
-        return;
-      }
-    }
-
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current);
-    }
-    closeTimeoutRef.current = setTimeout(() => {
-      setIsFriendsCollapsed(true);
-      closeTimeoutRef.current = null;
-    }, 350);
-  };
 
   const handleExplicitClose = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (openTimeoutRef.current) {
-      clearTimeout(openTimeoutRef.current);
-      openTimeoutRef.current = null;
-    }
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current);
-      closeTimeoutRef.current = null;
-    }
-    justClosedRef.current = true;
     setIsFriendsCollapsed(true);
-    setTimeout(() => {
-      justClosedRef.current = false;
-    }, 600);
   };
 
   const handleHeaderClick = () => {
     if (isFriendsCollapsed) {
-      if (openTimeoutRef.current) {
-        clearTimeout(openTimeoutRef.current);
-        openTimeoutRef.current = null;
-      }
-      justClosedRef.current = false;
       setIsFriendsCollapsed(false);
     }
   };
@@ -185,22 +117,21 @@ export function HomeFriendsSidebar({
         setIsFriendsCollapsed(true);
       }
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !friendToRemove) {
+        setIsFriendsCollapsed(true);
+      }
+    };
     document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isFriendsCollapsed, friendToRemove, setIsFriendsCollapsed]);
 
-  useEffect(() => {
-    return () => {
-      if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
-      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-    };
-  }, []);
-
   const [showOnline, setShowOnline] = useState(true);
   const [showOffline, setShowOffline] = useState(false);
-
   const [activeTab, setActiveTab] = useState<"all" | "requests">("all");
 
   const incomingRequests = friendRequests.filter((r) => r.type === "incoming");
@@ -236,8 +167,6 @@ export function HomeFriendsSidebar({
   return (
     <aside
       ref={asideRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       className={cn(
         "flex flex-col h-full w-full bg-[#070a12]/95 border-l border-white/10 backdrop-blur-xl transition-all duration-300 shrink-0 select-none overflow-hidden justify-between",
       )}
@@ -247,25 +176,25 @@ export function HomeFriendsSidebar({
         className={cn(
           "border-b border-white/10 shrink-0 bg-black/40 transition-colors",
           isFriendsCollapsed
-            ? "p-2.5 flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-white/5 group"
-            : "flex items-center justify-between p-3",
+            ? "p-3 flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-white/5 group"
+            : "flex items-center justify-between p-3.5",
         )}
         title={isFriendsCollapsed ? "Friends" : undefined}
       >
         {isFriendsCollapsed ? (
-          <div className="flex flex-col items-center gap-1 w-full">
+          <div className="flex flex-col items-center gap-1.5 w-full">
             {isAnonymous ? (
               <Lock className="h-4 w-4 text-[#FF4655]" />
             ) : (
               <div className="relative">
-                <Users className="h-4 w-4 text-accent group-hover:scale-110 transition-transform" />
+                <Users className="h-4 w-4 text-[#FF4655] group-hover:scale-110 transition-transform" />
                 {(incomingRequests.length > 0 ||
                   incomingPartyInvites.length > 0) && (
-                  <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#FF4655] animate-ping" />
+                  <span className="absolute -top-1 -right-1 h-2 w-2 rounded-sm bg-[#FF4655] animate-ping" />
                 )}
               </div>
             )}
-            <ChevronLeft className="h-3.5 w-3.5 text-white/40 group-hover:text-accent transition-colors" />
+            <ChevronLeft className="h-3.5 w-3.5 text-white/40 group-hover:text-[#FF4655] transition-colors" />
           </div>
         ) : (
           <>
@@ -274,13 +203,13 @@ export function HomeFriendsSidebar({
                 <>
                   <Lock className="h-4 w-4 text-[#FF4655] shrink-0" />
                   <span>FRIENDS</span>
-                  <span className="text-[9px] font-mono text-[#FF4655] bg-[#FF4655]/10 px-1.5 py-0.2 rounded-xs border border-[#FF4655]/20">
+                  <span className="text-xs font-mono text-[#FF4655] bg-[#FF4655]/10 px-1.5 py-0.5 rounded-sm border border-[#FF4655]/20">
                     LOCKED
                   </span>
                 </>
               ) : (
                 <>
-                  <Users className="h-4 w-4 text-accent shrink-0" />
+                  <Users className="h-4 w-4 text-[#FF4655] shrink-0" />
                   <span>FRIENDS ({friendsList.length})</span>
                 </>
               )}
@@ -289,8 +218,9 @@ export function HomeFriendsSidebar({
             <button
               type="button"
               onClick={handleExplicitClose}
-              className="p-1 hover:bg-white/10 rounded-xs text-white/60 hover:text-white transition cursor-pointer"
+              className="p-1 hover:bg-white/10 rounded-sm text-white/60 hover:text-white transition cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
               title="Close Friends Menu"
+              aria-label="Close friends menu"
             >
               <X className="h-4 w-4 lg:hidden" />
               <ChevronRight className="h-4 w-4 hidden lg:block" />
@@ -300,8 +230,8 @@ export function HomeFriendsSidebar({
       </div>
 
       {!isFriendsCollapsed && !isAnonymous && user?.username && (
-        <div className="mx-2.5 mt-2.5 p-2 rounded-xs bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 flex items-center justify-between gap-2 transition group shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="mx-3 mt-3 p-2.5 rounded-sm bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 flex items-center justify-between gap-2.5 transition group shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative h-8 w-8 overflow-hidden shrink-0">
               <Image
                 src={user.image || DEFAULT_AVATARS.USER}
@@ -313,10 +243,10 @@ export function HomeFriendsSidebar({
             </div>
 
             <div className="flex flex-col min-w-0 text-left">
-              <span className="text-xs font-display font-bold text-accent tracking-wider truncate leading-tight cursor-text select-text">
+              <span className="text-xs font-display font-bold text-[#FF4655] tracking-wider truncate leading-tight cursor-text select-text">
                 @{user.username.replace(/^@/, "")}
               </span>
-              <span className="text-[9px] font-normal text-white/70 truncate leading-tight font-sans">
+              <span className="text-xs font-normal text-white/60 truncate leading-tight font-sans">
                 You
               </span>
             </div>
@@ -325,7 +255,7 @@ export function HomeFriendsSidebar({
           <button
             type="button"
             onClick={handleCopyUsername}
-            className="px-2 py-1 bg-accent/10 hover:bg-accent text-accent hover:text-white border border-accent/30 rounded-xs text-[9px] font-mono font-bold flex items-center gap-1 transition shrink-0 cursor-pointer active:scale-95"
+            className="px-2 py-1 bg-[#FF4655]/10 hover:bg-[#FF4655] text-[#FF4655] hover:text-white border border-[#FF4655]/30 rounded-sm text-xs font-mono font-medium flex items-center gap-1.5 transition shrink-0 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
             title="Copy username to share with friends"
           >
             {copiedId ? (
@@ -344,18 +274,18 @@ export function HomeFriendsSidebar({
       )}
 
       {!isFriendsCollapsed && !isAnonymous && (
-        <div className="flex items-center border-b border-white/10 bg-white/[0.02] p-1.5 gap-1 shrink-0 text-[10px] font-display font-bold uppercase tracking-wider">
+        <div className="flex items-center border-b border-white/10 bg-white/[0.02] p-1.5 gap-1 shrink-0 text-xs font-display font-bold uppercase tracking-wider">
           <button
             onClick={() => setActiveTab("all")}
             className={cn(
-              "flex-1 py-1 px-2 rounded-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer",
+              "flex-1 py-1.5 px-2 rounded-sm transition text-center flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
               activeTab === "all"
-                ? "bg-accent text-white"
+                ? "bg-[#FF4655] text-white"
                 : "text-white/60 hover:text-white hover:bg-white/5",
             )}
           >
             <span>FRIENDS</span>
-            <span className="text-[9px] opacity-80">
+            <span className="text-xs opacity-80">
               ({friendsList.length})
             </span>
           </button>
@@ -363,9 +293,9 @@ export function HomeFriendsSidebar({
           <button
             onClick={() => setActiveTab("requests")}
             className={cn(
-              "flex-1 py-1 px-2 rounded-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer",
+              "flex-1 py-1.5 px-2 rounded-sm transition text-center flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
               activeTab === "requests"
-                ? "bg-accent text-white"
+                ? "bg-[#FF4655] text-white"
                 : "text-white/60 hover:text-white hover:bg-white/5",
             )}
           >
@@ -373,10 +303,10 @@ export function HomeFriendsSidebar({
             {totalRequestsCount > 0 && (
               <span
                 className={cn(
-                  "px-1.5 py-0.2 rounded-full text-[8px] font-black",
+                  "px-1.5 py-0.5 rounded-sm text-xs font-bold",
                   activeTab === "requests"
-                    ? "bg-white text-accent"
-                    : "bg-accent text-white",
+                    ? "bg-white text-[#FF4655]"
+                    : "bg-[#FF4655] text-white",
                 )}
               >
                 {totalRequestsCount}
@@ -397,11 +327,11 @@ export function HomeFriendsSidebar({
             {incomingPartyInvites.length > 0 && (
               <div
                 onClick={() => setIsFriendsCollapsed(false)}
-                className="relative h-8 w-8 rounded-full bg-mint/20 border border-mint flex items-center justify-center text-mint cursor-pointer hover:scale-105 transition"
+                className="relative h-8 w-8 rounded-sm bg-mint/20 border border-mint flex items-center justify-center text-mint cursor-pointer hover:scale-105 transition"
                 title={`${incomingPartyInvites.length} Pending Party Invite(s)`}
               >
                 <Radio className="h-4 w-4" />
-                <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-mint text-black text-[8px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-sm bg-mint text-black text-xs font-bold flex items-center justify-center">
                   {incomingPartyInvites.length}
                 </span>
               </div>
@@ -410,11 +340,11 @@ export function HomeFriendsSidebar({
             {incomingRequests.length > 0 && (
               <div
                 onClick={() => setIsFriendsCollapsed(false)}
-                className="relative h-8 w-8 rounded-full bg-[#FF4655]/20 border border-[#FF4655] flex items-center justify-center text-[#FF4655] cursor-pointer hover:scale-105 transition"
+                className="relative h-8 w-8 rounded-sm bg-[#FF4655]/20 border border-[#FF4655] flex items-center justify-center text-[#FF4655] cursor-pointer hover:scale-105 transition"
                 title={`${incomingRequests.length} Pending Friend Request(s)`}
               >
                 <UserCheck className="h-4 w-4" />
-                <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-[#FF4655] text-white text-[8px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-sm bg-[#FF4655] text-white text-xs font-bold flex items-center justify-center">
                   {incomingRequests.length}
                 </span>
               </div>
@@ -430,7 +360,7 @@ export function HomeFriendsSidebar({
                 <div
                   key={friend.id}
                   onClick={() => setIsFriendsCollapsed(false)}
-                  className="relative h-8 w-8 rounded-full overflow-hidden border border-white/10 hover:border-accent transition cursor-pointer hover:scale-105 shrink-0"
+                  className="relative h-8 w-8 rounded-full overflow-hidden border border-white/10 hover:border-[#FF4655] transition cursor-pointer hover:scale-105 shrink-0"
                   title={`${friend.name} (${friend.status})`}
                 >
                   <Image
@@ -460,15 +390,15 @@ export function HomeFriendsSidebar({
             {activeTab === "requests" ? (
               <div className="space-y-4">
                 <div>
-                  <div className="flex items-center justify-between text-[9px] font-display font-bold uppercase tracking-wider text-white/50 mb-1.5 px-1">
-                    <span className="flex items-center gap-1.5 text-accent">
+                  <div className="flex items-center justify-between text-xs font-display font-bold uppercase tracking-wider text-white/50 mb-1.5 px-1">
+                    <span className="flex items-center gap-1.5 text-[#FF4655]">
                       <Clock className="h-3 w-3" /> PENDING REQUESTS (
                       {incomingRequests.length})
                     </span>
                   </div>
 
                   {incomingRequests.length === 0 ? (
-                    <div className="p-3 text-center rounded-xs bg-white/[0.02] border border-white/5 text-[10px] text-white/40 font-mono">
+                    <div className="p-3 text-center rounded-sm bg-white/[0.02] border border-white/5 text-xs text-white/40 font-mono">
                       No incoming friend requests
                     </div>
                   ) : (
@@ -486,7 +416,7 @@ export function HomeFriendsSidebar({
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between text-[9px] font-display font-bold uppercase tracking-wider text-white/50 mb-1.5 px-1">
+                  <div className="flex items-center justify-between text-xs font-display font-bold uppercase tracking-wider text-white/50 mb-1.5 px-1">
                     <span className="flex items-center gap-1.5 text-white/40">
                       <Send className="h-3 w-3" /> SENT REQUESTS (
                       {outgoingRequests.length})
@@ -494,7 +424,7 @@ export function HomeFriendsSidebar({
                   </div>
 
                   {outgoingRequests.length === 0 ? (
-                    <div className="p-3 text-center rounded-xs bg-white/[0.02] border border-white/5 text-[10px] text-white/40 font-mono">
+                    <div className="p-3 text-center rounded-sm bg-white/[0.02] border border-white/5 text-xs text-white/40 font-mono">
                       No outgoing sent requests
                     </div>
                   ) : (
@@ -515,28 +445,28 @@ export function HomeFriendsSidebar({
                 {incomingRequests.length > 0 && (
                   <div
                     onClick={() => setActiveTab("requests")}
-                    className="p-2 rounded-xs bg-accent/15 border border-accent/40 flex items-center justify-between text-accent hover:bg-accent/20 transition cursor-pointer group"
+                    className="p-2.5 rounded-sm bg-[#FF4655]/15 border border-[#FF4655]/40 flex items-center justify-between text-[#FF4655] hover:bg-[#FF4655]/20 transition cursor-pointer group active:scale-98"
                   >
                     <div className="flex items-center gap-2">
-                      <UserCheck className="h-3.5 w-3.5" />
-                      <span className="text-[10px] font-display font-bold uppercase tracking-wider">
+                      <UserCheck className="h-4 w-4" />
+                      <span className="text-xs font-display font-bold uppercase tracking-wider">
                         {incomingRequests.length} Pending Request
                         {incomingRequests.length > 1 ? "s" : ""}
                       </span>
                     </div>
-                    <span className="text-[9px] font-bold text-white group-hover:underline">
+                    <span className="text-xs font-bold text-white group-hover:underline">
                       VIEW →
                     </span>
                   </div>
                 )}
 
                 {friendsList.length === 0 ? (
-                  <div className="p-4 text-center rounded-xs bg-white/[0.02] border border-white/5 space-y-1.5 my-2">
+                  <div className="p-4 text-center rounded-sm bg-white/[0.02] border border-white/5 space-y-1.5 my-2">
                     <Users className="h-6 w-6 text-white/20 mx-auto mb-1" />
-                    <div className="text-[10.5px] font-display font-bold text-white/70 uppercase tracking-wider">
+                    <div className="text-xs font-display font-bold text-white/70 uppercase tracking-wider">
                       NO FRIENDS YET
                     </div>
-                    <div className="text-[9.5px] text-white/40 leading-normal font-sans">
+                    <div className="text-xs text-white/40 leading-normal font-sans">
                       Send a friend request using the input below to add
                       players.
                     </div>
@@ -546,7 +476,7 @@ export function HomeFriendsSidebar({
                     <div>
                       <button
                         onClick={() => setShowOnline(!showOnline)}
-                        className="w-full flex items-center justify-between text-[9px] font-display font-bold uppercase tracking-wider text-white/60 mb-1.5 px-1 hover:text-white transition cursor-pointer"
+                        className="w-full flex items-center justify-between text-xs font-display font-bold uppercase tracking-wider text-white/60 mb-1.5 px-1 hover:text-white transition cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
                       >
                         <span className="flex items-center gap-1.5 text-mint">
                           <Circle className="h-2 w-2 fill-mint text-mint" /> ONLINE (
@@ -563,7 +493,7 @@ export function HomeFriendsSidebar({
                       {showOnline && (
                         <div className="space-y-1.5">
                           {onlineFriends.length === 0 ? (
-                            <div className="p-2.5 text-center rounded-xs bg-white/[0.02] border border-white/5 text-[10px] text-white/40 font-mono">
+                            <div className="p-2.5 text-center rounded-sm bg-white/[0.02] border border-white/5 text-xs text-white/40 font-mono">
                               No friends currently online
                             </div>
                           ) : (
@@ -640,11 +570,10 @@ export function HomeFriendsSidebar({
                     <div>
                       <button
                         onClick={() => setShowOffline(!showOffline)}
-                        className="w-full flex items-center justify-between text-[9px] font-display font-bold uppercase tracking-wider text-white/50 mb-1.5 px-1 hover:text-white transition cursor-pointer"
+                        className="w-full flex items-center justify-between text-xs font-display font-bold uppercase tracking-wider text-white/50 mb-1.5 px-1 hover:text-white transition cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
                       >
                         <span className="flex items-center gap-1.5 text-white/40">
-                          <Circle className="h-2 w-2 fill-zinc-600 text-zinc-600" />{" "}
-                          OFFLINE ({offlineFriends.length})
+                          <Circle className="h-2 w-2 fill-zinc-600 text-zinc-600" /> OFFLINE ({offlineFriends.length})
                         </span>
                         <ChevronDown
                           className={cn(
@@ -657,7 +586,7 @@ export function HomeFriendsSidebar({
                       {showOffline && (
                         <div className="space-y-1.5">
                           {offlineFriends.length === 0 ? (
-                            <div className="p-2.5 text-center rounded-xs bg-white/[0.02] border border-white/5 text-[10px] text-white/40 font-mono">
+                            <div className="p-2.5 text-center rounded-sm bg-white/[0.02] border border-white/5 text-xs text-white/40 font-mono">
                               No offline friends
                             </div>
                           ) : (

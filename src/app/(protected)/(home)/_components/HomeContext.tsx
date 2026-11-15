@@ -5,7 +5,6 @@ import { Friend, FriendRequest } from "@/types/friends";
 import { Party, IncomingPartyInvite } from "@/types/party";
 
 export interface HomeContextValue {
-  // Friends state & actions
   friendsList: Friend[];
   friendRequests: FriendRequest[];
   friendInput: string;
@@ -17,7 +16,6 @@ export interface HomeContextValue {
   handleRemoveFriend: (friendId: string) => void | Promise<void>;
   isAddingFriend: boolean;
 
-  // Party state & actions
   party: Party | null;
   partyInput: string;
   setPartyInput: (val: string) => void;
@@ -39,11 +37,9 @@ export interface HomeContextValue {
   handleStartGame: () => void;
   isStartingGame: boolean;
 
-  // Friends Sidebar collapsible state
   isFriendsCollapsed: boolean;
   setIsFriendsCollapsed: (collapsed: boolean) => void;
 
-  // Modals triggers
   openHowToPlay: () => void;
   openLogoutModal: () => void;
 }

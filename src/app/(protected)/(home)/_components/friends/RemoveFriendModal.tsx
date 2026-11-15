@@ -32,21 +32,18 @@ export function RemoveFriendModal({
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#FF4655]" />
 
         <div className="flex flex-col items-center text-center space-y-4 pt-1">
-          <div className="h-12 w-12 rounded-full bg-[#FF4655]/10 border border-[#FF4655]/30 flex items-center justify-center text-[#FF4655]">
+          <div className="h-12 w-12 rounded-sm bg-[#FF4655]/10 border border-[#FF4655]/30 flex items-center justify-center text-[#FF4655]">
             <UserMinus className="h-6 w-6" />
           </div>
 
           <div className="space-y-1">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-[#FF4655] font-bold">
-              CONFIRM ACTION
-            </div>
             <h3 className="font-valorant text-lg tracking-wider text-white">
               REMOVE FRIEND
             </h3>
           </div>
 
           {friendToRemove && (
-            <div className="w-full flex items-center gap-3 p-3 bg-white/[0.03] border border-white/10 rounded-xs">
+            <div className="w-full flex items-center gap-3 p-3 bg-white/[0.03] border border-white/10 rounded-sm">
               <div className="relative h-9 w-9 rounded-full overflow-hidden border border-white/20 shrink-0">
                 <Image
                   src={friendToRemove.avatar}
@@ -77,7 +74,7 @@ export function RemoveFriendModal({
               type="button"
               disabled={isRemoving}
               onClick={onClose}
-              className="flex-1 py-2.5 px-4 bg-white/5 hover:bg-white/10 border border-white/15 text-white/80 hover:text-white font-display text-xs font-bold uppercase tracking-wider rounded-xs transition cursor-pointer disabled:opacity-50"
+              className="flex-1 py-2.5 px-4 bg-white/5 hover:bg-white/10 border border-white/15 text-white/80 hover:text-white font-display text-xs font-bold uppercase tracking-wider rounded-sm transition cursor-pointer disabled:opacity-50 active:scale-98 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
             >
               CANCEL
             </button>
@@ -86,7 +83,7 @@ export function RemoveFriendModal({
               type="button"
               disabled={isRemoving}
               onClick={onConfirm}
-              className="flex-1 py-2.5 px-4 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-display text-xs font-bold uppercase tracking-wider rounded-xs transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 active:scale-98"
+              className="flex-1 py-2.5 px-4 bg-[#FF4655] hover:bg-[#ff5a67] text-white font-display text-xs font-bold uppercase tracking-wider rounded-sm transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 active:scale-98 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
             >
               {isRemoving ? (
                 <span className="animate-pulse">REMOVING...</span>

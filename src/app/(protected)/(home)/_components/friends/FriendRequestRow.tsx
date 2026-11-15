@@ -18,7 +18,7 @@ export function IncomingRequestRow({
   const cleanUsername = request.username ? request.username.replace(/^@/, "") : "";
 
   return (
-    <div className="flex items-center justify-between p-2 rounded-xs bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 transition">
+    <div className="flex items-center justify-between p-2 rounded-sm bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 transition">
       <div className="flex items-center gap-2 min-w-0">
         <div className="relative h-7 w-7 rounded-full overflow-hidden border border-white/20 shrink-0">
           <Image
@@ -33,7 +33,7 @@ export function IncomingRequestRow({
             {request.name}
           </span>
           {cleanUsername && (
-            <span className="text-[8.5px] text-[#FF4655] font-mono truncate">
+            <span className="text-xs text-[#FF4655] font-mono truncate">
               @{cleanUsername}
             </span>
           )}
@@ -43,15 +43,17 @@ export function IncomingRequestRow({
       <div className="flex items-center gap-1 shrink-0">
         <button
           onClick={() => onAccept(request.id)}
-          className="h-6 w-6 rounded-xs bg-mint/20 hover:bg-mint/30 border border-mint/40 text-mint flex items-center justify-center transition cursor-pointer"
+          className="h-6 w-6 rounded-sm bg-mint/20 hover:bg-mint/30 border border-mint/40 text-mint flex items-center justify-center transition cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
           title="Accept Friend Request"
+          aria-label="Accept friend request"
         >
           <Check className="h-3.5 w-3.5 stroke-[3]" />
         </button>
         <button
           onClick={() => onDecline(request.id)}
-          className="h-6 w-6 rounded-xs bg-[#FF4655]/20 hover:bg-[#FF4655]/30 border border-[#FF4655]/40 text-[#FF4655] flex items-center justify-center transition cursor-pointer"
+          className="h-6 w-6 rounded-sm bg-[#FF4655]/20 hover:bg-[#FF4655]/30 border border-[#FF4655]/40 text-[#FF4655] flex items-center justify-center transition cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
           title="Decline Friend Request"
+          aria-label="Decline friend request"
         >
           <X className="h-3.5 w-3.5 stroke-[3]" />
         </button>
@@ -70,7 +72,7 @@ export function OutgoingRequestRow({
   onCancel,
 }: OutgoingRequestRowProps) {
   return (
-    <div className="flex items-center justify-between p-2 rounded-xs bg-white/[0.03] border border-white/10 transition">
+    <div className="flex items-center justify-between p-2 rounded-sm bg-white/[0.03] border border-white/10 transition">
       <div className="flex items-center gap-2 min-w-0">
         <div className="relative h-7 w-7 rounded-full overflow-hidden border border-white/15 shrink-0 opacity-80">
           <Image
@@ -84,16 +86,17 @@ export function OutgoingRequestRow({
           <span className="font-display text-xs font-bold text-white/90 tracking-wide truncate max-w-[110px] uppercase">
             {request.name}
           </span>
-          <span className="text-[8.5px] text-amber-400 font-mono">
-            Pending confirmation...
+          <span className="text-xs text-amber-400 font-mono">
+            Pending...
           </span>
         </div>
       </div>
 
       <button
         onClick={() => onCancel(request.id)}
-        className="text-white/40 hover:text-[#FF4655] p-1 rounded-xs transition cursor-pointer"
+        className="text-white/40 hover:text-[#FF4655] p-1 rounded-sm transition cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
         title="Cancel Request"
+        aria-label="Cancel outgoing friend request"
       >
         <X className="h-3.5 w-3.5" />
       </button>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { X, UserPlus, Check } from "lucide-react";
+import { X, UserPlus, UserMinus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Friend } from "@/types/friends";
 
@@ -41,7 +41,7 @@ export function FriendRow({
   return (
     <div
       className={cn(
-        "flex items-center justify-between p-2 rounded-xs transition group",
+        "flex items-center justify-between p-2 rounded-sm transition group",
         hasIncomingInvite
           ? "bg-mint/[0.08] border border-mint/40"
           : isOffline
@@ -51,26 +51,22 @@ export function FriendRow({
     >
       <div className="flex items-center gap-2.5 min-w-0">
         <div
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelectToRemove(friend);
-          }}
-          className="relative h-7 w-7 rounded-full overflow-hidden border border-white/10 shrink-0 group/avatar cursor-pointer"
-          title={`Remove ${friend.name}`}
+          className="relative h-7 w-7 rounded-full overflow-hidden border border-white/10 shrink-0"
+          title={`${friend.name} (${friend.status})`}
         >
           <Image
             src={friend.avatar}
             alt={friend.name}
             fill
             className={cn(
-              "object-cover object-top transition-all duration-200 group-hover/avatar:scale-110",
-              isOffline && "grayscale opacity-50 group-hover/avatar:opacity-80"
+              "object-cover object-top transition-all duration-200",
+              isOffline && "grayscale opacity-50"
             )}
           />
 
           <div
             className={cn(
-              "absolute bottom-0 right-0 h-2 w-2 rounded-full border border-black transition-opacity duration-150 group-hover/avatar:opacity-0",
+              "absolute bottom-0 right-0 h-2 w-2 rounded-full border border-black",
               friend.status === "online"
                 ? "bg-mint"
                 : friend.status === "ingame"
@@ -78,10 +74,6 @@ export function FriendRow({
                 : "bg-zinc-600"
             )}
           />
-
-          <div className="absolute inset-0 bg-[#FF4655]/85 opacity-0 group-hover/avatar:opacity-100 transition-all duration-200 flex items-center justify-center text-white z-10 rounded-full">
-            <X className="h-3.5 w-3.5 stroke-[3] text-white" />
-          </div>
         </div>
 
         <div className="flex flex-col text-left min-w-0">
@@ -90,7 +82,7 @@ export function FriendRow({
           </span>
           <span
             className={cn(
-              "text-[8px] uppercase font-bold tracking-wider font-mono",
+              "text-xs font-mono font-medium tracking-wide",
               hasIncomingInvite
                 ? "text-mint flex items-center gap-1"
                 : isOffline
@@ -100,7 +92,7 @@ export function FriendRow({
           >
             {hasIncomingInvite ? (
               <>
-                <span className="h-1.5 w-1.5 rounded-full bg-mint animate-ping" />
+                <span className="h-1.5 w-1.5 rounded-sm bg-mint animate-ping" />
                 INVITED YOU
               </>
             ) : isOffline ? (
@@ -121,8 +113,9 @@ export function FriendRow({
               e.stopPropagation();
               onAcceptIncomingInvite?.();
             }}
-            className="h-6.5 w-6.5 rounded-xs bg-mint/20 hover:bg-mint/30 border border-mint/50 text-mint flex items-center justify-center transition cursor-pointer"
+            className="h-6.5 w-6.5 rounded-sm bg-mint/20 hover:bg-mint/30 border border-mint/50 text-mint flex items-center justify-center transition cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
             title="Accept Invite (✓)"
+            aria-label="Accept party invite"
           >
             <Check className="h-3.5 w-3.5 stroke-[3]" />
           </button>
@@ -131,30 +124,49 @@ export function FriendRow({
               e.stopPropagation();
               onDeclineIncomingInvite?.();
             }}
-            className="h-6.5 w-6.5 rounded-xs bg-[#FF4655]/20 hover:bg-[#FF4655]/30 border border-[#FF4655]/50 text-[#FF4655] flex items-center justify-center transition cursor-pointer"
+            className="h-6.5 w-6.5 rounded-sm bg-[#FF4655]/20 hover:bg-[#FF4655]/30 border border-[#FF4655]/50 text-[#FF4655] flex items-center justify-center transition cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
             title="Decline Invite (✕)"
+            aria-label="Decline party invite"
           >
             <X className="h-3.5 w-3.5 stroke-[3]" />
           </button>
         </div>
-      ) : !isOffline && onInvite ? (
-        <button
-          onClick={handleInviteClick}
-          className={cn(
-            "p-1 rounded-xs transition cursor-pointer shrink-0",
-            justInvited
-              ? "text-mint bg-mint/15"
-              : "text-white/40 hover:text-accent hover:bg-white/5"
+      ) : (
+        <div className="flex items-center gap-1 shrink-0">
+          {!isOffline && onInvite && (
+            <button
+              onClick={handleInviteClick}
+              className={cn(
+                "p-1 rounded-sm transition cursor-pointer shrink-0 active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
+                justInvited
+                  ? "text-mint bg-mint/15"
+                  : "text-white/40 hover:text-accent hover:bg-white/5"
+              )}
+              title="Invite to Party"
+              aria-label="Invite friend to party"
+            >
+              {justInvited ? (
+                <Check className="h-3.5 w-3.5 stroke-[2.5]" />
+              ) : (
+                <UserPlus className="h-3.5 w-3.5" />
+              )}
+            </button>
           )}
-          title="Invite to Party"
-        >
-          {justInvited ? (
-            <Check className="h-3.5 w-3.5 stroke-[2.5]" />
-          ) : (
-            <UserPlus className="h-3.5 w-3.5" />
-          )}
-        </button>
-      ) : null}
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectToRemove(friend);
+            }}
+            className="p-1 rounded-sm text-white/30 hover:text-[#FF4655] hover:bg-white/5 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#FF4655]/50"
+            title={`Remove ${friend.name}`}
+            aria-label={`Remove ${friend.name} from friends list`}
+          >
+            <UserMinus className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

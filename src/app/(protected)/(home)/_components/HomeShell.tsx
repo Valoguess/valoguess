@@ -125,39 +125,31 @@ export function HomeShell({ children }: { children: React.ReactNode }) {
 
           <div
             className={cn(
-              "transition-all duration-300 h-full",
+              "transition-all duration-300 h-full shrink-0 z-30",
               isFriendsCollapsed
-                ? "hidden lg:block lg:relative lg:w-16 lg:shrink-0 lg:z-30"
-                : "fixed inset-y-0 right-0 w-80 sm:w-84 max-w-[88vw] z-50 lg:relative lg:w-16 lg:shrink-0 lg:z-30"
+                ? "hidden lg:block lg:w-16"
+                : "fixed inset-y-0 right-0 w-80 sm:w-84 max-w-[88vw] lg:static lg:w-80"
             )}
           >
-            <div
-              className={cn(
-                "transition-all duration-300 h-full shrink-0",
-                "w-full lg:absolute lg:right-0",
-                isFriendsCollapsed ? "lg:w-16" : "lg:w-80 sm:lg:w-84"
-              )}
-            >
-              <HomeFriendsSidebar
-                isFriendsCollapsed={isFriendsCollapsed}
-                setIsFriendsCollapsed={setIsFriendsCollapsed}
-                isAnonymous={isAnonymous}
-                friendsList={friends.friendsList}
-                friendRequests={friends.friendRequests}
-                friendInput={friends.friendInput}
-                setFriendInput={friends.setFriendInput}
-                handleAddFriend={friends.handleAddFriend}
-                handleAcceptRequest={friends.handleAcceptRequest}
-                handleDeclineRequest={friends.handleDeclineRequest}
-                handleCancelRequest={friends.handleCancelRequest}
-                handleRemoveFriend={friends.handleRemoveFriend}
-                handleInviteFriend={lobbyParty.onInviteFriendToParty}
-                incomingPartyInvites={lobbyParty.enrichedIncomingInvites}
-                onAcceptPartyInvite={lobbyParty.handleAcceptPartyInvite}
-                onDeclinePartyInvite={lobbyParty.handleDeclinePartyInvite}
-                isAddingFriend={friends.isAddingFriend}
-              />
-            </div>
+            <HomeFriendsSidebar
+              isFriendsCollapsed={isFriendsCollapsed}
+              setIsFriendsCollapsed={setIsFriendsCollapsed}
+              isAnonymous={isAnonymous}
+              friendsList={friends.friendsList}
+              friendRequests={friends.friendRequests}
+              friendInput={friends.friendInput}
+              setFriendInput={friends.setFriendInput}
+              handleAddFriend={friends.handleAddFriend}
+              handleAcceptRequest={friends.handleAcceptRequest}
+              handleDeclineRequest={friends.handleDeclineRequest}
+              handleCancelRequest={friends.handleCancelRequest}
+              handleRemoveFriend={friends.handleRemoveFriend}
+              handleInviteFriend={lobbyParty.onInviteFriendToParty}
+              incomingPartyInvites={lobbyParty.enrichedIncomingInvites}
+              onAcceptPartyInvite={lobbyParty.handleAcceptPartyInvite}
+              onDeclinePartyInvite={lobbyParty.handleDeclinePartyInvite}
+              isAddingFriend={friends.isAddingFriend}
+            />
           </div>
         </div>
 

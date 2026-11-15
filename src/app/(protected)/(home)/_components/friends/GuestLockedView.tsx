@@ -16,13 +16,13 @@ export function GuestLockedView({
     return (
       <div
         onClick={onExpand}
-        className="flex flex-col items-center gap-2 py-4 cursor-pointer hover:scale-105 transition"
-        title="Link Account to Unlock Friends"
+        className="flex flex-col items-center gap-1.5 py-4 cursor-pointer hover:scale-105 transition"
+        title="Sign in to unlock friends"
       >
-        <div className="h-9 w-9 rounded-full bg-[#FF4655]/15 border border-[#FF4655]/40 flex items-center justify-center text-[#FF4655]">
+        <div className="h-9 w-9 rounded-sm bg-[#FF4655]/15 border border-[#FF4655]/40 flex items-center justify-center text-[#FF4655]">
           <Lock className="h-4 w-4" />
         </div>
-        <span className="text-[8px] font-display font-bold uppercase tracking-widest text-[#FF4655] text-center">
+        <span className="text-xs font-display font-bold uppercase tracking-wider text-[#FF4655] text-center">
           LOCKED
         </span>
       </div>
@@ -31,32 +31,29 @@ export function GuestLockedView({
 
   return (
     <div className="h-full flex flex-col items-center justify-center p-4 text-center space-y-4 my-auto">
-      <div className="h-12 w-12 rounded-full bg-[#FF4655]/15 border border-[#FF4655]/40 flex items-center justify-center text-[#FF4655]">
+      <div className="h-12 w-12 rounded-sm bg-[#FF4655]/15 border border-[#FF4655]/40 flex items-center justify-center text-[#FF4655]">
         <ShieldAlert className="h-6 w-6" />
       </div>
 
       <div className="space-y-1.5">
-        <div className="inline-flex items-center gap-1.5 text-[9px] font-mono font-bold uppercase tracking-widest text-[#FF4655] bg-[#FF4655]/10 px-2 py-0.5 rounded-xs border border-[#FF4655]/25">
-          <Lock className="h-3 w-3" /> GUEST ACCOUNT
-        </div>
-        <h3 className="font-valorant text-sm tracking-wider text-white">
+        <h3 className="font-valorant text-base tracking-wider text-white">
           FRIENDS LOCKED
         </h3>
-        <p className="text-[11px] text-white/50 leading-relaxed max-w-[220px] font-sans">
-          Guest users cannot access the friends list, send friend requests, or invite players.
+        <p className="text-xs text-white/50 leading-relaxed max-w-[220px] font-sans">
+          Guest accounts cannot manage friends, send requests, or invite players to custom parties.
         </p>
       </div>
 
       <div className="w-full pt-1 space-y-2">
         <Link
           href="/login"
-          className="w-full py-2.5 px-4 rounded-xs bg-[#FF4655] hover:bg-[#ff5a67] text-white font-display text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+          className="w-full py-2.5 px-4 rounded-sm bg-[#FF4655] hover:bg-[#ff5a67] text-white font-display text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
         >
           <Link2 className="h-3.5 w-3.5" />
-          <span>LINK ACCOUNT</span>
+          <span>SIGN IN TO UNLOCK</span>
         </Link>
-        <p className="text-[10px] text-white/40 leading-normal font-sans">
-          Sign in with Google to unlock full social features and friend matchmaking.
+        <p className="text-xs text-white/40 leading-normal font-sans">
+          Sign in with Google to unlock full social features and party matchmaking.
         </p>
       </div>
     </div>
