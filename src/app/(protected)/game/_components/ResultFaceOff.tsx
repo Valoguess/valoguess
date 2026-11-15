@@ -63,7 +63,7 @@ export function ResultFaceOff({
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4 px-1 sm:px-2 my-auto max-h-[460px]">
         <div
           className={cn(
-            "rounded-sm border p-2 sm:p-3 bg-[#07090e] flex flex-col transition-all duration-300 relative",
+            "rounded-sm border p-3 sm:p-4 bg-[#07090e] flex flex-col transition-all duration-300 relative",
             isVictory
               ? "border-mint/50 shadow-[0_0_20px_rgba(60,242,196,0.15)]"
               : isTie
@@ -71,11 +71,7 @@ export function ResultFaceOff({
                 : "border-white/10",
           )}
         >
-          <div className="absolute left-0 top-0 h-4 w-4">
-            <div className="absolute left-0 top-0 h-px w-4 bg-accent/60" />
-            <div className="absolute left-0 top-0 h-4 w-px bg-accent/60" />
-          </div>
-          <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold uppercase tracking-[0.2em] mb-1.5 sm:mb-2 text-center block">
+          <span className="text-xs text-white/50 font-bold uppercase tracking-wider mb-2 text-center block">
             YOUR AGENT
           </span>
 
@@ -88,11 +84,11 @@ export function ResultFaceOff({
             />
           </div>
 
-          <div className="text-center mt-2 sm:mt-2.5">
+          <div className="text-center mt-2.5">
             <h3 className="font-display text-sm sm:text-xl font-black uppercase text-white tracking-widest leading-none truncate">
               {myAgentObj.name}
             </h3>
-            <span className="text-[8px] sm:text-[9px] text-zinc-500 uppercase tracking-widest font-semibold mt-1 block leading-none">
+            <span className="text-xs text-white/50 uppercase tracking-wider font-semibold mt-1.5 block leading-none">
               {myAgentObj.role}
             </span>
           </div>
@@ -102,7 +98,7 @@ export function ResultFaceOff({
 
         <div
           className={cn(
-            "rounded-sm border p-2 sm:p-3 bg-[#07090e] flex flex-col transition-all duration-300 relative",
+            "rounded-sm border p-3 sm:p-4 bg-[#07090e] flex flex-col transition-all duration-300 relative",
             isDefeat
               ? "border-accent/40 shadow-[0_0_20px_rgba(255,70,85,0.08)]"
               : isTie
@@ -110,11 +106,7 @@ export function ResultFaceOff({
                 : "border-white/10",
           )}
         >
-          <div className="absolute right-0 top-0 h-4 w-4">
-            <div className="absolute right-0 top-0 h-px w-4 bg-accent/60" />
-            <div className="absolute right-0 top-0 h-4 w-px bg-accent/60" />
-          </div>
-          <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold uppercase tracking-[0.2em] mb-1.5 sm:mb-2 text-center block">
+          <span className="text-xs text-white/50 font-bold uppercase tracking-wider mb-2 text-center block">
             OPPONENT&apos;S AGENT
           </span>
 
@@ -127,11 +119,11 @@ export function ResultFaceOff({
             />
           </div>
 
-          <div className="text-center mt-2 sm:mt-2.5">
+          <div className="text-center mt-2.5">
             <h3 className="font-display text-sm sm:text-xl font-black uppercase text-white tracking-widest leading-none truncate">
               {oppAgentObj.name}
             </h3>
-            <span className="text-[8px] sm:text-[9px] text-zinc-500 uppercase tracking-widest font-semibold mt-1 block leading-none">
+            <span className="text-xs text-white/50 uppercase tracking-wider font-semibold mt-1.5 block leading-none">
               {oppAgentObj.role}
             </span>
           </div>
@@ -159,7 +151,7 @@ export function ResultFaceOff({
       </div>
 
       <div className="rounded-sm border border-white/10 bg-[#07090e] p-3 sm:p-4 flex flex-col shrink-0">
-        <h4 className="font-display text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-2.5 block leading-none">
+        <h4 className="font-display text-xs font-bold uppercase tracking-wider text-white/60 mb-3 block leading-none">
           MATCH STATS
         </h4>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center">

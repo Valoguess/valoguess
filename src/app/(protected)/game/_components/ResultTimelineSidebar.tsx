@@ -17,7 +17,7 @@ export function ResultTimelineSidebar({
 }: ResultTimelineSidebarProps) {
   return (
     <div className="rounded-sm border border-white/10 bg-[#07090e] p-4 flex flex-col h-full overflow-hidden">
-      <h4 className="font-display text-[10px] font-bold uppercase tracking-widest text-[#FF4655] mb-3 shrink-0">
+      <h4 className="font-display text-xs font-bold uppercase tracking-wider text-white/70 mb-3 shrink-0">
         MATCH TIMELINE
       </h4>
 
@@ -30,7 +30,7 @@ export function ResultTimelineSidebar({
               <div key={event.id} className="flex items-start gap-2.5 text-xs group">
                 <div
                   className={cn(
-                    "h-4 w-4 rounded-full flex items-center justify-center shrink-0 text-[9px] mt-0.5 border z-10 transition",
+                    "h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-xs mt-0.5 border z-10 transition",
                     event.kind === "asked" && "bg-[#040609] border-white/20 text-white/50",
                     event.kind === "answered-yes" && "bg-mint/20 border-mint text-mint",
                     event.kind === "answered-no" && "bg-accent/20 border-accent text-accent",
@@ -46,8 +46,8 @@ export function ResultTimelineSidebar({
                   {(event.kind === "system-win" || event.kind === "system-lose") && "🏆"}
                 </div>
 
-                <div className="flex-1 min-w-0 bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 p-2 rounded-sm transition">
-                  <div className="flex items-center justify-between text-[8px] text-zinc-500 font-semibold mb-0.5">
+                <div className="flex-1 min-w-0 bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 p-2.5 rounded-sm transition">
+                  <div className="flex items-center justify-between text-xs text-zinc-400 font-semibold mb-1">
                     <span className="uppercase tracking-wider">
                       {event.actor === "you"
                         ? userName
@@ -59,7 +59,7 @@ export function ResultTimelineSidebar({
                       {event.kind === "answered-no" && " ANSWERED"}
                       {event.kind === "guessed" && " GUESSED"}
                     </span>
-                    <span className="tabular-nums font-mono">{event.time}</span>
+                    <span className="tabular-nums font-mono text-zinc-500">{event.time}</span>
                   </div>
                   <p
                     className={cn(

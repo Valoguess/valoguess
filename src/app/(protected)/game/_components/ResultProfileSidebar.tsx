@@ -68,7 +68,7 @@ export function ResultProfileSidebar({
         <h3 className="font-display text-xl font-black uppercase tracking-wide text-white mt-3">
           {userName}
         </h3>
-        <span className="text-[10px] font-semibold text-mint uppercase tracking-widest mt-0.5">
+        <span className="text-xs font-semibold text-mint uppercase tracking-wider mt-0.5">
           {myAgentObj.role}
         </span>
 
@@ -92,7 +92,7 @@ export function ResultProfileSidebar({
       </div>
 
       <div className="rounded-sm border border-white/10 bg-[#07090e] p-4 flex flex-col shrink-0">
-        <h4 className="font-display text-[10px] font-bold uppercase tracking-widest text-[#FF4655] mb-3">
+        <h4 className="font-display text-xs font-bold uppercase tracking-wider text-white/70 mb-3">
           GAME SUMMARY
         </h4>
 
@@ -131,7 +131,7 @@ export function ResultProfileSidebar({
       </div>
 
       <div className="rounded-sm border border-white/10 bg-[#07090e] p-4 flex flex-col shrink-0">
-        <h4 className="font-display text-[10px] font-bold uppercase tracking-widest text-[#FF4655] mb-3">
+        <h4 className="font-display text-xs font-bold uppercase tracking-wider text-white/70 mb-3">
           MATCH OVERVIEW
         </h4>
 

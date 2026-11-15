@@ -12,12 +12,12 @@ export function StatCol({
   valClass?: string;
 }) {
   return (
-    <div className="flex flex-col items-center bg-[#0d1119]/40 border border-white/[0.01] p-2 rounded-sm">
-      <span className="text-base mb-0.5">{icon}</span>
-      <span className="text-[8px] text-zinc-500 uppercase tracking-widest font-bold text-center h-5 flex items-center justify-center leading-tight">
+    <div className="flex flex-col items-center bg-[#0d1119]/60 border border-white/5 p-2.5 rounded-sm">
+      <span className="text-base mb-1">{icon}</span>
+      <span className="text-xs text-zinc-400 uppercase tracking-wider font-semibold text-center min-h-[1.75rem] flex items-center justify-center leading-tight">
         {label}
       </span>
-      <span className={cn("text-xs font-black text-white mt-0.5 leading-none font-display", valClass)}>
+      <span className={cn("text-sm font-black text-white mt-1 leading-none font-display", valClass)}>
         {val}
       </span>
     </div>
