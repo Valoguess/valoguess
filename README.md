@@ -10,42 +10,13 @@ out what everyone else knows without giving themselves away.
 
 ## Screenshots
 
-### Lobby and parties
-
-Create or join a party, set up a match, and chat before the game starts.
-
 ![Party lobby](public/showcase/lobby-in-party.webp)
-
-### Friends
-
-See who's online and invite friends to play.
 
 ![Friends and lobby](public/showcase/lobby.webp)
 
-### Guess the Agent
-
-Players ask questions, mark agents off the board, and try to identify
-their opponent's secret agent.
-
 ![Guess the Agent match](public/showcase/game.webp)
 
-### Match Result
-
-After a match, see who won, review the match events, and check your stats.
-
-![Match result](public/showcase/match-result.webp)
-
-### Match history
-
-Check previous matches and review your stats.
-
 ![Match history](public/showcase/match-history.webp)
-
-### Profile settings
-
-Customize your player card, tagline, display name, and username.
-
-![Profile settings](public/showcase/settings.webp)
 
 ## What you can do
 
